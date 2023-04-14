@@ -17,7 +17,7 @@ DIN         -     pin 11 (MOSI)
 
 DOUT        -     pin 12 (MISO)
 
-DRDY        -     pin 9
+DRDY        -     pin 6 Note this was changed from pin 9 to pin 6 to not interfer with using pin 9 in the FastAccelStepper Library
 
 CS          -     pin 10
 
