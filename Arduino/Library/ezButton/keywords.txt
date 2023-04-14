@@ -1,0 +1,31 @@
+#######################################
+# Syntax Coloring Map For ezButton
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+ezButton	KEYWORD1
+button	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+setDebounceTime	KEYWORD2
+getState	KEYWORD2
+getStateRaw	KEYWORD2
+isPressed	KEYWORD2
+isReleased	KEYWORD2
+setCountMode	KEYWORD2
+getCount	KEYWORD2
+resetCount	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+COUNT_FALLING	LITERAL1
+COUNT_RISING	LITERAL1
+COUNT_BOTH	LITERAL1
