@@ -126,7 +126,7 @@ void setup()
   }
 
   offset = sval/samples;
-  conversion = -0.30/offset*conversion;
+  conversion = -0.30/offset*conversion;  //ADS1256 doesn't always have a consitent conversion factor so I had to add this in 
 
     Serial.print("Offset ");
     Serial.println(offset,10);
@@ -159,7 +159,7 @@ limitSwitchMax.setDebounceTime(50); // set debounce time to 50 milliseconds
   //int stateMax = limitSwitchMax.getState();
   
 
-     int set = 0;
+     int set = 0;                                                 //Setting Max Limit Switch Position
       while(limitSwitchMax.getState() == HIGH){
       stepper->setSpeedInHz(speed);   // steps/s      
       stepper->moveTo(set);       //Move motor 10 steps back
@@ -182,7 +182,7 @@ limitSwitchMax.setDebounceTime(50); // set debounce time to 50 milliseconds
     }
   }    
 
-      while(limitSwitchMin.getState() == HIGH){
+      while(limitSwitchMin.getState() == HIGH){                    //Setting Min Limit Switch Position
         stepper->setSpeedInHz(speed);   // steps/s
         stepper->moveTo(set);       //Move motor 10 steps back
 
@@ -214,18 +214,13 @@ stepper->setSpeedInHz(speed);
 
 void loop()
 { 
-//limitSwitchMax.loop();  // MUST call the loop() function first
-//Serial.println("Switch Ready");
-
-//while(limitSwitchMax.getState() == HIGH){
 
 adc.waitDRDY(); // wait for DRDY to go low before changing multiplexer register
   adc.setChannel(0,1);   // Set the MUX for differential between ch2 and 3 
   sensor1 = adc.readCurrentChannel()*conversion; // DOUT arriving here are from MUX AIN0 and AIN1
-  //Force_Current = sensor1;
   Force_Current = Force_Current_MA.reading(sensor1);
 
-
+ 
   if (Force_Current > Force_Max)  {       //If current force is over the max force it will just read the max force
     Force_Current = Force_Max;
   }
@@ -244,7 +239,7 @@ adc.waitDRDY(); // wait for DRDY to go low before changing multiplexer register
   Serial.print(" senosr lbs ");
   Serial.println(sensor1,4);
 
-  if(abs(Position_Next-Position_Current)>Position_Deadzone){
+  if(abs(Position_Next-Position_Current)>Position_Deadzone){       //Checks to see if the new position move is greater than the deadzone limit set to prevent oscillation
   
   stepper->moveTo(Position_Next);
 
