@@ -5,8 +5,7 @@ This is my DIY Simucube Active Pedal prototype, an affordable alternative to the
 
 https://www.youtube.com/watch?v=hGqJAhKMDJU
 
-
-Current Build of Materials ~$205 **Some of these parts will be switched out as I only picked them cause I had them laying around
+Current Build of Materials ~$250 **Some of these parts will be switched out as I only picked them cause I had them laying around
 - 300kg Load Cell $36.69 
 - NEMA 23 Integrated Easy Servo Motor 130w ( iSV57T-130 ) $93.93 (Could probably get away with the smaller 90 watt version and cut down on the overall length of the pedal)
 - ADS1256 $17.99
@@ -15,3 +14,4 @@ Current Build of Materials ~$205 **Some of these parts will be switched out as I
 - 8mm to 8mm Shaft Coupling $9.99
 - Arduino Uno $16.99 (upgrading to a Teensy 4.0 in the future)
 - 2x Micro Limit Switch $5.99
+- DROK 48V Power Supply, AC 110V/220V to DC 0-48V 10A 480W $40.99
