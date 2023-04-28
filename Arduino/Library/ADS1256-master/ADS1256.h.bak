@@ -9,7 +9,7 @@
 
 #if defined(__AVR_ATmega32U4__)
     // Define PORT
-    #define PORT_DRDY PORTE // Pin 7 on Arduino Leonardo
+    #define PORT_DRDY PORTE // Pin 6 on Arduino Leonardo
     #define PIN_DRDY PINE
     #define PINDEX_DRDY PE6
     #define DDR_DRDY DDRE
@@ -19,7 +19,7 @@
     #define PINDEX_CS PB6
     #define DDR_CS DDRB
 
-    #define PORT_RESET PORTD // PIN 6 on Arduino Leonardo
+    #define PORT_RESET PORTD // PIN 7 on Arduino Leonardo
     #define PIN_REST PIND
     #define PINDEX_RESET PD7
     #define DDR_RESET DDRD
