@@ -61,6 +61,18 @@ BLA::Matrix<Nobs, 1> obs; // observation vector
 
 
 
+#define USE_PID_CONTROLLER
+#ifdef USE_PID_CONTROLLER
+#include <PID_v1.h>
+// Add PID controller to compute the travel distance
+//Specify the links and initial tuning parameters
+double Kp=1.0, Ki=0.0, Kd=0.0;
+double Setpoint, Input, Output;
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+
+
+#endif
+
 
 
 float clockMHZ = 7.68; // crystal frequency used on ADS1256
@@ -72,7 +84,8 @@ ADS1256 adc(clockMHZ,vRef,false); // RESETPIN is permanently tied to 3.3v
 float sensor1;
 movingAvgFloat movingAvgFilter(40);      //Sets the number of data points to use when calculating the moving average 
 
-float conversion = 4000.0f; //conversion factor
+float conversion = 4000.0f;
+
 float loadcellOffset = 0.0f;     //offset value
 float varEstimate = 0.0f; // estimated loadcell variance
 float stdEstimate = 0.0f;
@@ -104,6 +117,29 @@ float springStiffnesssInv = 1;
 
 long prevPosition = 0;
 long currentPosition = 0;
+
+
+
+double normalizePos(long pos)
+{
+  return ((double)(pos - Position_Min)) / ((double)(Position_Max - Position_Min));
+}
+
+double unnormalizePos(double relPos)
+{
+  double absPos = relPos * (double)(Position_Max - Position_Min) + (double)Position_Min;
+
+  if (absPos > Position_Max)  {       //If current force is over the max force it will just read the max force
+    absPos = Position_Max;
+  }
+  if (absPos < Position_Min)  {       //If current force is below the min force it will just read 0
+    absPos = Position_Min;
+  }
+
+  return absPos;
+}
+  
+
 
 void setup()
 {
@@ -300,6 +336,13 @@ stepper->setSpeedInHz(speed);
            0.0, 1.0f};
 
 
+#ifdef USE_PID_CONTROLLER
+  //turn the PID on
+  Input = 0;
+  Setpoint = 0;
+  myPID.SetSampleTime(1);
+  myPID.SetMode(AUTOMATIC);
+#endif
 
 }
 
@@ -360,11 +403,13 @@ void loop()
   float expectedForceIncrease = 1.0 * springStiffnesss * (float)(currentPosition - prevPosition);
   Force_Current -= expectedForceIncrease;
 #endif
+
+
   // estimate target pedal position
   //Position_Next = springStiffnesssInv * (Force_Current_MA-Force_Min) + Position_Min ;        //Calculates new position using linear function
   //Position_Next = springStiffnesssInv * (Force_Current_EXP-Force_Min) + Position_Min ;        //Calculates new position using linear function
   Position_Next = springStiffnesssInv * (Force_Current_KF-Force_Min) + Position_Min ;        //Calculates new position using linear function
-  
+
   // clip target pedal position
   if (Position_Next > Position_Max)  {       //If current force is over the max force it will just read the max force
     Position_Next = Position_Max;
@@ -373,11 +418,56 @@ void loop()
     Position_Next = Position_Min;
   }
 
+  
+
+
+#ifdef USE_PID_CONTROLLER
+  // originally a P (k_p=1) controller is used to calculate the target position.
+  // the target psoition only depends on the current difference between target position and current position.
+  // By using the I and D components, the target position also depends on the accumulated difference and the change of the difference.
+  // Proper parameter tuning might help to reduce/remove pedal oscilations.
+
+
+  // Use PID controller to compute the next position
+  // travelDistance is the residue
+  Setpoint = normalizePos(Position_Next); // normalized target position
+  Input = normalizePos(currentPosition); // normalized current position
+  
+  myPID.Compute(); // PID computes normalized target position
+
+  /*Serial.print("pidSetpoint:");
+  Serial.print(Setpoint, 5);
+  Serial.print(",");
+
+  Serial.print("pidInput:");
+  Serial.print(Input, 5);
+  Serial.print(",");
+
+  Serial.print("pidOutput:");
+  Serial.print(Output, 5);
+  Serial.print(",");
+
+  Serial.print("targetPos:");
+  Serial.print((long)unnormalizePos(Output));
+  Serial.print(",");
+
+  Serial.print("Position_Next:");
+  Serial.print(Position_Next);
+  Serial.print(",");*/
+
+  // unnormalize PID output and set as new target position
+  Position_Next = (long)unnormalizePos(Output);
+  
+#endif
+
+
+  long travelDistance = Position_Next - currentPosition;
   float targetPosRel = ( (float)(Position_Next-Position_Min)) / ( (float)(Position_Max - Position_Min) );
 
 // write debug info to serial monitor
 #define DEBUG_OUTPUT
 #ifdef DEBUG_OUTPUT
+
   Serial.print("elapsedTime:");
   Serial.print(elapsedTime);
   Serial.print(",");
@@ -400,8 +490,9 @@ void loop()
   Serial.print(",");
 
   Serial.print("TravelDistance:");
-  Serial.print(Position_Next - Position_Current);
+  Serial.print(travelDistance);
   Serial.print(",");
+
   Serial.print("targetPosRel:");
   Serial.print(targetPosRel,5);
   Serial.println(" ");
