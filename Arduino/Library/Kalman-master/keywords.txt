@@ -1,0 +1,25 @@
+#######################################
+# Syntax Coloring Map for Kalman
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+KALMAN	KEYWORD1
+Symmetric	KEYWORD1
+SkewSymmetric	KEYWORD1
+Diagonal	KEYWORD1
+TriangularSup	KEYWORD1
+TriangularInf	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+update	KEYWORD2
+getxcopy	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

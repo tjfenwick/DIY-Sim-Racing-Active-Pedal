@@ -32,7 +32,33 @@ POWN - 5V
 
 #include <ADS1256.h>
 #include <SPI.h>
-#include <movingAvgFloat.h> 
+#include <movingAvgFloat.h>
+
+
+// Configuration of Kalman filter
+// assume constant rate of change 
+// observed states:
+// x = [force, d force / dt]
+// state transition matrix
+// x_k+1 = [1, delta_t; 0, 1] * x_k
+#include <Kalman.h>
+using namespace BLA;
+
+// Dimensions of the matrices
+#define Nstate 2 // length of the state vector
+#define Nobs 1   // length of the measurement vector
+
+// measurement std (to be characterized from your sensors)
+#define n1 0.002 // noise on the 1st measurement component // standard deviation of measurement noise. Rule of thumb: assume Gaussian distribution. 99.9% is 3*sigma interval --> (max-min) / 3 = stddev
+#define n2 0.1 // noise on the 2nd measurement component 
+
+
+KALMAN<Nstate,Nobs> K; // your Kalman filter
+BLA::Matrix<Nobs, 1> obs; // observation vector
+
+
+
+
 
 float clockMHZ = 7.68; // crystal frequency used on ADS1256
 float vRef = 2.5; // voltage reference
@@ -225,6 +251,25 @@ stepper->setSpeedInHz(speed);
   // obtain current stepper position
   prevPosition = stepper->getCurrentPosition();
 
+
+
+
+  // example of evolution matrix. Size is <Nstate,Nstate>
+  K.F = {1.0, 0.0,
+         0.0, 1.0};
+         
+  // example of measurement matrix. Size is <Nobs,Nstate>
+  K.H = {1.0, 0.0};
+
+  // example of measurement covariance matrix. Size is <Nobs,Nobs>
+  K.R = {n1*n1};
+
+  // example of model covariance matrix. Size is <Nstate,Nstate>
+  K.Q = {1.0f,   0.0,
+           0.0, 1.0f};
+
+
+
 }
 
 
@@ -250,6 +295,29 @@ void loop()
   // low pass filter the force readings
   Force_Current_MA = movingAvgFilter.reading(sensor1);
   Force_Current_EXP = Force_Current_EXP * (1.0f - alpha) + sensor1 * alpha;
+
+
+  // Kalman filter  
+  // update state transition and system covariance matrices
+  float delta_t = (float)elapsedTime / 1000.0f;
+  K.F = {1.0,  delta_t,
+         0.0,  1.0};
+
+  float delta_t_pow2 = delta_t * delta_t;
+  float delta_t_pow3 = delta_t_pow2 * delta_t;
+  float delta_t_pow4 = delta_t_pow3 * delta_t;
+  K.Q = {0.25f * delta_t_pow4,   0.5f * delta_t_pow3,
+        0.5f * delta_t_pow3, delta_t_pow2};
+
+  // APPLY KALMAN FILTER
+  obs(0) = sensor1;
+  K.update(obs);
+
+  //K.x
+  //Serial << obs << ' ' << K.x << '\n';
+
+
+
 
   // get current stepper position
   currentPosition = stepper->getCurrentPosition();
@@ -289,6 +357,15 @@ void loop()
   Serial.print("Force_Current_EXP:");
   Serial.print(Force_Current_EXP, 6);
   Serial.print(",");
+
+  Serial.print("Kalman_x:");
+  Serial.print(K.x(0,0), 6);
+  Serial.print(",");
+
+  Serial.print("Kalman_x_d:");
+  Serial.print(K.x(1,0), 6);
+  Serial.print(",");
+
   Serial.print("TravelDistance:");
   Serial.print(Position_Next - Position_Current);
   Serial.print(",");
