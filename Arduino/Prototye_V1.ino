@@ -41,41 +41,46 @@ ADS1256 adc(clockMHZ,vRef,false); // RESETPIN is permanently tied to 3.3v
 
 
 float sensor1;
-movingAvgFloat Force_Current_MA(40);      //Sets the number of data points to use when calculating the moving average 
+movingAvgFloat movingAvgFilter(40);      //Sets the number of data points to use when calculating the moving average 
 
 float conversion = 4000; //conversion factor
 float loadcellOffset = 0;     //offset value
 
 //Variable for calculation pedal movement & Stepper Parameters
-  float Force_Min = 0.1;    //Min Force in lb to activate Movement
-  float Force_Max = 10.;     //Max Force in lb = Max Travel Position
-  float Force_Current = 0;
-  
-  long  Position_Min = 0;       //Pedal starting Postion. In the future this could be found using a switch
-  long  Position_Max = 90;     //Pedal maxium distance to travel
-  long  Position_Current = 0;   //Current position of pedal
-  long  Position_Next = 0;      //Future pedal postion based on current load cell data
-  long  Position_Deadzone = 5;  //Number of steps required before the pedal will move. Added in to prevent oscillation caused by varaying load cell readings
-  
-  float steps_per_rev = 1600;
-  float rpm = 2500;
-  float speed = (rpm/60*steps_per_rev);   //needs to be in us per step || 1 sec = 1000000 us
-  float accel = 1000000;
+float Force_Min = 0.1;    //Min Force in lb to activate Movement
+float Force_Max = 10.;     //Max Force in lb = Max Travel Position
+float Force_Current_MA = 0.0f; // current force smoothened by MA filter
+float Force_Current_EXP = 0.0f; // current force smoothened by exp filter
+float alpha = 0.15; // exp filter coefficient
 
-  long previousTime = 0;
+long  Position_Min = 0;       //Pedal starting Postion. In the future this could be found using a switch
+long  Position_Max = 90;     //Pedal maxium distance to travel
+long  Position_Current = 0;   //Current position of pedal
+long  Position_Next = 0;      //Future pedal postion based on current load cell data
+long  Position_Deadzone = 5;  //Number of steps required before the pedal will move. Added in to prevent oscillation caused by varaying load cell readings
+
+float steps_per_rev = 1600;
+float rpm = 2500;
+//float rpm = 1500;
+float speed = (rpm/60*steps_per_rev);   //needs to be in us per step || 1 sec = 1000000 us
+float accel = 1000000;
+//float accel = 10000;
+
+long previousTime = 0;
 
 
-  float springStiffnesss = 1;
-  float springStiffnesssInv = 1;
+float springStiffnesss = 1;
+float springStiffnesssInv = 1;
 
-  long prevPosition = 0;
-  long currentPosition = 0;
+long prevPosition = 0;
+long currentPosition = 0;
 
 void setup()
 {
   Serial.begin(2000000);
 
-  Force_Current_MA.begin();     //Start force moving average
+
+  movingAvgFilter.begin();     //Start force moving average
   
   Serial.println("Starting ADC");
 
@@ -222,6 +227,8 @@ stepper->setSpeedInHz(speed);
 
 }
 
+
+
 void loop()
 { 
 
@@ -241,7 +248,8 @@ void loop()
   sensor1 = -1.0f * sensor1; // flip sign to make pressure positive
 
   // low pass filter the force readings
-  Force_Current = Force_Current_MA.reading(sensor1);
+  Force_Current_MA = movingAvgFilter.reading(sensor1);
+  Force_Current_EXP = Force_Current_EXP * (1.0f - alpha) + sensor1 * alpha;
 
   // get current stepper position
   currentPosition = stepper->getCurrentPosition();
@@ -253,7 +261,8 @@ void loop()
   Force_Current -= expectedForceIncrease;
 #endif
   // estimate target pedal position
-  Position_Next = springStiffnesssInv * (Force_Current-Force_Min) + Position_Min ;        //Calculates new position using linear function
+  //Position_Next = springStiffnesssInv * (Force_Current_MA-Force_Min) + Position_Min ;        //Calculates new position using linear function
+  Position_Next = springStiffnesssInv * (Force_Current_EXP-Force_Min) + Position_Min ;        //Calculates new position using linear function
   
   // clip target pedal position
   if (Position_Next > Position_Max)  {       //If current force is over the max force it will just read the max force
@@ -262,6 +271,8 @@ void loop()
   if (Position_Next < Position_Min)  {       //If current force is below the min force it will just read 0
     Position_Next = Position_Min;
   }
+
+  float targetPosRel = ( (float)(Position_Next-Position_Min)) / ( (float)(Position_Max - Position_Min) );
 
 // write debug info to serial monitor
 #define DEBUG_OUTPUT
@@ -272,14 +283,17 @@ void loop()
   Serial.print("instantaneousForceMeasured:");
   Serial.print(sensor1,6);
   Serial.print(",");
-  Serial.print("filteredForceMeasured:");
-  Serial.print(Force_Current, 6);
+  Serial.print("Force_Current_MA:");
+  Serial.print(Force_Current_MA, 6);
+  Serial.print(",");
+  Serial.print("Force_Current_EXP:");
+  Serial.print(Force_Current_EXP, 6);
   Serial.print(",");
   Serial.print("TravelDistance:");
   Serial.print(Position_Next - Position_Current);
   Serial.print(",");
-  Serial.print("TargetPosition:");
-  Serial.print(Position_Next);
+  Serial.print("targetPosRel:");
+  Serial.print(targetPosRel,5);
   Serial.println(" ");
 #endif
 
