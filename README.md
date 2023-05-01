@@ -1,3 +1,4 @@
+WORK IN INPROGRESS NOT A FINAL DESIGN
 # DIY-Sim-Racing-Active-Pedal
 This is my DIY Simucube Active Pedal prototype, an affordable alternative to the official Simucube active pedals that cost over $2,000 per pedal. The pedal uses a load cell to measure the force applied to the pedal, a NEMA 23 Integrated Easy Servo Motor to drive the lead screw, and an Arduino Pro Micro to control everything. I used Fusion 360 to create CAD models for all the 3d printed parts. While there are still some issues to address, such as shaky ADC readings and a lack of computing power on the Arduino, I'm proud of what I've achieved so far and hope to inspire others to take on similar DIY projects. Check out the video of the pedal in action, and feel free to contribute to the project or share your own DIY ideas!
 
