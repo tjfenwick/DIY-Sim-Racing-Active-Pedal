@@ -19,7 +19,9 @@ https://www.youtube.com/watch?v=hGqJAhKMDJU
 - L7805CV Voltage Regulator $0.32
 
 **To Do List**
+- Solder all wire connects to hopefully get more consistant readings on the ADS1256 & switch to a 100kg Load Cell
 - Create a wiring diagram
-- Create a Build of Materials with links
 - Update mechanical design to be more robust and use new components like the 1605 150mm Ball Screw & 100kg Load Cell
-- Solder all wire connects to hopefully get more consistant readings on the ADS1256 
+- Create a Build of Materials with links
+
+ 
