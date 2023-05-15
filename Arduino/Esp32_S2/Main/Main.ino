@@ -1,6 +1,14 @@
-
+#define STEPPER_DELAY 0
 
 #include <Joystick_ESP32S2.h>
+
+
+Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD,
+                   0, 0,                 // Button Count, Hat Switch Count
+                   false, false, false,  // X and Y, but no Z Axis
+                   false, false, false,  // No Rx, Ry, or Rz
+                   false, false,         // No rudder or throttle
+                   false, true, false);  // No accelerator, brake, or steering
 
 
 
@@ -47,8 +55,8 @@ long stepperPosCurrent = 0;
 long  Position_Deadzone = 10;  //Number of steps required before the pedal will move. Added in to prevent oscillation caused by varaying load cell readings
 
 
-#define minPin 34
-#define maxPin 35
+#define minPin 4
+#define maxPin 5
 
 
 long stepperPosMin = 0;
@@ -106,8 +114,8 @@ float stdEstimate = 0.0f;
 #include "FastAccelStepper.h"
 
 // Stepper Wiring
-#define dirPinStepper    0 
-#define stepPinStepper   4  // step pin must be pin 9
+#define dirPinStepper    12//3 
+#define stepPinStepper   13//2  // step pin must be pin 9
 
 //no clue what this does
 FastAccelStepperEngine engine = FastAccelStepperEngine();
@@ -116,7 +124,7 @@ FastAccelStepper *stepper = NULL;
 
 
 float steps_per_rev = 500;
-float rpm = 4000;
+float rpm = 4000;//4000;
 float maxStepperSpeed = (rpm/60*steps_per_rev);   //needs to be in us per step || 1 sec = 1000000 us
 float maxStepperAccel = maxStepperSpeed * 100;
 
@@ -124,6 +132,12 @@ float maxStepperAccel = maxStepperSpeed * 100;
 // Written by Axel Sepulveda, May 2020
 #define ADC
 #include <SPI.h>
+
+/*#define FSPI_MISO   37
+#define FSPI_MOSI   35
+#define FSPI_SCLK   36
+#define FSPI_SS     34 */
+
 #include <ADS1256.h>
 
 
@@ -279,6 +293,7 @@ void setup()
     ival = (sensor1 - loadcellOffset);
     ival *= ival;
     varEstimate += ival * varNormalizer;
+    Serial.println(sensor1,10);
   }
   //varEstimate *= conversion * conversion; // respect linear scaling y = mu * x --> var(y) = mu^2 * var(x)
 
@@ -301,13 +316,37 @@ void setup()
   engine.init();
   stepper = engine.stepperConnectToPin(stepPinStepper);
   if (stepper) {
+
+    Serial.println("Setup stepper!");
     stepper->setDirectionPin(dirPinStepper, false);
+    //stepper->setDirectionPin(dirPinStepper);
     //stepper->setEnablePin(enablePinStepper);
     stepper->setAutoEnable(true);
     
   //Stepper Parameters
     stepper->setSpeedInHz(maxStepperSpeed);   // steps/s
-    stepper->setAcceleration(maxStepperAccel);  // 100 steps/s²
+    //stepper->setAcceleration(maxStepperAccel);  // 100 steps/s²
+
+    //stepper->setSpeedInHz(20000);   // steps/s
+    stepper->setAcceleration(10000000);  // 100 steps/s²
+
+
+
+    //stepper->runForward();
+
+
+
+#ifdef CONFIG_IDF_TARGET_ESP32S2
+Serial.println("Got it!");
+//Serial.println( engine._isValidStepPin(stepPinStepper) );
+engine.setDebugLed(LED_BUILTIN);
+
+Serial.println( getCpuFrequencyMhz() );
+
+#endif
+    delay(5000);
+
+
 
   }
 
@@ -332,6 +371,7 @@ void setup()
     Serial.println(maxEndstopNotTriggered);*/
 
     stepper->moveTo(set, true);
+    delayMicroseconds(STEPPER_DELAY);
 
 
     maxEndstopNotTriggered = digitalRead(maxPin);
@@ -343,6 +383,7 @@ void setup()
   Serial.println("The limit switch: Max On");
   Serial.print("Max Position is "); 
   Serial.println( stepperPosMax );
+  Serial.println( set );
 
 
 
@@ -359,6 +400,7 @@ void setup()
     Serial.println(minEndstopNotTriggered);*/
 
     stepper->moveTo(set, true);
+    delayMicroseconds(STEPPER_DELAY);
 
 
     minEndstopNotTriggered = digitalRead(minPin);
@@ -367,9 +409,13 @@ void setup()
   //s1.stop();
   stepperPosMin = (long)stepper->getCurrentPosition() + STEPPER_MIN_OFFSET;
 
+
   Serial.println("The limit switch: Min On");
   Serial.print("Min Position is "); 
   Serial.println( stepperPosMin );
+  Serial.println( set );
+
+  
 
 
 
@@ -433,6 +479,16 @@ void setup()
 
 
 
+//Throttle Control Setup
+  //Joystick.setAcceleratorRange(stepperPosMin, stepperPosMax);
+  Joystick.setBrakeRange(0, 10000);
+  delay(100);
+  Joystick.begin();
+
+
+  Serial.println("Setup end!");
+
+
 }
 
 long currentTime = 0;
@@ -440,6 +496,23 @@ long elapsedTime = 0;
 long previousTime = 0;
 
 double Force_Current_KF = 0.;
+
+
+float averageCycleTime = 0.0f;
+
+uint64_t maxCycles = 100;
+
+uint64_t cycleIdx = 0;
+
+int32_t joystickNormalizedToInt32 = 0;
+
+float delta_t = 0.;
+float delta_t_pow2 = 0.;
+float delta_t_pow3 = 0.;
+float delta_t_pow4 = 0.;
+
+long Position_Next = 0;
+
 
 void loop()
 { 
@@ -450,6 +523,23 @@ void loop()
   if (elapsedTime<1){elapsedTime=1;}
   previousTime = currentTime;
 
+
+  averageCycleTime += elapsedTime;
+  cycleIdx++;
+  if (maxCycles< cycleIdx)
+  {
+    cycleIdx = 0;
+
+    averageCycleTime /= (float)maxCycles; 
+
+    Serial.println(averageCycleTime);
+
+    averageCycleTime = 0;
+  }
+
+
+#define READ_ADC 
+#ifdef READ_ADC
 
   // read ADC value
   adc.waitDRDY(); // wait for DRDY to go low before next register read
@@ -463,33 +553,32 @@ void loop()
   // get endstop psotiion
   minEndstopNotTriggered = digitalRead(minPin);
   maxEndstopNotTriggered = digitalRead(maxPin);
+#endif
 
 
-
-
-
+#define APPLY_KF
+#ifdef APPLY_KF
 
   // Kalman filter  
   // update state transition and system covariance matrices
-  float delta_t = (float)elapsedTime / 1000000.0f; // convert to seconds
+  delta_t = (float)elapsedTime / 1000000.0f; // convert to seconds
 
-  
-
-  float delta_t_pow2 = delta_t * delta_t;
-  float delta_t_pow3 = delta_t_pow2 * delta_t;
-  float delta_t_pow4 = delta_t_pow3 * delta_t;
+  delta_t_pow2 = delta_t * delta_t;
+  delta_t_pow3 = delta_t_pow2 * delta_t;
+  delta_t_pow4 = delta_t_pow2 * delta_t_pow2;
 
 #ifdef KF_CONST_VEL
 
   K.F = {1.0,  delta_t, 
          0.0,  1.0};
 
-  K.Q = {forceAccelerationError * 0.25f * delta_t_pow4,   forceAccelerationError * 0.5f * delta_t_pow3,
-        forceAccelerationError * 0.5f * delta_t_pow3, forceAccelerationError * delta_t_pow2};
+  double K_Q_11 = forceAccelerationError * 0.5f * delta_t_pow3;
+  K.Q = {forceAccelerationError * 0.25f * delta_t_pow4,   K_Q_11,
+        K_Q_11, forceAccelerationError * delta_t_pow2};
         
 #else
 
-  K.F = {1.0,  delta_t, 0.5 * delta_t * delta_t,
+  K.F = {1.0,  delta_t, 0.5 * delta_t_pow2,
          0.0,  1.0, delta_t, 
          0.0, 0.0, 1.0};
 
@@ -507,7 +596,7 @@ void loop()
 
 
   // compute target position
-  long Position_Next = springStiffnesssInv * (Force_Current_KF-Force_Min) + stepperPosMin ;        //Calculates new position using linear function
+  Position_Next = springStiffnesssInv * (Force_Current_KF-Force_Min) + stepperPosMin ;        //Calculates new position using linear function
 
   if (Position_Next<stepperPosMin)
   {
@@ -519,6 +608,7 @@ void loop()
     Position_Next = stepperPosMax;
   }
 
+#endif
 
 
 
@@ -603,6 +693,11 @@ void loop()
   
 #endif
 
+
+
+
+
+
 //#define PRINT_DEBUG
 #ifdef PRINT_DEBUG
   Serial.print("elapsedTime:");
@@ -614,25 +709,29 @@ void loop()
   Serial.print(",Position_Next:");
   Serial.print(Position_Next, 6);
 
-  Serial.print(",Position_Next_PID:");
-  Serial.print(Position_Next_PID, 6);
+  //Serial.print(",Position_Next_PID:");
+  //Serial.print(Position_Next_PID, 6);
 
   Serial.println(" ");
 #endif
 
-
+#define SET_STEPPER
+#ifdef SET_STEPPER
   //Position_Next = Position_Next_PID;
   if(abs(Position_Next-stepperPosCurrent)>Position_Deadzone){       //Checks to see if the new position move is greater than the deadzone limit set to prevent oscillation
     stepper->moveTo(Position_Next, false);
-  }
+
+    delayMicroseconds(STEPPER_DELAY);
+  } 
+#endif
 
 
-  /*Serial.print("Min:");
-  Serial.print(minEndstopNotTriggered); // Print as decimal, 10 decimal places
-  Serial.print(",Max:");
-  Serial.print(maxEndstopNotTriggered); // Print as decimal, 10 decimal places
-  Serial.println(" ");*/
-
+#define JOYSTICK_OUTPUT
+#ifdef JOYSTICK_OUTPUT
+  joystickNormalizedToInt32 =  ( Force_Current_KF - Force_Min) / (Force_Max-Force_Min)  * 10000.;
+  Joystick.setBrake(joystickNormalizedToInt32);
+#endif
+  
 
 
   
