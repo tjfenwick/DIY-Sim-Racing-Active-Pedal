@@ -21,8 +21,8 @@ Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD,
 
 
 
-#define STEPPER_MIN_OFFSET 3000
-#define STEPPER_MAX_OFFSET 3000
+#define STEPPER_MIN_OFFSET 2 * 500
+#define STEPPER_MAX_OFFSET 2 * 500
 
 
 //#define USE_PID_CONTROLLER
@@ -48,15 +48,15 @@ double pidIntegrator = 0.0f;
 float springStiffnesss = 1;
 float springStiffnesssInv = 1;
 float Force_Min = 0.1;    //Min Force in lb to activate Movement
-float Force_Max = 3.;     //Max Force in lb = Max Travel Position
+float Force_Max = 5.;     //Max Force in lb = Max Travel Position
 long stepperPosPrevious = 0;
 long stepperPosCurrent = 0;
 //long  Position_Deadzone = 1600. / 10.;  //Number of steps required before the pedal will move. Added in to prevent oscillation caused by varaying load cell readings
-long  Position_Deadzone = 10;  //Number of steps required before the pedal will move. Added in to prevent oscillation caused by varaying load cell readings
+long  Position_Deadzone = 1;  //Number of steps required before the pedal will move. Added in to prevent oscillation caused by varaying load cell readings
 
 
-#define minPin 4
-#define maxPin 5
+#define minPin 11//4
+#define maxPin 10//5
 
 
 long stepperPosMin = 0;
@@ -114,8 +114,8 @@ float stdEstimate = 0.0f;
 #include "FastAccelStepper.h"
 
 // Stepper Wiring
-#define dirPinStepper    12//3 
-#define stepPinStepper   13//2  // step pin must be pin 9
+#define dirPinStepper    8//12//3 
+#define stepPinStepper   9//13//2  // step pin must be pin 9
 
 //no clue what this does
 FastAccelStepperEngine engine = FastAccelStepperEngine();
@@ -128,6 +128,8 @@ float rpm = 4000;//4000;
 float maxStepperSpeed = (rpm/60*steps_per_rev);   //needs to be in us per step || 1 sec = 1000000 us
 float maxStepperAccel = maxStepperSpeed * 100;
 
+float startPosRel = 0.1;
+float endPosRel = 0.7;
 
 // Written by Axel Sepulveda, May 2020
 #define ADC
@@ -415,6 +417,11 @@ Serial.println( getCpuFrequencyMhz() );
   Serial.println( stepperPosMin );
   Serial.println( set );
 
+
+  // correct start and end position as requested from the user
+  float stepperRange = (stepperPosMax - stepperPosMin);
+  stepperPosMin = stepperPosMin + stepperRange * startPosRel;
+  stepperPosMax = stepperPosMin + stepperRange * endPosRel;
   
 
 
@@ -523,7 +530,8 @@ void loop()
   if (elapsedTime<1){elapsedTime=1;}
   previousTime = currentTime;
 
-
+//#define PRINT_CYCLETIME
+#ifdef PRINT_CYCLETIME
   averageCycleTime += elapsedTime;
   cycleIdx++;
   if (maxCycles< cycleIdx)
@@ -536,6 +544,7 @@ void loop()
 
     averageCycleTime = 0;
   }
+#endif
 
 
 #define READ_ADC 
