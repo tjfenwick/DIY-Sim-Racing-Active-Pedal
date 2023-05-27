@@ -1,4 +1,4 @@
-#define STEPPER_DELAY 0
+#define STEPPER_DELAY 5
 
 #include <Joystick_ESP32S2.h>
 
@@ -25,30 +25,13 @@ Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD,
 #define STEPPER_MAX_OFFSET 2 * 500
 
 
-//#define USE_PID_CONTROLLER
-#ifdef USE_PID_CONTROLLER
-#include <PID_v1.h>
-// Add PID controller to compute the travel distance
-//Specify the links and initial tuning parameters
-//double Kp=0.5, Ki=0.01, Kd=0.3;
-double Kp=1., Ki=0.00, Kd=0.0;
-double Setpoint, Input, Output;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
-
-double antiWindup = 0;
-double pidLastError = 0.0f;
-double pidLastInput = 0.0f;
-double pidIntegrator = 0.0f;
-
-#endif
-
 
 
 
 float springStiffnesss = 1;
 float springStiffnesssInv = 1;
 float Force_Min = 0.1;    //Min Force in lb to activate Movement
-float Force_Max = 5.;     //Max Force in lb = Max Travel Position
+float Force_Max = 7.;     //Max Force in lb = Max Travel Position
 long stepperPosPrevious = 0;
 long stepperPosCurrent = 0;
 //long  Position_Deadzone = 1600. / 10.;  //Number of steps required before the pedal will move. Added in to prevent oscillation caused by varaying load cell readings
@@ -61,6 +44,8 @@ long  Position_Deadzone = 1;  //Number of steps required before the pedal will m
 
 long stepperPosMin = 0;
 long stepperPosMax = 0;
+long stepperPosMin_global = 0;
+long stepperPosMax_global = 0;
 bool minEndstopNotTriggered = false;
 bool maxEndstopNotTriggered = false;
 
@@ -91,7 +76,7 @@ using namespace BLA;
 #define n1 0.002 // noise on the 1st measurement component // standard deviation of measurement noise. Rule of thumb: assume Gaussian distribution. 99.9% is 3*sigma interval --> (max-min) / 3 = stddev
 #define n2 0.1 // noise on the 2nd measurement component 
 
-#define forceAccelerationError 0.5f
+#define forceAccelerationError 100.0f
 
 KALMAN<Nstate,Nobs> K; // your Kalman filter
 BLA::Matrix<Nobs, 1> obs; // observation vector
@@ -123,10 +108,10 @@ FastAccelStepper *stepper = NULL;
 
 
 
-float steps_per_rev = 500;
-float rpm = 4000;//4000;
+float steps_per_rev = 800;
+float rpm = 2500;//4000;
 float maxStepperSpeed = (rpm/60*steps_per_rev);   //needs to be in us per step || 1 sec = 1000000 us
-float maxStepperAccel = maxStepperSpeed * 100;
+float maxStepperAccel = 5 * 1e6;//maxStepperSpeed * 100;
 
 float startPosRel = 0.1;
 float endPosRel = 0.7;
@@ -380,6 +365,7 @@ Serial.println( getCpuFrequencyMhz() );
     set = set + 20;
   }  
   //s1.stop();
+  stepperPosMax_global = (long)stepper->getCurrentPosition();
   stepperPosMax = (long)stepper->getCurrentPosition() - STEPPER_MAX_OFFSET;
 
   Serial.println("The limit switch: Max On");
@@ -409,6 +395,7 @@ Serial.println( getCpuFrequencyMhz() );
     set = set - 20;
   }  
   //s1.stop();
+  stepperPosMin_global = (long)stepper->getCurrentPosition();
   stepperPosMin = (long)stepper->getCurrentPosition() + STEPPER_MIN_OFFSET;
 
 
@@ -476,15 +463,6 @@ Serial.println( getCpuFrequencyMhz() );
 
 
 
-#ifdef USE_PID_CONTROLLER
-  //turn the PID on
-  Input = 0;
-  Setpoint = 0;
-  myPID.SetSampleTime(1);
-  myPID.SetMode(AUTOMATIC);
-#endif
-
-
 
 //Throttle Control Setup
   //Joystick.setAcceleratorRange(stepperPosMin, stepperPosMax);
@@ -547,6 +525,26 @@ void loop()
 #endif
 
 
+
+
+#define RECALIBRATE_POSITION
+#ifdef RECALIBRATE_POSITION
+  // in case the stepper loses its position and therefore an endstop is triggered reset position
+  minEndstopNotTriggered = digitalRead(minPin);
+  maxEndstopNotTriggered = digitalRead(maxPin);
+
+  if (minEndstopNotTriggered == false)
+  {
+    stepper->forceStopAndNewPosition(stepperPosMin_global);
+  }
+  if (maxEndstopNotTriggered == false)
+  {
+    stepper->forceStopAndNewPosition(stepperPosMax_global);
+  }
+
+#endif
+
+
 #define READ_ADC 
 #ifdef READ_ADC
 
@@ -556,7 +554,7 @@ void loop()
   sensor1 -= loadcellOffset;
 
   // get current stepper position
-  stepperPosCurrent = stepper->getCurrentPosition();
+  //stepperPosCurrent = stepper->getCurrentPosition();
 
 
   // get endstop psotiion
@@ -622,88 +620,6 @@ void loop()
 
 
 
-#ifdef USE_PID_CONTROLLER
-  // originally a P (k_p=1) controller is used to calculate the target position.
-  // the target psoition only depends on the current difference between target position and current position.
-  // By using the I and D components, the target position also depends on the accumulated difference and the change of the difference.
-  // Proper parameter tuning might help to reduce/remove pedal oscilations.
-
-
-  // Use PID controller to compute the next position
-  // travelDistance is the residue
-  Setpoint = normalizePos(Position_Next, stepperPosMin, stepperPosMax); // normalized target position
-  Input = normalizePos(stepperPosCurrent, stepperPosMin, stepperPosMax); // normalized current position
-
-  
-  //myPID.Compute(); // PID computes normalized target position
-
-
-  double error = Setpoint - Input;
-  double error_d = error - pidLastError;
-  double input_d = (Input - pidLastInput) / delta_t;
-  pidLastError = error;
-  pidLastInput = Input;
-
-  // Integrator with anti windup
-
-  // 
-  
-
-
-  pidIntegrator += error * delta_t;
-  pidIntegrator += antiWindup * delta_t;
-
-  // http://brettbeauregard.com/blog/2011/04/improving-the-beginner%E2%80%99s-pid-reset-windup/
-  double outMax = 1.0f / Ki;
-  double outMin = -1.0f / Ki;
-  //if(pidIntegrator> outMax) pidIntegrator= outMax;
-  //else if(pidIntegrator< outMin) pidIntegrator= outMin;
-
-
-  //Output = Kp * error + Ki * pidIntegrator + Kd * error_d;
-  Output = Kp * error + Ki * pidIntegrator - Kd * input_d;
-
-  
-  if (Output > 1)
-  {
-    antiWindup = 1. - Output;
-    Output = 1.0;
-  }
-
-  if (Output < 0)
-  {
-    antiWindup = 0. - Output;
-    Output = 0.0;
-  }
-
-
-  /*Serial.print("pidSetpoint:");
-  Serial.print(Setpoint, 5);
-  Serial.print(",");
-
-  Serial.print("pidInput:");
-  Serial.print(Input, 5);
-  Serial.print(",");
-
-  Serial.print("pidOutput:");
-  Serial.print(Output, 5);
-  Serial.print(",");
-
-  Serial.print("targetPos:");
-  Serial.print((long)unnormalizePos(Output));
-  Serial.print(",");
-
-  Serial.print("Position_Next:");
-  Serial.print(Position_Next);
-  Serial.print(",");*/
-
-  // unnormalize PID output and set as new target position
-  double Position_Next_PID = (long)unnormalizePos(Output, stepperPosMin, stepperPosMax);
-  
-#endif
-
-
-
 
 
 
@@ -724,6 +640,10 @@ void loop()
   Serial.println(" ");
 #endif
 
+
+// get current stepper position
+  stepperPosCurrent = stepper->getCurrentPosition();
+
 #define SET_STEPPER
 #ifdef SET_STEPPER
   //Position_Next = Position_Next_PID;
@@ -741,6 +661,7 @@ void loop()
   Joystick.setBrake(joystickNormalizedToInt32);
 #endif
   
+
 
 
   
