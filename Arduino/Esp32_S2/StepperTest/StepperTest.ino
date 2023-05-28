@@ -73,7 +73,9 @@ void loop()
   Position_Next += 500; // increment position
   Position_Next %= 10000; // reset position
 
+  Serial.println(Position_Next);
+
   // add target position
   stepper->moveTo(Position_Next, false);
-  
+
 }
