@@ -1,0 +1,15 @@
+[submodule "Arduino/Esp32_S2/libs/FastAccelStepper"]
+	path = Arduino/Esp32_S2/libs/FastAccelStepper
+	url = https://github.com/gin66/FastAccelStepper.git
+[submodule "Arduino/Esp32_S2/libs/Kalman"]
+	path = Arduino/Esp32_S2/libs/Kalman
+	url = https://github.com/rfetick/Kalman.git
+[submodule "Arduino/Esp32_S2/libs/BasicLinearAlgebra"]
+	path = Arduino/Esp32_S2/libs/BasicLinearAlgebra
+	url = https://github.com/tomstewart89/BasicLinearAlgebra.git
+[submodule "Arduino/Esp32_S2/libs/Joystick_ESP32S2"]
+	path = Arduino/Esp32_S2/libs/Joystick_ESP32S2
+	url = https://github.com/schnoog/Joystick_ESP32S2.git
+[submodule "Arduino/Esp32_S2/libs/ADS1255-ADS1256-master"]
+	path = Arduino/Esp32_S2/libs/ADS1255-ADS1256-master
+	url = https://github.com/ADS1xxx-Series-ADC-Libraries/ADS1255-ADS1256.git

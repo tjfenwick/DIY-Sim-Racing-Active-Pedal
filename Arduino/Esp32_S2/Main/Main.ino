@@ -1,4 +1,5 @@
-#define STEPPER_DELAY 5
+#define STEPPER_DELAY 0
+#define ENDSTOP_MOVEMENT 5
 
 #include <Joystick_ESP32S2.h>
 
@@ -99,8 +100,8 @@ float stdEstimate = 0.0f;
 #include "FastAccelStepper.h"
 
 // Stepper Wiring
-#define dirPinStepper    8//12//3 
-#define stepPinStepper   9//13//2  // step pin must be pin 9
+#define dirPinStepper    8//17//8//12//3 
+#define stepPinStepper   9//16//9//13//2  // step pin must be pin 9
 
 //no clue what this does
 FastAccelStepperEngine engine = FastAccelStepperEngine();
@@ -109,9 +110,9 @@ FastAccelStepper *stepper = NULL;
 
 
 float steps_per_rev = 800;
-float rpm = 2500;//4000;
+float rpm = 1000;//2500;//4000;
 float maxStepperSpeed = (rpm/60*steps_per_rev);   //needs to be in us per step || 1 sec = 1000000 us
-float maxStepperAccel = 5 * 1e6;//maxStepperSpeed * 100;
+float maxStepperAccel = 1e6;//5 * 1e6;//maxStepperSpeed * 100;
 
 float startPosRel = 0.1;
 float endPosRel = 0.7;
@@ -315,7 +316,17 @@ void setup()
     //stepper->setAcceleration(maxStepperAccel);  // 100 steps/s²
 
     //stepper->setSpeedInHz(20000);   // steps/s
-    stepper->setAcceleration(10000000);  // 100 steps/s²
+    //stepper->setAcceleration(10000000);  // 100 steps/s²
+    //stepper->setAcceleration(1e7);  // 100 steps/s²
+    stepper->setAcceleration(1000000000);  // 100 steps/s²
+
+    Serial.print("1:");
+    Serial.print(10000000);
+    Serial.print(",2:");
+    Serial.print(1e7);
+    Serial.print(",3:");
+    Serial.print((int32_t)1e7);
+    Serial.println("");
 
 
 
@@ -341,40 +352,8 @@ Serial.println( getCpuFrequencyMhz() );
 
 
 
-
-
-
-  // Find max stepper position
   long set = 0;
   float slowMoveSpeed = maxStepperSpeed * 0.05;
-  //Setting Max Limit Switch Position
-  maxEndstopNotTriggered = digitalRead(maxPin);
-  Serial.print(maxEndstopNotTriggered);
-  while(maxEndstopNotTriggered == true){
-
-    /*Serial.print("Pos:");
-    Serial.print(set);
-    Serial.print(", Max endstop state:");
-    Serial.println(maxEndstopNotTriggered);*/
-
-    stepper->moveTo(set, true);
-    delayMicroseconds(STEPPER_DELAY);
-
-
-    maxEndstopNotTriggered = digitalRead(maxPin);
-    set = set + 20;
-  }  
-  //s1.stop();
-  stepperPosMax_global = (long)stepper->getCurrentPosition();
-  stepperPosMax = (long)stepper->getCurrentPosition() - STEPPER_MAX_OFFSET;
-
-  Serial.println("The limit switch: Max On");
-  Serial.print("Max Position is "); 
-  Serial.println( stepperPosMax );
-  Serial.println( set );
-
-
-
 
   // Find min stepper position
   //Setting Max Limit Switch Position
@@ -392,9 +371,10 @@ Serial.println( getCpuFrequencyMhz() );
 
 
     minEndstopNotTriggered = digitalRead(minPin);
-    set = set - 20;
+    set = set - ENDSTOP_MOVEMENT;
   }  
-  //s1.stop();
+  stepper->forceStopAndNewPosition(0);
+  stepper->moveTo(0);
   stepperPosMin_global = (long)stepper->getCurrentPosition();
   stepperPosMin = (long)stepper->getCurrentPosition() + STEPPER_MIN_OFFSET;
 
@@ -402,13 +382,49 @@ Serial.println( getCpuFrequencyMhz() );
   Serial.println("The limit switch: Min On");
   Serial.print("Min Position is "); 
   Serial.println( stepperPosMin );
-  Serial.println( set );
+
+
+  // Find max stepper position
+  set = 0;
+  //Setting Max Limit Switch Position
+  maxEndstopNotTriggered = digitalRead(maxPin);
+  Serial.print(maxEndstopNotTriggered);
+  while(maxEndstopNotTriggered == true){
+
+    /*Serial.print("Pos:");
+    Serial.print(set);
+    Serial.print(", Max endstop state:");
+    Serial.println(maxEndstopNotTriggered);*/
+
+    stepper->moveTo(set, true);
+    delayMicroseconds(STEPPER_DELAY);
+
+
+    maxEndstopNotTriggered = digitalRead(maxPin);
+    set = set + ENDSTOP_MOVEMENT;
+  }  
+  //s1.stop();
+  stepperPosMax_global = (long)stepper->getCurrentPosition();
+  stepperPosMax = (long)stepper->getCurrentPosition() - STEPPER_MAX_OFFSET;
+
+  Serial.println("The limit switch: Max On");
+  Serial.print("Max Position is "); 
+  Serial.println( stepperPosMax );
+
+  
+
+
+
+
 
 
   // correct start and end position as requested from the user
   float stepperRange = (stepperPosMax - stepperPosMin);
   stepperPosMin = stepperPosMin + stepperRange * startPosRel;
   stepperPosMax = stepperPosMin + stepperRange * endPosRel;
+
+  // move to initial position
+  stepper->moveTo(stepperPosMin, true);
   
 
 
@@ -603,6 +619,7 @@ void loop()
 
 
   // compute target position
+  //Position_Next = springStiffnesssInv * (sensor1-Force_Min) + stepperPosMin ;        //Calculates new position using linear function
   Position_Next = springStiffnesssInv * (Force_Current_KF-Force_Min) + stepperPosMin ;        //Calculates new position using linear function
 
   if (Position_Next<stepperPosMin)
