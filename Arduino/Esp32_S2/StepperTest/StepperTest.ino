@@ -4,10 +4,17 @@
   // Stepper Wiring
   #define dirPinStepper 8   //This can be any output capable port pin.
   #define stepPinStepper 9  // step pin must be pin 9, 10 or 11
+  #define debugPinStepper  10
+
 #elif defined(ARDUINO_ARCH_ESP32)
   // Stepper Wiring
-  #define dirPinStepper    8
-  #define stepPinStepper   9
+  //#define dirPinStepper    8
+  //#define stepPinStepper   9
+
+  #define dirPinStepper    5
+  #define stepPinStepper   17
+  #define debugPinStepper  16
+
 #endif
 
 //no clue what this does
@@ -17,7 +24,8 @@ FastAccelStepper *stepper = NULL;
 float steps_per_rev = 800;
 float rpm = 2000;
 float maxStepperSpeed = (rpm/60*steps_per_rev);   //needs to be in us per step || 1 sec = 1000000 us
-float maxStepperAccel = 1e2;
+//float maxStepperAccel = 1e2;
+float maxStepperAccel = 1e8;
 
 
 
@@ -31,7 +39,9 @@ void setup()
 
   //FastAccelStepper setup
   engine.init();
-  stepper = engine.stepperConnectToPin(stepPinStepper);
+  //DRIVER_MCPWM_PCNT 
+  //DRIVER_RMT
+  stepper = engine.stepperConnectToPin(stepPinStepper, DRIVER_RMT);
   if (stepper) {
 
     Serial.println("Setup stepper!");
@@ -53,7 +63,7 @@ void setup()
   stepper->moveTo(0);
 
 
-  pinMode(10, OUTPUT);    // sets the digital pin 13 as output
+  pinMode(debugPinStepper, OUTPUT);    // sets the digital pin 13 as output
   
 }
 
@@ -63,7 +73,8 @@ long previousTime = 0;
 
 long Position_Next = 0;
 
-long targetCycleTime = 130;
+//long targetCycleTime = 130;
+long targetCycleTime = 1000;
 //long targetCycleTime = 3000;
 
 void loop()
@@ -78,9 +89,20 @@ void loop()
   long waitTime = targetCycleTime - elapsedTime;
   if (waitTime > 0){delayMicroseconds(waitTime); }
 
+  //delay(500);
+
   //delay(1);
+  currentTime = micros();
+  elapsedTime = currentTime - previousTime;
 
   previousTime = currentTime;
+
+  //Serial.println(elapsedTime);
+
+  //Serial.println(stepper->rampState());
+  
+
+  
 
   // compute target position
   Position_Next += 500; // increment position
@@ -88,11 +110,11 @@ void loop()
 
   if (Position_Next == 0)
   {
-    digitalWrite(10, HIGH);
+    digitalWrite(debugPinStepper, HIGH);
   }
   else
   {
-    digitalWrite(10, LOW);
+    digitalWrite(debugPinStepper, LOW);
   }
 
   //Serial.println(Position_Next);
