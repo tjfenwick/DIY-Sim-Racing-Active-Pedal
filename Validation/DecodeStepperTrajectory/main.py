@@ -3,7 +3,7 @@ from pandas import *
 import matplotlib.pyplot as plt
 
 # rolling window length to smooth the velocity signal. Adjust as needed
-velocityWindowLength = 3
+velocityWindowLength = 5
 
 fileName = 'C:/Users/chris/Downloads/digital.csv'
 
@@ -11,6 +11,8 @@ fileName = 'C:/Users/chris/Downloads/digital.csv'
 if __name__ == '__main__':
 
     data = read_csv(fileName)
+
+    data['cycleTime'] = data['Time [s]'].diff()
 
     # compute rising edges of step signal
     data['step_edge_rising'] = data['Channel 2'].diff() > 0.5
@@ -22,9 +24,14 @@ if __name__ == '__main__':
     data['position'] = data['movement'].cumsum()
 
     # compute velocity & acceleration
-    data['velocity_p'] = data['position'].diff().rolling(velocityWindowLength).max()
-    data['velocity_n'] = data['position'].diff().rolling(velocityWindowLength).min()
+
+
+    data['velocity_p'] = ( data['position'].diff() / data['cycleTime']).rolling(velocityWindowLength).max()
+    data['velocity_n'] = ( data['position'].diff() / data['cycleTime']).rolling(velocityWindowLength).min()
     data['velocity'] = data['velocity_p'] + data['velocity_n']
+    #data['velocity'] = (data['velocity'].abs() > 1e6).replace(1, 0)
+    data.loc[data['velocity'].abs() > 1e5, 'velocity'] = 0
+
     data['acceleration'] = data['velocity'].diff()
 
 
