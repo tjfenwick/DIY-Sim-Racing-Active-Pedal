@@ -1,3 +1,22 @@
+long currentTime = 0;
+long elapsedTime = 0;
+long previousTime = 0;
+double Force_Current_KF = 0.;
+float averageCycleTime = 0.0f;
+uint64_t maxCycles = 100;
+uint64_t cycleIdx = 0;
+int32_t joystickNormalizedToInt32 = 0;
+float delta_t = 0.;
+float delta_t_pow2 = 0.;
+float delta_t_pow3 = 0.;
+float delta_t_pow4 = 0.;
+long Position_Next = 0;
+
+
+
+
+
+
 /**********************************************************************************************/
 /*                                                                                            */
 /*                         joystick  definitions                                              */
@@ -157,11 +176,15 @@ void setup()
   pinMode(maxPin, INPUT);
 
 
+  engine.init();
+  stepper = engine.stepperConnectToPin(stepPinStepper);
+
+
   Serial.println("Starting ADC");  
   adc.initSpi(clockMHZ);
   delay(1000);
   Serial.println("ADS: send SDATAC command");
-  adc.sendCommand(ADS1256_CMD_SDATAC);
+  //adc.sendCommand(ADS1256_CMD_SDATAC);
 
   
   // start the ADS1256 with data rate of 15kSPS SPS and gain x64
@@ -214,8 +237,6 @@ void setup()
 
 
   //FastAccelStepper setup
-  engine.init();
-  stepper = engine.stepperConnectToPin(stepPinStepper);
   if (stepper) {
 
     Serial.println("Setup stepper!");
@@ -315,26 +336,11 @@ void setup()
 
   Serial.println("Setup end!");
 
+  previousTime = micros();
+
 
 }
 
-
-
-
-
-long currentTime = 0;
-long elapsedTime = 0;
-long previousTime = 0;
-double Force_Current_KF = 0.;
-float averageCycleTime = 0.0f;
-uint64_t maxCycles = 100;
-uint64_t cycleIdx = 0;
-int32_t joystickNormalizedToInt32 = 0;
-float delta_t = 0.;
-float delta_t_pow2 = 0.;
-float delta_t_pow3 = 0.;
-float delta_t_pow4 = 0.;
-long Position_Next = 0;
 
 
 
@@ -428,7 +434,7 @@ void loop()
   #define SET_STEPPER
   #ifdef SET_STEPPER
     // get current stepper position
-    stepperPosCurrent = stepper->getCurrentPosition();
+    //stepperPosCurrent = stepper->getCurrentPosition();
     stepper->moveTo(Position_Next, false);
   #endif
 
@@ -452,7 +458,8 @@ void loop()
     Serial.print(",Position_Next:");
     Serial.print(Position_Next, 6);
     Serial.println(" ");
+
+    delay(100);
   #endif
-    
 
 }
