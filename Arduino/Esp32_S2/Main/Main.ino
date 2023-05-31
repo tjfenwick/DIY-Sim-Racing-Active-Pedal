@@ -13,6 +13,11 @@ float delta_t_pow4 = 0.;
 long Position_Next = 0;
 long set = 0;
 
+USBCDC USBSerial;
+
+#define MIN_STEPS 5
+
+
 
 
 
@@ -91,7 +96,7 @@ using namespace BLA;
 #define KF_CONST_VEL
 #define Nstate 2 // length of the state vector
 #define Nobs 1   // length of the measurement vector
-#define KF_MODEL_NOISE_FORCE_ACCELERATION (float)10.0f // adjust model noise here
+#define KF_MODEL_NOISE_FORCE_ACCELERATION (float)50.0f // adjust model noise here
 
 KALMAN<Nstate,Nobs> K; // your Kalman filter
 BLA::Matrix<Nobs, 1> obs; // observation vector
@@ -133,7 +138,7 @@ FastAccelStepper *stepper = NULL;
 #define MAXIMUM_STEPPER_RPM (float)4000.0f
 #define MAXIMUM_STEPPER_SPEED (MAXIMUM_STEPPER_RPM/60*STEPS_PER_MOTOR_REVOLUTION)   //needs to be in us per step || 1 sec = 1000000 us
 #define SLOW_STEPPER_SPEED (float)(MAXIMUM_STEPPER_SPEED * 0.05f)
-#define MAXIMUM_STEPPER_ACCELERATION (float)1e9
+#define MAXIMUM_STEPPER_ACCELERATION (float)1e6
 
 
 
@@ -167,7 +172,10 @@ double loadcellReading;
 /**********************************************************************************************/
 void setup()
 {
-  Serial.begin(115200);
+  //Serial.begin(115200);
+  Serial.begin(921600);
+
+  USBSerial.begin(115200);
 
   delay(1000);
 
@@ -399,7 +407,7 @@ void loop()
     previousTime = currentTime;
 
   // average execution time averaged over multiple cycles 
-  #define PRINT_CYCLETIME
+  //#define PRINT_CYCLETIME
   #ifdef PRINT_CYCLETIME
     averageCycleTime += elapsedTime;
     cycleIdx++;
@@ -467,13 +475,19 @@ void loop()
     // compute target position
     Position_Next = springStiffnesssInv * (Force_Current_KF-Force_Min) + stepperPosMin ;        //Calculates new position using linear function
     Position_Next = (int32_t)constrain(Position_Next, stepperPosMin, stepperPosMax);
+
     
+
 
   #define SET_STEPPER
   #ifdef SET_STEPPER
     // get current stepper position
-    //stepperPosCurrent = stepper->getCurrentPosition();
-    stepper->moveTo(Position_Next, false);
+    stepperPosCurrent = stepper->getCurrentPosition(); 
+    //float movement = abs( stepperPosCurrent - Position_Next);
+    //if (movement>MIN_STEPS  )
+    {
+      stepper->moveTo(Position_Next, false);
+    }
   #endif
 
 
@@ -499,5 +513,7 @@ void loop()
 
     delay(100);
   #endif
+
+  //USBSerial.println("debug message!");
 
 }

@@ -8,6 +8,7 @@
 
 #elif defined(ARDUINO_ARCH_ESP32)
   // Stepper Wiring
+
   //#define dirPinStepper    8
   //#define stepPinStepper   9
 
@@ -25,7 +26,7 @@ float steps_per_rev = 800;
 float rpm = 2000;
 float maxStepperSpeed = (rpm/60*steps_per_rev);   //needs to be in us per step || 1 sec = 1000000 us
 //float maxStepperAccel = 1e2;
-float maxStepperAccel = 1e8;
+float maxStepperAccel = 1e6;
 
 
 
@@ -41,7 +42,14 @@ void setup()
   engine.init();
   //DRIVER_MCPWM_PCNT 
   //DRIVER_RMT
-  stepper = engine.stepperConnectToPin(stepPinStepper, DRIVER_RMT);
+
+  #if defined(ARDUINO_ARCH_ESP32)
+    //stepper = engine.stepperConnectToPin(stepPinStepper, DRIVER_RMT);
+    stepper = engine.stepperConnectToPin(stepPinStepper);
+  #else
+    stepper = engine.stepperConnectToPin(stepPinStepper);
+  #endif
+
   if (stepper) {
 
     Serial.println("Setup stepper!");
@@ -90,6 +98,8 @@ void loop()
   if (waitTime > 0){delayMicroseconds(waitTime); }
 
   //delay(500);
+  //delay(300);
+  delay(5);
 
   //delay(1);
   currentTime = micros();
@@ -106,7 +116,7 @@ void loop()
 
   // compute target position
   Position_Next += 500; // increment position
-  Position_Next %= 10000; // reset positiony
+  Position_Next %= 6000; // reset positiony
 
   if (Position_Next == 0)
   {
