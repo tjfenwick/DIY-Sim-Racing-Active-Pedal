@@ -11,6 +11,7 @@ float delta_t_pow2 = 0.;
 float delta_t_pow3 = 0.;
 float delta_t_pow4 = 0.;
 long Position_Next = 0;
+long set = 0;
 
 
 
@@ -90,7 +91,7 @@ using namespace BLA;
 #define KF_CONST_VEL
 #define Nstate 2 // length of the state vector
 #define Nobs 1   // length of the measurement vector
-#define KF_MODEL_NOISE_FORCE_ACCELERATION (float)100.0f // adjust model noise here
+#define KF_MODEL_NOISE_FORCE_ACCELERATION (float)10.0f // adjust model noise here
 
 KALMAN<Nstate,Nobs> K; // your Kalman filter
 BLA::Matrix<Nobs, 1> obs; // observation vector
@@ -166,7 +167,7 @@ double loadcellReading;
 /**********************************************************************************************/
 void setup()
 {
-  Serial.begin(250000);
+  Serial.begin(115200);
 
   delay(1000);
 
@@ -254,7 +255,7 @@ void setup()
 
 
 
-  long set = 0;
+  
 
   // Find min stepper position
   minEndstopNotTriggered = digitalRead(minPin);
@@ -354,6 +355,43 @@ void setup()
 /**********************************************************************************************/
 void loop()
 { 
+
+  #define RECALIBRATE_POSITION_FROM_SERIAL
+  #ifdef RECALIBRATE_POSITION_FROM_SERIAL
+    byte n = Serial.available();
+    if(n !=0 )
+    {
+      int menuChoice = Serial.parseInt();
+      
+      switch (menuChoice) {
+        // resset minimum position
+        case 1:
+
+          //Serial.println("Reset position!");
+          set = stepperPosMin_global;
+          while(minEndstopNotTriggered == true){
+            stepper->moveTo(set, true);
+            minEndstopNotTriggered = digitalRead(minPin);
+            set = set - ENDSTOP_MOVEMENT;
+          }  
+          stepper->forceStopAndNewPosition(stepperPosMin_global);
+          //stepper->moveTo(0);
+          
+          break;
+
+        // toggle ABS
+        case 2:
+          Serial.print("Second case:");
+          break;
+
+        default:
+          Serial.print("Default case:");
+      }
+    }
+  #endif
+
+
+
     // obtain time
     currentTime = micros();
     elapsedTime = currentTime - previousTime;
@@ -361,7 +399,7 @@ void loop()
     previousTime = currentTime;
 
   // average execution time averaged over multiple cycles 
-  //#define PRINT_CYCLETIME
+  #define PRINT_CYCLETIME
   #ifdef PRINT_CYCLETIME
     averageCycleTime += elapsedTime;
     cycleIdx++;
