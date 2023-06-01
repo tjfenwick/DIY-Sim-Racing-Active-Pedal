@@ -454,10 +454,10 @@ const static char messages[] PROGMEM =
     "is not defined" _NL_ _SEP_
 #define _run_ "\225"
     "run " _SEP_
-#define _forward_ "\226"
-    "forward " _SEP_
-#define _backward_ "\227"
-    "backward " _SEP_
+#define _forward "\226"
+    "forward" _SEP_
+#define _backward "\227"
+    "backward" _SEP_
 #define _Stepped_ "\230"
     "Stepped " _SEP_
 #define _acceleration_ "\231"
@@ -478,8 +478,8 @@ const static char messages[] PROGMEM =
     " ... " _SEP_
 #define _Enter_ "\241"
     "Enter " _SEP_
-#define _mode_ "\242"
-    "mode " _SEP_
+#define _mode "\242"
+    "mode" _SEP_
 #define _clear_ "\243"
     "clear " _SEP_
 #define _stepper "\244"
@@ -508,8 +508,8 @@ const static char messages[] PROGMEM =
     "one " _step " " _SEP_
 #define _position_ "\260"
     "position " _SEP_
-#define _of_the_ "\261"
-    "of the " _SEP_
+#define __of_the_ "\261"
+    " of the " _SEP_
 #define _Turn_ "\262"
     "Turn " _SEP_
 #define _stop "\263"
@@ -532,7 +532,7 @@ const static char messages[] PROGMEM =
     "<speed> "  _SEP_
 #define _I_accel_I_ "\274"
     "<accel> "  _SEP_
-#define _Enter_command_seperated_by_space_carriage_return_or_newline_NL "\275"
+#define _Enter_command_separated_by_space_carriage_return_or_newline_NL "\275"
     _Enter_ "commands separated by space, carriage return or newline:" _NL_ _SEP_
 #define MSG_OFFSET 62
 #define MSG_SELECT_STEPPER 0+MSG_OFFSET
@@ -542,7 +542,7 @@ const static char messages[] PROGMEM =
 #define MSG_TOGGLE_USAGE_INFO 2+MSG_OFFSET
     _Toggle_  _usage_ "info" _NL_ _SEP_
 #define MSG_ENTER_TEST_MODE 3+MSG_OFFSET
-    _Enter_ _test_ _mode_ _NL_ _SEP_
+    _Enter_ _test_ _mode _NL_ _SEP_
 #define MSG_SET_ACCELERATION_TO 4+MSG_OFFSET
     _set_ _acceleration_ _to_ _SEP_
 #define MSG_SET_SPEED_TO_US 5+MSG_OFFSET
@@ -564,15 +564,15 @@ const static char messages[] PROGMEM =
 #define MSG_OUTPUT_DRIVER_OFF 13+MSG_OFFSET
     _Output_driver_ "off" _NL_ _SEP_
 #define MSG_OUTPUT_DRIVER_AUTO 14+MSG_OFFSET
-    _Output_driver_ "automatic " _mode_ _NL_ _SEP_
+    _Output_driver_ "automatic " _mode _NL_ _SEP_
 #define MSG_STOP 15+MSG_OFFSET
     _stop _NL_ _SEP_
 #define MSG_KEEP_RUNNING 16+MSG_OFFSET
     "Keep running" _NL_ _SEP_
 #define MSG_RUN_FORWARD 17+MSG_OFFSET
-    _run_ _forward_ _NL_ _SEP_
+    _run_ _forward _NL_ _SEP_
 #define MSG_RUN_BACKWARD 18+MSG_OFFSET
-    _run_ _backward_ _NL_ _SEP_
+    _run_ _backward _NL_ _SEP_
 #define MSG_IMMEDIATE_STOP 19+MSG_OFFSET
     "immediate " _stop _NL_ _SEP_
 #define MSG_UPDATE_SPEED_ACCELERATION 20+MSG_OFFSET
@@ -582,9 +582,9 @@ const static char messages[] PROGMEM =
 #define MSG_TEST_DIRECT_DRIVE 22+MSG_OFFSET
     _test_ "direct drive" _NL_ _SEP_
 #define MSG_STEPPED_FORWARD 23+MSG_OFFSET
-    _Stepped_ _forward_ _NL_ _SEP_
+    _Stepped_ _forward _NL_ _SEP_
 #define MSG_STEPPED_BACKWARD 24+MSG_OFFSET
-    _Stepped_ _backward_ _NL_ _SEP_
+    _Stepped_ _backward _NL_ _SEP_
 #define MSG_WAIT_MS 25+MSG_OFFSET
     " ms wait" _NL_ _SEP_
 #define MSG_SELECT_TEST_SEQUENCE 26+MSG_OFFSET
@@ -647,7 +647,7 @@ const static char messages[] PROGMEM =
 #define MSG_TEST_COMPLETED 54+MSG_OFFSET
     _test_ "completed" _NL_ _SEP_
 #define MSG_ENTER_CONFIG_MODE 55+MSG_OFFSET
-    _Enter_ "config " _mode_ _NL_ _SEP_
+    _Enter_ "config " _mode _NL_ _SEP_
 #define MSG_DIRECTION_PIN 56+MSG_OFFSET
     _direction_ _pin_ _SEP_
 #define MSG_SET_TO_PIN 57+MSG_OFFSET
@@ -655,36 +655,48 @@ const static char messages[] PROGMEM =
 #define MSG_DISABLED 58+MSG_OFFSET
     _disable "d" _NL_ _SEP_
 #define MSG_HIGH_COUNT_UP 59+MSG_OFFSET
-    _high_counts_ "up" _NL_ _SEP_
+    _high_counts_ "up" _SEP_
 #define MSG_HIGH_COUNT_DOWN 60+MSG_OFFSET
-    _high_counts_ "down" _NL_ _SEP_
+    _high_counts_ "down" _SEP_
 #define MSG_DELAY 61+MSG_OFFSET
     _delay_ "in us = " _SEP_
 #define MSG_UNKNOWN_COMMAND 62 + MSG_OFFSET
-    "Cannot interpret this command: " _SEP_
+    "Unknown command: " _SEP_
 #define MSG_SET_SPEED_TO_MILLI_HZ 63+MSG_OFFSET
     _set_ _speed_ "(" _steps_ "/1000s) " _to_ _SEP_
-#define MSG_USAGE_NORMAL 64+MSG_OFFSET
-#define MSG_USAGE_TEST 65+MSG_OFFSET
-#define MSG_USAGE_CONFIG 66+MSG_OFFSET
+#define MSG_ACCELERATION_STATUS 64+MSG_OFFSET
+     " " _acceleration_ " [" _step "s/s^2]=" _SEP_
+#define MSG_SPEED_STATUS_FREQ 65+MSG_OFFSET
+     " " _speed_ "[m" _step "/s]=" _SEP_
+#define MSG_SPEED_STATUS_TIME 66+MSG_OFFSET
+     " " _speed_ "[us/" _step "]=" _SEP_
+#define MSG_LINEAR_ACCELERATION 67+MSG_OFFSET
+     "linear " _acceleration_ _step "s=" _SEP_
+#define MSG_JUMP_START 68+MSG_OFFSET
+     "jump start " _step "s=" _SEP_
+#define MSG_USAGE_NORMAL 69+MSG_OFFSET
+#define MSG_USAGE_TEST 70+MSG_OFFSET
+#define MSG_USAGE_CONFIG 71+MSG_OFFSET
 #if MSG_USAGE_CONFIG >= 128+32
 #error "TOO MANY ENTRIES"
 #endif
     /* USAGE NORMAL */
-    _Enter_command_seperated_by_space_carriage_return_or_newline_NL
+    _Enter_command_separated_by_space_carriage_return_or_newline_NL
 	_m1_m2_to_select_stepper_
-    ____ "c" ________ _ooo_ _Enter_ _configuration_ _mode_ _NL_
+    ____ "c" ________ _ooo_ _Enter_ _configuration_ _mode _NL_
     ____ "V" _I_speed_I_  _ooo_set_selected_stepper_s_ _speed_ "in us/" _step _NL_
     ____ "H" _I_speed_I_  _ooo_set_selected_stepper_s_ _speed_ "in " _steps_ "/s" _NL_
     ____ "h" _I_speed_I_  _ooo_set_selected_stepper_s_ _speed_ "in " _steps_ "/1000s" _NL_
     ____ "A" _I_accel_I_  _ooo_set_selected_stepper_s_ _acceleration_ _NL_
     ____ "a" _I_accel_I_  _ooo_ _acceleration_ "control with +/-" _acceleration_ "values" _NL_
-    ____ "U" ________ _ooo_ "Update " _selected_stepper "'s " _speed_ "/ " _acceleration_ " while "
+    ____ "J<" _step "s> " _ooo_set_selected_stepper_s_ "linear " _acceleration_  " for <" _step "s>" _NL_
+    ____ "j<" _step "s> " _ooo_set_selected_stepper_s_ "jump start to <" _step "s>" _NL_
+    ____ "U" ________ _ooo_ "Update " _selected_stepper "'s " _speed_ "/ " _acceleration_ "while "
     "running" _NL_
     ____ "P<pos>   " _ooo_ _Move_ _selected_stepper " " _to_ "+/- " _position_ _NL_
     ____ "R<n> " ____ _ooo_ _Move_ _selected_stepper " by +/- n " _steps_ _NL_
-    ____ "f" ________ _ooo_ _run_ _forward_ _comma__counting_ "up" _NL_
-    ____ "b" ________ _ooo_ _run_ _backward_ _comma__counting_ "down" _NL_
+    ____ "f" ________ _ooo_ _run_ _forward _comma__counting_ "up" _NL_
+    ____ "b" ________ _ooo_ _run_ _backward _comma__counting_ "down" _NL_
     ____ "K" ________ _ooo_ "Keep " _selected_stepper " running in current " _direction_ _NL_
     ____ "@<pos>   " _ooo_ _set_ _selected_stepper " " _to_ _position_ "(can be "
     "negative)" _NL_
@@ -692,7 +704,7 @@ const static char messages[] PROGMEM =
     ____ "D<ms>" ____ _ooo_set_selected_stepper_s_ _delay_ _from_ _steps_ _to_ _disable _NL_
     ____ "N" ________ _ooo_ _Turn_ _selected_stepper _output_ "on, " __disable_auto_enable_nl
     ____ "F" ________ _ooo_ _Turn_ _selected_stepper _output_ "off," __disable_auto_enable_nl
-    ____ "O" ________ _ooo_ "Put " _selected_stepper " into auto " _enable_ _mode_ _NL_
+    ____ "O" ________ _ooo_ "Put " _selected_stepper " into auto " _enable_ _mode _NL_
     ____ "S" ________ _ooo_ _stop " " _selected_stepper " with deceleration" _NL_
     ____ "X" ________ _ooo_ "Immediately " _stop " " _stepper " and " _set_ "zero position" _NL_
     ____ "I" ________ _ooo_ _Toggle_ _stepper " info, while any " _stepper " is running" _NL_
@@ -700,8 +712,8 @@ const static char messages[] PROGMEM =
     ____ "W" ________ _ooo_ "Blocking wait until " _selected_stepper " is " _stop "ped, will "
     "deadlock if " _stepper " never " _stop "s" _NL_
     ____ "w<ms>" ____ _ooo_ "Wait time in ms" _NL_
-    ____ "+" ________ _ooo_ _Perform_ _one_step_ _forward_ _of_the_ _selected_stepper _NL_
-    ____ "-" ________ _ooo_ _Perform_ _one_step_ _backward_ _of_the_ _selected_stepper _NL_
+    ____ "+" ________ _ooo_ _Perform_ _one_step_ _forward __of_the_ _selected_stepper _NL_
+    ____ "-" ________ _ooo_ _Perform_ _one_step_ _backward __of_the_ _selected_stepper _NL_
     ____ "T" ________ _ooo_ _test_  _select "ed " _stepper " with direct port access" _NL_
 #endif
 #if defined(ARDUINO_ARCH_ESP32)
@@ -711,10 +723,10 @@ const static char messages[] PROGMEM =
     ____ "p<n>,l,h " _ooo_ _attach " " _pulse_counter_ "n<=7 with low,high limits" _NL_
     ____ "pc   " ____ _ooo_ _clear_ _pulse_counter_ _NL_
 #endif
-    ____ "t" ________ _ooo_ _Enter_ _test_ _mode_ _NL_
-    ____ "u" ________ _ooo_ "Unidirectional " _mode_ "(need reset " _to_ "restore)" _NL_
+    ____ "t" ________ _ooo_ _Enter_ _test_ _mode _NL_
+    ____ "u" ________ _ooo_ "Unidirectional " _mode " (need reset " _to_ "restore)" _NL_
 #if defined(ARDUINO_ARCH_AVR)
-    ____ "r" ________ _ooo_ _Toggle_ _erroneous_ _digitalRead_ _of_the_ _stepper " pin" _NL_
+    ____ "r" ________ _ooo_ _Toggle_ _erroneous_ _digitalRead_ __of_the_ _stepper " pin" _NL_
 #endif
     ____ "e" ________ _ooo_ _Toggle_ _erroneous_ "long 100us interrupt block" _NL_
     _toggle_print_usage_after_stepper_stop
@@ -723,8 +735,8 @@ const static char messages[] PROGMEM =
 
 
     /* USAGE TEST */
-#ifndef SIM_TEST_INPUT
-    _Enter_command_seperated_by_space_carriage_return_or_newline_NL
+#if !defined(SIM_TEST_INPUT)
+    _Enter_command_separated_by_space_carriage_return_or_newline_NL
 	_m1_m2_to_select_stepper_
     ____ "R" ________ _ooo_ "start all " _select "ed tests" _NL_
     ____ "I" ________ _ooo_ _Toggle_ _stepper " info, while " _test_sequence_ "is running" _NL_
@@ -741,17 +753,17 @@ const static char messages[] PROGMEM =
 
     /* USAGE CONFIG */
 #if !defined(SIM_TEST_INPUT) && !defined(__AVR_ATmega32U4__)
-    _Enter_command_seperated_by_space_carriage_return_or_newline_NL
+    _Enter_command_separated_by_space_carriage_return_or_newline_NL
 	_m1_m2_to_select_stepper_
     ____ "d<p> " ____ _ooo_ _set_ _direction_ _pin_ _NL_
     ____ "d<p,n>" _NL_
     ____ "d<p,n,t>" _NL_
     ________ ________ ________ "p" _ooo_ _pin_ "number" _NL_
-    ________ ________ ________ "n" _ooo_ "1: high counts up 0: high counts down" _NL_
+    ________ ________ ________ "n" _ooo_ "1: " _high_counts_ "up 0: " _high_counts_ "down" _NL_
     ________ ________ ________ "t" _ooo_ _delay_ _from_ "dir change " _to_ "step in us, 0 means "
     "off" _NL_
     ____ "dc   " ____ _ooo_ _clear_ _direction_ _pin_ "(unidirectional)" _NL_
-    ____ "x" ________ _ooo_ "Exit " _configuration_ _mode_ _NL_
+    ____ "x" ________ _ooo_ "Exit " _configuration_ _mode _NL_
 	_print_this_usage_
 #endif
     _SEP_
@@ -977,9 +989,6 @@ void info(FastAccelStepper *s, bool long_info) {
         case RAMP_STATE_ACCELERATE:
           Serial.print(" ACC  ");
           break;
-        case RAMP_STATE_DECELERATE_TO_STOP:
-          Serial.print(" DEC  ");
-          break;
         case RAMP_STATE_DECELERATE:
           Serial.print(" RED  ");  // Reduce
           break;
@@ -997,13 +1006,13 @@ void info(FastAccelStepper *s, bool long_info) {
     }
   } else {
     if (long_info) {
-      Serial.print(" Acceleration [Steps/s^2]=");
+      output_msg(MSG_ACCELERATION_STATUS);
       Serial.print(s->getAcceleration());
       if (speed_in_milli_hz) {
-        Serial.print(" Speed [mStep/s]=");
+        output_msg(MSG_SPEED_STATUS_FREQ);
         Serial.print(s->getSpeedInMilliHz());
       } else {
-        Serial.print(" Speed [us/step]=");
+        output_msg(MSG_SPEED_STATUS_TIME);
         Serial.print(s->getSpeedInUs());
       }
     }
@@ -1012,20 +1021,7 @@ void info(FastAccelStepper *s, bool long_info) {
 }
 
 void stepper_info() {
-  for (uint8_t i = 0; i < MAX_STEPPER; i++) {
-    if (stepper[i]) {
-      if (i == selected) {
-        Serial.print(">> ");
-      } else {
-        Serial.print("   ");
-      }
-      Serial.print('M');
-      Serial.print(i + 1);
-      Serial.print(": ");
-      info(stepper[i], true);
-      Serial.println();
-    }
-  }
+  output_info(false);
   if (simulate_blocked_ISR) {
     output_msg(MSG_LONG_INTERRUPT_BLOCK_ENABLED);
   }
@@ -1055,12 +1051,23 @@ void output_info(bool only_running) {
   bool need_ln = false;
   for (uint8_t i = 0; i < MAX_STEPPER; i++) {
     if (stepper[i]) {
+      if (!only_running) {
+        if (i == selected) {
+          Serial.print(">> ");
+        } else {
+          Serial.print("   ");
+        }
+      }
       if (!only_running || stepper[i]->isRunning()) {
-        need_ln = true;
         Serial.print('M');
         Serial.print(i + 1);
         Serial.print(": ");
-        info(stepper[i], false);
+        info(stepper[i], !only_running);
+        if (!only_running) {
+          Serial.println();
+        } else {
+          need_ln = true;
+        }
       }
     }
   }
@@ -1071,38 +1078,21 @@ void output_info(bool only_running) {
 
 #define MODE(mode, CMD) ((mode << 8) + CMD)
 
-long val1, val2, val3;
+long val_n[3];
 int8_t get_val1_val2_val3(char *cmd) {
   char *endptr;
-  val1 = strtol(cmd, &endptr, 10);
-  if (endptr == cmd) {
-    return -1;
-  }
-  cmd = endptr;
-  if (*cmd == 0) {
-    return 1;
-  }
-  if (*cmd++ != ',') {
-    return -1;
-  }
-  val2 = strtol(cmd, &endptr, 10);
-  if (endptr == cmd) {
-    return -1;
-  }
-  cmd = endptr;
-  if (*cmd == 0) {
-    return 2;
-  }
-  if (*cmd++ != ',') {
-    return -1;
-  }
-  val3 = strtol(cmd, &endptr, 10);
-  if (endptr == cmd) {
-    return -1;
-  }
-  cmd = endptr;
-  if (*cmd == 0) {
-    return 3;
+  for (uint8_t i = 0; i < 3; i++) {
+    val_n[i] = strtol(cmd, &endptr, 10);
+    if (endptr == cmd) {
+      return -1;
+    }
+    cmd = endptr;
+    if (*cmd == 0) {
+      return i + 1;
+    }
+    if ((i < 2) && (*cmd++ != ',')) {
+      return -1;
+    }
   }
   return -1;
 }
@@ -1112,14 +1102,15 @@ bool process_cmd(char *cmd) {
   uint16_t s = *cmd++;
   char *endptr;
   int8_t res;
+  int8_t gv;
   switch (MODE(mode, s)) {
     case MODE(normal, 'M'):
     case MODE(test, 'M'):
     case MODE(config, 'M'):
       if (get_val1_val2_val3(cmd) == 1) {
-        if ((val1 > 0) && (val1 <= MAX_STEPPER)) {
+        if ((val_n[0] > 0) && (val_n[0] <= MAX_STEPPER)) {
           output_msg(MSG_SELECT_STEPPER);
-          selected = val1 - 1;
+          selected = val_n[0] - 1;
           Serial.println(selected + 1);
           return true;
         }
@@ -1193,24 +1184,42 @@ bool process_cmd(char *cmd) {
       }
       break;
     case MODE(normal, 'A'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
         output_msg(MSG_SET_ACCELERATION_TO);
-        Serial.println(val1);
-        res = stepper_selected->setAcceleration(val1);
+        Serial.println(val_n[0]);
+        res = stepper_selected->setAcceleration(val_n[0]);
         if (res < 0) {
           output_msg(MSG_ERROR_INVALID_VALUE);
         }
         return true;
       }
       break;
+    case MODE(normal, 'J'):
+      val_n[0] = strtol(cmd, &endptr, 10);
+      if (*endptr == 0) {
+        output_msg(MSG_LINEAR_ACCELERATION);
+        Serial.println(val_n[0]);
+        stepper_selected->setLinearAcceleration(val_n[0]);
+        return true;
+      }
+      break;
+    case MODE(normal, 'j'):
+      val_n[0] = strtol(cmd, &endptr, 10);
+      if (*endptr == 0) {
+        output_msg(MSG_JUMP_START);
+        Serial.println(val_n[0]);
+        stepper_selected->setJumpStart(val_n[0]);
+        return true;
+      }
+      break;
     case MODE(normal, 'V'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
         speed_in_milli_hz = false;
         output_msg(MSG_SET_SPEED_TO_US);
-        Serial.println(val1);
-        res = stepper_selected->setSpeedInUs(val1);
+        Serial.println(val_n[0]);
+        res = stepper_selected->setSpeedInUs(val_n[0]);
         if (res < 0) {
           output_msg(MSG_ERROR_INVALID_VALUE);
         }
@@ -1218,12 +1227,12 @@ bool process_cmd(char *cmd) {
       }
       break;
     case MODE(normal, 'H'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
         speed_in_milli_hz = true;
         output_msg(MSG_SET_SPEED_TO_HZ);
-        Serial.println(val1);
-        res = stepper_selected->setSpeedInHz(val1);
+        Serial.println(val_n[0]);
+        res = stepper_selected->setSpeedInHz(val_n[0]);
         if (res < 0) {
           output_msg(MSG_ERROR_INVALID_VALUE);
         }
@@ -1231,12 +1240,12 @@ bool process_cmd(char *cmd) {
       }
       break;
     case MODE(normal, 'h'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
         speed_in_milli_hz = true;
         output_msg(MSG_SET_SPEED_TO_MILLI_HZ);
-        Serial.println(val1);
-        res = stepper_selected->setSpeedInMilliHz(val1);
+        Serial.println(val_n[0]);
+        res = stepper_selected->setSpeedInMilliHz(val_n[0]);
         if (res < 0) {
           output_msg(MSG_ERROR_INVALID_VALUE);
         }
@@ -1244,70 +1253,70 @@ bool process_cmd(char *cmd) {
       }
       break;
     case MODE(normal, 'a'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
         output_msg(MSG_SET_ACCELERATION_TO);
-        Serial.println(val1);
-        res = stepper_selected->moveByAcceleration(val1);
+        Serial.println(val_n[0]);
+        res = stepper_selected->moveByAcceleration(val_n[0]);
         output_msg(MSG_MOVE_OK + res);
         return true;
       }
       break;
     case MODE(normal, 'R'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
         output_msg(MSG_MOVE_STEPS);
-        Serial.println(val1);
-        res = stepper_selected->move(val1);
+        Serial.println(val_n[0]);
+        res = stepper_selected->move(val_n[0]);
         output_msg(MSG_MOVE_OK + res);
         return true;
       }
       break;
     case MODE(normal, 'P'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
         output_msg(MSG_MOVE_TO_POSITION);
-        Serial.println(val1);
-        res = stepper_selected->moveTo(val1);
+        Serial.println(val_n[0]);
+        res = stepper_selected->moveTo(val_n[0]);
         output_msg(MSG_MOVE_OK + res);
         return true;
       }
       break;
     case MODE(normal, '@'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
         output_msg(MSG_SET_POSITION);
-        Serial.println(val1);
-        stepper_selected->setCurrentPosition(val1);
+        Serial.println(val_n[0]);
+        stepper_selected->setCurrentPosition(val_n[0]);
         return true;
       }
       break;
     case MODE(normal, 'E'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
         output_msg(MSG_SET_ENABLE_TIME);
-        Serial.println(val1);
-        res = stepper_selected->setDelayToEnable(val1);
+        Serial.println(val_n[0]);
+        res = stepper_selected->setDelayToEnable(val_n[0]);
         output_msg(MSG_RETURN_CODE);
         Serial.println(res);
         return true;
       }
       break;
     case MODE(normal, 'D'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
         output_msg(MSG_SET_DISABLE_TIME);
-        Serial.println(val1);
-        stepper_selected->setDelayToDisable(val1);
+        Serial.println(val_n[0]);
+        stepper_selected->setDelayToDisable(val_n[0]);
         return true;
       }
       break;
     case MODE(normal, 'w'):
-      val1 = strtol(cmd, &endptr, 10);
+      val_n[0] = strtol(cmd, &endptr, 10);
       if (*endptr == 0) {
-        Serial.print(val1);
+        Serial.print(val_n[0]);
         output_msg(MSG_WAIT_MS);
-        pause_ms = val1;
+        pause_ms = val_n[0];
         pause_start = millis();
         return true;
       }
@@ -1318,39 +1327,33 @@ bool process_cmd(char *cmd) {
         stepper_selected->setDirectionPin(PIN_UNDEFINED);
         return true;
       }
-      switch (get_val1_val2_val3(cmd)) {
+      gv = get_val1_val2_val3(cmd);
+      switch (gv) {
         case 1:
           output_msg(MSG_DIRECTION_PIN);
           output_msg(MSG_SET_TO_PIN);
-          Serial.println(val1);
-          stepper_selected->setDirectionPin(val1);
+          Serial.println(val_n[0]);
+          stepper_selected->setDirectionPin(val_n[0]);
           return true;
         case 2:
-          output_msg(MSG_DIRECTION_PIN);
-          output_msg(MSG_SET_TO_PIN);
-          Serial.println(val1);
-          output_msg(MSG_DIRECTION_PIN);
-          if (val2 != 0) {
-            output_msg(MSG_HIGH_COUNT_DOWN);
-          } else {
-            output_msg(MSG_HIGH_COUNT_UP);
-          }
-          stepper_selected->setDirectionPin(val1, val2);
-          return true;
         case 3:
-          val3 = strtol(cmd, &endptr, 10);
           output_msg(MSG_DIRECTION_PIN);
           output_msg(MSG_SET_TO_PIN);
-          Serial.println(val1);
+          Serial.println(val_n[0]);
           output_msg(MSG_DIRECTION_PIN);
-          if (val2 != 0) {
+          if (val_n[1] != 0) {
             output_msg(MSG_HIGH_COUNT_DOWN);
           } else {
             output_msg(MSG_HIGH_COUNT_UP);
           }
-          output_msg(MSG_DELAY);
-          Serial.println(val3);
-          stepper_selected->setDirectionPin(val1, val2, val3);
+          Serial.println();
+          if (gv == 2) {
+            stepper_selected->setDirectionPin(val_n[0], val_n[1]);
+          } else {
+            output_msg(MSG_DELAY);
+            Serial.println(val_n[2]);
+            stepper_selected->setDirectionPin(val_n[0], val_n[1], val_n[2]);
+          }
           return true;
         default:
           break;
@@ -1509,16 +1512,17 @@ bool process_cmd(char *cmd) {
       }
       if (get_val1_val2_val3(cmd) == 3) {
         output_msg(MSG_ATTACH_PULSE_COUNTER);
-        Serial.println(val1);
-        if (!stepper_selected->attachToPulseCounter(val1, val2, val3)) {
+        Serial.println(val_n[0]);
+        if (!stepper_selected->attachToPulseCounter(val_n[0], val_n[1],
+                                                    val_n[2])) {
           output_msg(MSG_ERROR_ATTACH_PULSE_COUNTER);
         }
         return true;
       }
       if (get_val1_val2_val3(cmd) == 1) {
         output_msg(MSG_ATTACH_PULSE_COUNTER);
-        Serial.println(val1);
-        if (!stepper_selected->attachToPulseCounter(val1)) {
+        Serial.println(val_n[0]);
+        if (!stepper_selected->attachToPulseCounter(val_n[0])) {
           output_msg(MSG_ERROR_ATTACH_PULSE_COUNTER);
         }
         return true;

@@ -12,10 +12,14 @@ float delta_t_pow3 = 0.;
 float delta_t_pow4 = 0.;
 long Position_Next = 0;
 long set = 0;
+bool checkPosition = 1;
 
-USBCDC USBSerial;
+
+//USBCDC USBSerial;
 
 #define MIN_STEPS 5
+
+//#define SUPPORT_ESP32_PULSE_COUNTER
 
 
 
@@ -175,7 +179,7 @@ void setup()
   //Serial.begin(115200);
   Serial.begin(921600);
 
-  USBSerial.begin(115200);
+  //USBSerial.begin(115200);
 
   delay(1000);
 
@@ -238,6 +242,7 @@ void setup()
 
   // make sure estimate is nonzero
   if (varEstimate < LOADCELL_VARIANCE_MIN){varEstimate = LOADCELL_VARIANCE_MIN; }
+  varEstimate *= 9;
   stdEstimate = sqrt(varEstimate);
 
   Serial.print("stdEstimate:");
@@ -343,9 +348,19 @@ void setup()
   Joystick.begin();
 
 
+
+
+
+/*#if defined(SUPPORT_ESP32_PULSE_COUNTER)
+  stepper->attachToPulseCounter(1, 0, 0);
+#endif*/
+
+
   Serial.println("Setup end!");
 
   previousTime = micros();
+
+
 
 
 }
@@ -364,7 +379,7 @@ void setup()
 void loop()
 { 
 
-  #define RECALIBRATE_POSITION_FROM_SERIAL
+  //#define RECALIBRATE_POSITION_FROM_SERIAL
   #ifdef RECALIBRATE_POSITION_FROM_SERIAL
     byte n = Serial.available();
     if(n !=0 )
@@ -482,7 +497,33 @@ void loop()
   #define SET_STEPPER
   #ifdef SET_STEPPER
     // get current stepper position
-    stepperPosCurrent = stepper->getCurrentPosition(); 
+    stepperPosCurrent = stepper->getCurrentPosition();
+
+    /*#if defined(SUPPORT_ESP32_PULSE_COUNTER) 
+      //if (stepperPosCurrent > (stepperPosMin + 30))
+      {
+        if (checkPosition == 1)
+        {
+          checkPosition = 0;
+        }
+        int16_t pcnt = stepper->readPulseCounter();
+        //if (stepperPosMin != pcnt)
+        {
+          Serial.print('A:');
+          Serial.print(stepperPosMin);
+          Serial.print('B:');
+          Serial.print(pcnt);
+          Serial.println(" ");
+        }
+      }
+      else
+      {
+        checkPosition = 1;
+      }
+    #endif*/
+    
+
+
     //float movement = abs( stepperPosCurrent - Position_Next);
     //if (movement>MIN_STEPS  )
     {

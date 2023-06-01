@@ -47,31 +47,34 @@ uint32_t calculate_ticks_v3(uint32_t steps, float pre_calc) {
   return n;
 }
 //
-// Using upm_float improves to 22-4 = 18us, but less precision
+// Using pmf_logarithmic improves to 22-4 = 18us, but less precision
 uint32_t calculate_ticks_v4(uint32_t steps, uint32_t acceleration) {
-  upm_float upm_a = upm_from(acceleration);
-  upm_float upm_s = upm_from(steps);
-  upm_float upm_res =
-      upm_divide(UPM_TICKS_PER_S, upm_sqrt(upm_multiply(upm_s, upm_a)));
-  uint32_t res = upm_to_u32(upm_res);
+  pmf_logarithmic pmfl_a = pmfl_from(acceleration);
+  pmf_logarithmic pmfl_s = pmfl_from(steps);
+  pmf_logarithmic pmfl_res =
+      pmfl_divide(PMF_TICKS_PER_S, pmfl_sqrt(pmfl_multiply(pmfl_s, pmfl_a)));
+  uint32_t res = pmfl_to_u32(pmfl_res);
   return res;
 }
 //
 // Precalculating the acceleration related constant improves further to 12-4 =
-// 8us
-uint32_t calculate_ticks_v5(uint32_t steps, upm_float pre_calc) {
-  upm_float upm_s = upm_from(steps);
-  upm_float upm_res = upm_divide(pre_calc, upm_sqrt(upm_s));
-  uint32_t res = upm_to_u32(upm_res);
+// 8us. This measurement was actually done with ump_float.
+// So this routine does not fit to that measurement anymore
+//
+uint32_t calculate_ticks_v5(uint32_t steps, pmf_logarithmic pre_calc) {
+  pmf_logarithmic pmfl_s = pmfl_from(steps);
+  pmf_logarithmic pmfl_res = pmfl_divide(pre_calc, pmfl_sqrt(pmfl_s));
+  uint32_t res = pmfl_to_u32(pmfl_res);
   return res;
 }
 //
 // using the combined function yields actually no measureable improvement
-uint32_t calculate_ticks_v6(uint32_t steps, upm_float pre_calc) {
-  upm_float upm_s = upm_from(steps);
-  upm_float upm_res = upm_sqrt_after_divide(pre_calc, upm_s);
-  uint32_t res = upm_to_u32(upm_res);
-  return res;
+uint32_t calculate_ticks_v6(uint32_t steps, pmf_logarithmic pre_calc) {
+  //  pmf_logarithmic pmfl_s = pmfl_from(steps);
+  //  pmf_logarithmic pmfl_res = pmfl_sqrt_after_divide(pre_calc, pmfl_s);
+  //  uint32_t res = pmfl_to_u32(pmfl_res);
+  //  return res;
+  return calculate_ticks_v5(steps, pre_calc);
 }
 //
 // In order to increase the precision to more than 8 bits and avoid
@@ -134,7 +137,7 @@ uint32_t calculate_ticks_v6(uint32_t steps, upm_float pre_calc) {
 //
 // Actually this is a dead end, because below routines already needs 35us,
 // while several variables below ought to be 32bit
-uint32_t calculate_ticks_v7(uint32_t steps, upm_float pre_calc) {
+uint32_t calculate_ticks_v7(uint32_t steps, pmf_logarithmic pre_calc) {
   // initial values for i = 0
   uint16_t mask_i = 0x800;
   uint16_t n_i = 0;
@@ -161,95 +164,18 @@ uint32_t calculate_ticks_v7(uint32_t steps, upm_float pre_calc) {
   }
   return n_i;
 }
-//
-// New approach is to calculate the draft result and then increase the
-// resolution by another operation.
-//
-// Starting again with:
-//
-//		n * timeticks = 1 / sqrt(2*s*a)
-//
-// solved for n and timeticks replaced with 1/f
-//
-//		n = 1 / sqrt(s) * f / sqrt(2 * a)
-//
-// The second part should be the precalculated A
-//
-//	    A = f / sqrt(2 * a)
-//
-// Thus
-//		n = A / sqrt(s)
-//
-// Now we define
-//
-//		s = s_r + e = s_r * (1 + e/s_r)
-//
-// When calculate n, actually calculated with rounding/truncation from 8 bit
-// operation:
-//
-//		n_r = A / sqrt(s_r)
-//
-// The error from the rounding/truncation can be fixed by:
-//
-//     n = n_r * 1/sqrt(1+e/s_r) ~ n_r * (1 - 0.5 * e/s_r) = n_r - n_r * e/s_r/2
-//
-// How to get e and s_r ?
-//
-// If calculating sqrt(s), the result squared is s_r
-//
-//    s_r = (sqrt(s))²
-//
-// And so:
-//
-//	  e = s - s_r
-//
-// This algorithm works pretty well, but the division error is not compensated
-#endif
 
-uint32_t calculate_ticks_v8(uint32_t steps, upm_float pre_calc) {
-  upm_float upm_steps = upm_from(steps);
-  upm_float upm_rsqrt_steps = upm_rsqrt(upm_steps);
-  upm_float upm_res = upm_multiply(pre_calc, upm_rsqrt_steps);
-  uint32_t res = upm_to_u32(upm_res);
-  return res;
-}
-
-#ifdef TEST
-uint32_t calculate_ticks_v9(uint32_t steps, upm_float pre_calc) {
-  upm_float upm_steps = upm_from(steps);
-  upm_float upm_rsqrt_steps = upm_rsqrt(upm_steps);
-  upm_float upm_res = upm_multiply(pre_calc, upm_rsqrt_steps);
-  uint32_t res = upm_to_u32(upm_res);
-
-#ifdef OFF
-  // now improving the result
-  uint16_t sqrt_steps = upm_to_u16(upm_sqrt_steps);
-  uint32_t steps_r = sqrt_steps;
-  steps_r *= sqrt_steps;
-  printf("%d ->sqrt -> %d ->^2-> %d\n", steps, sqrt_steps, steps_r);
-  printf("%d / sqrt(steps) = %d,   %d\n", upm_to_u32(pre_calc), res,
-         upm_to_u32(pre_calc) / sqrt_steps);
-
-  if (steps > steps_r) {
-    uint32_t e = steps - steps_r;
-    upm_float upm_e = upm_from(e >> 1);
-    upm_float upm_corr =
-        upm_divide(upm_e, upm_steps);  // steps instead of steps_r
-    upm_float upm_val = upm_multiply(upm_corr, upm_res);
-    uint32_t val = upm_to_u32(upm_val);
-    printf("%d %d\n", e, val);
-    res -= val;
-  } else if (steps < steps_r) {
-    uint32_t e = steps_r - steps;
-    upm_float upm_e = upm_from(e >> 1);
-    upm_float upm_corr =
-        upm_divide(upm_e, upm_steps);  // steps instead of steps_r
-    upm_float upm_val = upm_multiply(upm_corr, upm_res);
-    uint32_t val = upm_to_u32(upm_val);
-    res += val;
-  }
-#endif
-  printf("%d / sqrt(steps) = %d\n", upm_to_u32(pre_calc), res);
+// This is used and requires 9.5us.
+//
+// Measure with:
+//   cd extras/tests/simavr_based
+//   make -C off_test_timing
+//   From the results subtract port B from port A measurement
+uint32_t calculate_ticks_v8(uint32_t steps, pmf_logarithmic pre_calc) {
+  pmf_logarithmic pmfl_steps = pmfl_from(steps);
+  pmf_logarithmic pmfl_sqrt_steps = pmfl_sqrt(pmfl_steps);
+  pmf_logarithmic pmfl_res = pmfl_divide(pre_calc, pmfl_sqrt_steps);
+  uint32_t res = pmfl_to_u32(pmfl_res);
   return res;
 }
 #endif

@@ -9,18 +9,46 @@
 //#define enablePinStepper 6
 //#define stepPinStepper   9  // OC1A in case of AVR
 
-// As in StepperDemo for Motor 3 on ESP32
+// As in StepperDemo for Motor 7 on ESP32
 #define dirPinStepper 19
-#define enablePinStepper 12
-#define stepPinStepper 2
+#define enablePinStepper 26
+#define stepPinStepper 14
 
 FastAccelStepperEngine engine = FastAccelStepperEngine();
 FastAccelStepper *stepper = NULL;
 
 void setup() {
   Serial.begin(115200);
+
+  if (false) {
+    pinMode(stepPinStepper, OUTPUT);
+    digitalWrite(stepPinStepper, HIGH);
+    delay(1);
+    digitalWrite(stepPinStepper, LOW);
+    delay(1);
+    digitalWrite(stepPinStepper, HIGH);
+    delay(1);
+    digitalWrite(stepPinStepper, LOW);
+    delay(1);
+  }
+  if (false) {
+    pinMode(18, OUTPUT);
+    digitalWrite(18, HIGH);
+    delay(1000);
+    digitalWrite(18, LOW);
+    delay(1000);
+    digitalWrite(18, HIGH);
+    delay(1000);
+    digitalWrite(18, LOW);
+    delay(1000);
+  }
+
   engine.init();
+#if defined(SUPPORT_SELECT_DRIVER_TYPE)
+  stepper = engine.stepperConnectToPin(stepPinStepper, DRIVER_RMT);
+#else
   stepper = engine.stepperConnectToPin(stepPinStepper);
+#endif
 }
 
 void loop1() {
@@ -51,19 +79,37 @@ void loop1() {
   delay(300);
 }
 void loop() {
-  uint16_t min_ticks = stepper->getMaxSpeedInTicks();
+  uint16_t min_ticks = 0;
+  if (stepper) {
+    min_ticks = stepper->getMaxSpeedInTicks();
+  }
+  min_ticks = 30000;
   const struct stepper_command_s cmd_step1 = {
-      .ticks = MIN_CMD_TICKS, .steps = 1, .count_up = true};
-  const struct stepper_command_s cmd_step = {
+      .ticks = MIN_CMD_TICKS, .steps = 2, .count_up = true};
+  const struct stepper_command_s cmd_step10 = {
       .ticks = min_ticks, .steps = 10, .count_up = true};
+  const struct stepper_command_s cmd_step5 = {
+      .ticks = 45000, .steps = 5, .count_up = true};
   const struct stepper_command_s cmd_pause = {
       .ticks = 5000, .steps = 0, .count_up = true};
-
-  stepper->addQueueEntry(&cmd_step1);
-  stepper->addQueueEntry(&cmd_step);
-  stepper->addQueueEntry(&cmd_step1);
-  stepper->addQueueEntry(&cmd_step1);
-  stepper->addQueueEntry(&cmd_step);
-  stepper->addQueueEntry(&cmd_pause);
+  uint8_t res[10];
+  uint8_t *r = res;
+  if (stepper) {
+    stepper->addQueueEntry(&cmd_step1);
+    *r++ = stepper->addQueueEntry(&cmd_step10, false);
+    //  stepper->addQueueEntry(&cmd_step1);
+    //  stepper->addQueueEntry(&cmd_step1);
+    *r++ = stepper->addQueueEntry(&cmd_step5, false);
+    *r++ = stepper->addQueueEntry(&cmd_step10, false);
+    *r++ = stepper->addQueueEntry(&cmd_step5, false);
+    *r++ = stepper->addQueueEntry(&cmd_step10, false);
+    *r++ = stepper->addQueueEntry(&cmd_step5, false);
+    *r++ = stepper->addQueueEntry(&cmd_step10, false);
+    stepper->addQueueEntry(&cmd_pause);
+    *r++ = stepper->addQueueEntry(NULL);
+    Serial.print(res[0]);
+    Serial.print('-');
+    Serial.println(res[1]);
+  }
   delay(100);
 }

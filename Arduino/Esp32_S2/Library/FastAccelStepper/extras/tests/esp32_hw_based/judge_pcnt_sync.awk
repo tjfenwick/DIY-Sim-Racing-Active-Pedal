@@ -20,7 +20,7 @@ BEGIN {
 		print "FAIL HERE ^^^"
 	}
 }
-/^>> M1:/ {
+/^>> M[17]:/ {
 	print
 	api = substr($3,2)
 	api = api % 65536

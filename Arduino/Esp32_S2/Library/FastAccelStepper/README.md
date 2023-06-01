@@ -1,7 +1,15 @@
+# BE AWARE: ARDUINO LIBRARY MANAGER IS BROKEN AND 0.29.x do not show.
+
+No issue with platformio. Check the [related issue](https://github.com/arduino/library-registry/issues/2829) for the arduino library manager
+
+[![arduino-library-badge](https://www.ardu-badge.com/badge/FastAccelStepper.svg?)](https://www.ardu-badge.com/FastAccelStepper)
+
+
+
 # FastAccelStepper 
- 
 ![GitHub tag](https://img.shields.io/github/v/tag/gin66/FastAccelStepper.svg?sort=semver&no_cache_0.28.1)
 [![PlatformIO Registry](https://badges.registry.platformio.org/packages/gin66/library/FastAccelStepper.svg)](https://registry.platformio.org/libraries/gin66/FastAccelStepper)
+[![arduino-library-badge](https://www.ardu-badge.com/badge/FastAccelStepper.svg?)](https://www.ardu-badge.com/FastAccelStepper)
 
 ![Run tests](https://github.com/gin66/FastAccelStepper/workflows/Run%20tests/badge.svg?no_cache_0.28.1)
 ![Simvar tests](https://github.com/gin66/FastAccelStepper/workflows/Run%20tests%20with%20simavr/badge.svg?no_cache_0.28.1)
@@ -16,7 +24,7 @@
 [![Build examples for Atmega32U4](https://github.com/gin66/FastAccelStepper/actions/workflows/build_examples_atmega32u4.yml/badge.svg)](https://github.com/gin66/FastAccelStepper/actions/workflows/build_examples_nanoatmega32u4.yml)
 
 This is a high speed alternative for the [AccelStepper library](http://www.airspayce.com/mikem/arduino/AccelStepper/).
-Supported are avr (ATmega 328, ATmega2560), esp32, esp32s2 and atmelsam due.
+Supported are avr (ATmega 328, ATmega2560,  ATmega32u4), esp32, esp32s2, esp32s3 and atmelsam due.
 
 The stepper motors should be connected via a driver IC (like A4988) with a 1, 2 or 3-wire connection:
 * Step Signal
@@ -47,12 +55,14 @@ FastAccelStepper offers the following features:
 * Allows the motor to continuously run in the current direction until stopMove() is called.
 * speed/acceleration can be varied while stepper is running (call to functions move or moveTo is needed in order to apply the new values)
 * Constant acceleration control: In this mode the motor can be controled by acceleration values and with acceleration=0 will keep current speed
+* Linear acceleration increase from/to standstill using cubic speed function - configurable by `setLinearAcceleration()`
+* Jump start from standstill - configurable by `setJumpStart()`
 * Auto enable mode: stepper motor is enabled before movement and disabled afterwards with configurable delays
 * Enable pins can be shared between motors
 * Direction pins can be shared between motors
 * Configurable delay between direction change and following step
 * External callback function can be used to drive the enable pins (e.g. connected to shift register) and, only esp32 derivates: the direction pins
-* No float calculation (use own implementation of poor man float: 8 bit mantissa+8 bit exponent)
+* No float calculation (poor man float: use log2 representation in range -64..64 with 16bit integer representation and 1/512th resolution)
 * Provide API to each steppers' command queue. Those commands are tied to timer ticks aka the CPU frequency!
 * Command queue can be filled with commands and then started. This allows near synchronous start of several steppers for multi axis applications.
 
@@ -96,21 +106,21 @@ Comments to pin sharing:
 
 ### AVR ATMega 328
 
-* allows up to 70000 generated steps per second for single stepper operation, 37000 for dual stepper
+* allows up to 50000 generated steps per second for single stepper operation, 37000 for dual stepper
 * supports up to two stepper motors using Step/Direction/Enable Control (Direction and Enable is optional)
 * Uses `F_CPU` Macro for the relation tick value to time, so it should now not be limited to 16 MHz CPU frequency (untested)
 * Steppers' command queue depth: 16
 
 ### AVR ATMega 32u4
 
-* allows up to 70000 generated steps per second for single stepper operation, 37000 for dual stepper and 25000 for three steppers
+* allows up to 50000 generated steps per second for single stepper operation, 37000 for dual stepper and 20000 for three steppers
 * supports up to three stepper motors using Step/Direction/Enable Control (Direction and Enable is optional)
 * Uses `F_CPU` Macro for the relation tick value to time, so it should now not be limited to 16 MHz CPU frequency (untested)
 * Steppers' command queue depth: 16
 
 ### AVR ATMega 2560
 
-* allows up to 70000 generated steps per second for single stepper operation, 37000 for dual stepper and 25000 for three steppers
+* allows up to 50000 generated steps per second for single stepper operation, 37000 for dual stepper and 20000 for three steppers
 * supports up to three stepper motors using Step/Direction/Enable Control (Direction and Enable is optional)
 * Uses `F_CPU` Macro for the relation tick value to time, so it should now not be limited to 16 MHz CPU frequency (untested)
 * Steppers' command queue depth: 16
@@ -268,7 +278,9 @@ What are the differences between mcpwm/pcnt and rmt ?
 
 If the interrupt load is not an issue, then rmt is the better choice. With rmt the below (multi-axis application) mentioned loss of synchonicity at high speeds can be avoided. The rmt driver is - besides some rmt modules perks - less complex and way more straightforward.
 
-As of now, allocation of steppers on esp32 are: first all 6 mcpwm/pcnt drivers and then the 8 rmt drivers. In future this may be under application control.
+As of now, allocation of steppers on esp32 are: first all 6 mcpwm/pcnt drivers and then the 8 rmt drivers. In future this may be under application control. Starting with 0.29.2, the module can be directly selected on call of `stepperConnectToPin()`. So the allocation gets more flexible.
+
+One specific note for the rmt: If a direction pin toggle is needed directly after a command with steps, then the driver will add before that direction pin toggle another pause of `MIN_CMD_TICKS` ticks.
 
 ### ESP32S2
 
@@ -290,11 +302,15 @@ This is supported by clazarowitz
 
 ### ALL
 
-The used formula is just s = 1/2 * a * t² = v² / (2 a) with s = steps, a = acceleration, v = speed and t = time. In order to determine the speed for a given step, the calculation is v = sqrt(2 * a * s). The performed square root is an 8 bit table lookup. Sufficient exact for this purpose.
+The used formula is just s = 1/2 * a * t² = v² / (2 a) with s = steps, a = acceleration, v = speed and t = time. In order to determine the speed for a given step, the calculation is v = sqrt(2 * a * s). The performed square root is an 8 bit table lookup using log2/pow2. Sufficient exact for this purpose.
+
+For the linear acceleration from/to standstill the used formula is s = 1/2 * j * t³. The variable j is calculated from acceleration and steps of linear acceleration, which is set by `setLinearAcceleration()`.
 
 The compare interrupt routines use 16bit tick counters, which translates to approx. 4ms. For longer time between pulses, pauses without step output can be added. With this approach the ramp generation supports up to one step per 268s. 
 
 The low level command queue for each stepper allows direct speed control - when high level ramp generation is not operating. This allows precise control of the stepper, if the code, generating the commands, can cope with the stepper speed (beware of any Serial.print in your hot path).
+
+The chosen approach has few limitations for esp32. With acceleration = 1 step/s², the maximum speed is approx. 92 kStep/s. The max. supported speed for esp32 will be reachable only with acceleration >= 5 step/s².
 
 ## Usage for multi-axis applications
 

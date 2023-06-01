@@ -9,7 +9,8 @@ TESTS=$(basename $(wildcard test_??.cpp))
 test: $(TESTS) pmf_test rmc_test
 	./rmc_test
 	./pmf_test
-	$(addsuffix &&,$(addprefix ./,$(TESTS))) echo "All tests passed"
+	rm -f test.log
+	$(addsuffix >>test.log &&,$(addprefix ./,$(TESTS))) echo "All tests passed"
 
 LIB_H=FastAccelStepper.h PoorManFloat.h StepperISR.h \
 	  RampGenerator.h RampConstAcceleration.h RampCalculator.h common.h
@@ -53,4 +54,4 @@ StepperISR_test.o: StepperISR_test.cpp $(SRC_LIB_H)
 VERSION=$(shell git rev-parse --short HEAD)
 
 clean:
-	rm *.o test_[0-9][0-9] *.gnuplot pmf_test rmc_test
+	rm *.o test_[0-9][0-9] *.gnuplot pmf_test rmc_test test.log

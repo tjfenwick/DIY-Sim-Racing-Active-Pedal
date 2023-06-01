@@ -2,7 +2,7 @@
 
 #ifdef SUPPORT_ESP32_RMT
 
-//#define TEST_PROBE_1 21
+//#define TEST_PROBE_1 18
 //#define TEST_PROBE_2 18
 #ifdef TEST_PROBE_1
 int tp1 = 0;
@@ -18,7 +18,7 @@ int tp1 = 0;
 int tp2 = 0;
 #define PROBE_2(x) digitalWrite(TEST_PROBE_2, x)
 #define PROBE_2_TOGGLE \
-  tp2 = 2 - tp2;       \
+  tp2 = 1 - tp2;       \
   digitalWrite(TEST_PROBE_2, tp2)
 #else
 #define PROBE_2(x)
@@ -27,8 +27,8 @@ int tp2 = 0;
 
 // The following concept is in use:
 //
-//    The buffer of 64Bytes is split into two parts à  31 words.
-//    Each part will hold on command (or part of).
+//    The buffer of 64Bytes is split into two parts à 31 words.
+//    Each part will hold one command (or part of).
 //    After the 2*31 words an end marker is placed.
 //    The threshold is set to 31.
 //
@@ -37,7 +37,33 @@ int tp2 = 0;
 //
 // Of these 32 bits, the low 16-bit entry is sent first and the high entry
 // second.
+// Every 16 bit entry defines with MSB the output level and the lower 15 bits
+// the ticks.
 #define PART_SIZE 31
+
+void IRAM_ATTR StepperQueue::stop_rmt() {
+  // We are stopping the rmt by letting it run into the end at high speed.
+  //
+  // disable the interrupts
+  //  rmt_set_tx_intr_en(channel, false);
+  //  rmt_set_tx_thr_intr_en(channel, false, 0);
+
+  // stop esp32 rmt, by let it hit the end
+  RMT.conf_ch[channel].conf1.tx_conti_mode = 0;
+
+  // replace buffer with only pauses, coming from end
+  uint32_t *data = FAS_RMT_MEM(channel);
+  data = &data[63];
+  for (uint8_t i = 0; i < 64; i++) {
+    *data-- = 0x00010001;
+  }
+
+  // the queue is not running anymore
+  _isRunning = false;
+
+  // as the rmt is not running anymore, mark it as stopped
+  _rmtStopped = true;
+}
 
 static void IRAM_ATTR apply_command(StepperQueue *q, bool fill_part_one,
                                     uint32_t *data) {
@@ -46,44 +72,81 @@ static void IRAM_ATTR apply_command(StepperQueue *q, bool fill_part_one,
   }
   uint8_t rp = q->read_idx;
   if (rp == q->next_write_idx) {
+    // no command in queue
     for (uint8_t i = 0; i < PART_SIZE; i++) {
-      // two pauses à 4096 ticks
-      *data++ = 0x12341234;
+      // make a pause with approx. 1ms
+      //    258 ticks * 2 * 31 = 159996 @ 16MHz
+      *data++ = 0x01020102;
     }
-    for (uint8_t i = 2 * PART_SIZE; i < 64; i++) {
-      *data++ = 0x10001234;
-    }
-    RMT.conf_ch[q->channel].conf1.tx_conti_mode = 0;
+    // overwrite end markers
+    //    for (uint8_t i = 2 * PART_SIZE; i < 64; i++) {
+    //      *data++ = 0x10001234;
+    //    }
+    //    RMT.conf_ch[q->channel].conf1.tx_conti_mode = 0;
     if (!q->_isRunning) {
       // second invocation to stop.
-      rmt_tx_stop(q->channel);
-      rmt_rx_stop(q->channel);
-      rmt_memory_rw_rst(q->channel);
-      q->_rmtStopped = true;
+      q->stop_rmt();
+      //      rmt_tx_stop(q->channel);
+      //      rmt_rx_stop(q->channel);
+      //      rmt_memory_rw_rst(q->channel);
+      //      q->_rmtStopped = true;
     }
     q->_isRunning = false;
     return;
-  } else {
-    struct queue_entry *e_curr = &q->entry[rp & QUEUE_LEN_MASK];
+  }
+  // Process command
+  struct queue_entry *e_curr = &q->entry[rp & QUEUE_LEN_MASK];
 
-    uint8_t steps = e_curr->steps;
-    uint16_t ticks = e_curr->ticks;
-    if (steps != 0) {
-      //		PROBE_2_TOGGLE;
-    }
-    if (steps == 0) {
+  if (e_curr->toggle_dir) {
+    // the command requests dir pin toggle
+    // This is ok only, if the ongoing command does not contain steps
+    if (q->bufferContainsSteps[fill_part_one ? 1 : 0]) {
+      // So we need a pause. change the finished read entry into a pause
+      q->bufferContainsSteps[fill_part_one ? 0 : 1] = false;
       for (uint8_t i = 0; i < PART_SIZE - 1; i++) {
         // two pauses à 16 ticks
-        *data++ = 0x00100010;
-        ticks -= 32;
+        *data++ = 0x00010001 * (MIN_CMD_TICKS / 62 + 1);
       }
-      uint16_t ticks_l = ticks >> 1;
-      uint16_t ticks_r = ticks - ticks_l;
-      uint32_t rmt_entry = ticks_l;
-      rmt_entry <<= 16;
-      rmt_entry |= ticks_r;
-      *data = rmt_entry;
-    } else if (ticks == 0xffff) {
+      data--;
+      if (!fill_part_one) {
+        // Note: When enabling the continuous transmission mode by setting
+        // RMT_REG_TX_CONTI_MODE, the transmitter will transmit the data on the
+        // channel continuously, that is, from the first byte to the last one,
+        // then from the first to the last again, and so on. In this mode, there
+        // will be an idle level lasting one clk_div cycle between N and N+1
+        // transmissions.
+        *data -= 1;
+      }
+      // done
+      return;
+    }
+    // The dir pin toggle at this place is problematic, but if the last
+    // command contains only one step, it could work
+    gpio_num_t dirPin = (gpio_num_t)q->dirPin;
+    gpio_set_level(dirPin, gpio_get_level(dirPin) ^ 1);
+  }
+
+  uint8_t steps = e_curr->steps;
+  uint16_t ticks = e_curr->ticks;
+  if (steps != 0) {
+    //		PROBE_2_TOGGLE;
+  }
+  if (steps == 0) {
+    q->bufferContainsSteps[fill_part_one ? 0 : 1] = false;
+    for (uint8_t i = 0; i < PART_SIZE - 1; i++) {
+      // two pauses à 16 ticks
+      *data++ = 0x00100010;
+      ticks -= 32;
+    }
+    uint16_t ticks_l = ticks >> 1;
+    uint16_t ticks_r = ticks - ticks_l;
+    uint32_t rmt_entry = ticks_l;
+    rmt_entry <<= 16;
+    rmt_entry |= ticks_r;
+    *data = rmt_entry;
+  } else {
+    q->bufferContainsSteps[fill_part_one ? 0 : 1] = true;
+    if (ticks == 0xffff) {
       // special treatment for this case, because an rmt entry can only cover up
       // to 0xfffe ticks every step must be minimum split into two rmt entries,
       // so at max PART/2 steps can be done.
@@ -144,37 +207,28 @@ static void IRAM_ATTR apply_command(StepperQueue *q, bool fill_part_one,
         *data++ = rmt_entry;
       }
       // This could lead to single step at high speed in next part .... so need
-      // to rework The previous part tries to address this
+      // to rework the previous part to address this
       steps -= PART_SIZE;
       data--;
     }
-    if (!fill_part_one) {
-      // Note: When enabling the continuous transmission mode by setting
-      // RMT_REG_TX_CONTI_MODE, the transmitter will transmit the data on the
-      // channel continuously, that is, from the first byte to the last one,
-      // then from the first to the last again, and so on. In this mode, there
-      // will be an idle level lasting one clk_div cycle between N and N+1
-      // transmissions.
-      *data -= 1;
+  }
+  if (!fill_part_one) {
+    // Note: When enabling the continuous transmission mode by setting
+    // RMT_REG_TX_CONTI_MODE, the transmitter will transmit the data on the
+    // channel continuously, that is, from the first byte to the last one,
+    // then from the first to the last again, and so on. In this mode, there
+    // will be an idle level lasting one clk_div cycle between N and N+1
+    // transmissions.
+    *data -= 1;
+  }
+  if (steps == 0) {
+    // The command has been completed
+    if (e_curr->repeat_entry == 0) {
+      rp++;
     }
-    if (steps == 0) {
-      // The command has been completed
-      if (e_curr->repeat_entry == 0) {
-        rp++;
-      }
-      q->read_idx = rp;
-      // The dir pin toggle at this place is problematic, but if the last
-      // command contains only one step, it could work
-      if (rp == q->next_write_idx) {
-        struct queue_entry *e_next = &q->entry[rp & QUEUE_LEN_MASK];
-        if (e_next->toggle_dir) {
-          gpio_num_t dirPin = (gpio_num_t)q->dirPin;
-          gpio_set_level(dirPin, gpio_get_level(dirPin) ^ 1);
-        }
-      }
-    } else {
-      e_curr->steps = steps;
-    }
+    q->read_idx = rp;
+  } else {
+    e_curr->steps = steps;
   }
 }
 
@@ -188,9 +242,11 @@ static void IRAM_ATTR apply_command(StepperQueue *q, bool fill_part_one,
 
 #define PROCESS_CHANNEL(ch)                                                    \
   if (mask & RMT_CH##ch##_TX_END_INT_ST) {                                     \
+    PROBE_1_TOGGLE;                                                            \
     apply_command(&fas_queue[QUEUES_MCPWM_PCNT + ch], false, FAS_RMT_MEM(ch)); \
   }                                                                            \
   if (mask & RMT_CH##ch##_TX_THR_EVENT_INT_ST) {                               \
+    PROBE_1_TOGGLE;                                                            \
     apply_command(&fas_queue[QUEUES_MCPWM_PCNT + ch], true, FAS_RMT_MEM(ch));  \
     /* now repeat the interrupt at buffer size + end marker */                 \
     RMT.tx_lim_ch[ch].RMT_LIMIT = PART_SIZE * 2 + 1;                           \
@@ -216,7 +272,7 @@ static void IRAM_ATTR tx_intr_handler(void *arg) {
 void StepperQueue::init_rmt(uint8_t channel_num, uint8_t step_pin) {
 #ifdef TEST_PROBE_1
   pinMode(TEST_PROBE_1, OUTPUT);
-  PROBE_1(LOW);
+  PROBE_1(HIGH);
 #endif
 #ifdef TEST_PROBE_2
   pinMode(TEST_PROBE_2, OUTPUT);
@@ -231,7 +287,6 @@ void StepperQueue::init_rmt(uint8_t channel_num, uint8_t step_pin) {
   if (channel_num == 0) {
     periph_module_enable(PERIPH_RMT_MODULE);
   }
-
   // 80 MHz/5 = 16 MHz
   rmt_set_source_clk(channel, RMT_BASECLK_APB);
   rmt_set_clk_div(channel, 5);
@@ -248,6 +303,9 @@ void StepperQueue::init_rmt(uint8_t channel_num, uint8_t step_pin) {
 
   digitalWrite(step_pin, LOW);
   pinMode(step_pin, OUTPUT);
+
+  _isRunning = false;
+  _rmtStopped = true;
 
   connect();
 }
@@ -278,16 +336,19 @@ void StepperQueue::startQueue_rmt() {
 #ifdef TRACE
   Serial.println("START");
 #endif
+  PROBE_1_TOGGLE;
   rmt_tx_stop(channel);
   rmt_rx_stop(channel);
   rmt_memory_rw_rst(channel);
   uint32_t *mem = FAS_RMT_MEM(channel);
+  // Fill the buffer with a significant pattern for debugging
   for (uint8_t i = 0; i < 64; i += 2) {
     mem[i + 0] = 0x0fff8fff;
     mem[i + 1] = 0x7fff8fff;
   }
   mem[2 * PART_SIZE] = 0;
   _isRunning = true;
+  _lastEntryWithCommand = false;
   rmt_set_tx_intr_en(channel, false);
   rmt_set_tx_thr_intr_en(channel, false, 0);
   RMT.apb_conf.mem_tx_wrap_en = 0;
@@ -296,6 +357,19 @@ void StepperQueue::startQueue_rmt() {
   Serial.println(next_write_idx - read_idx);
 #endif
 
+  // set dirpin toggle here
+  uint8_t rp = read_idx;
+  if (rp == next_write_idx) {
+    // nothing to do ?
+    // Should not happen, so bail
+    return;
+  }
+  if (entry[rp & QUEUE_LEN_MASK].toggle_dir) {
+    gpio_set_level((gpio_num_t)dirPin, gpio_get_level((gpio_num_t)dirPin) ^ 1);
+    entry[rp & QUEUE_LEN_MASK].toggle_dir = false;
+  }
+
+  bufferContainsSteps[1] = true;
   apply_command(this, true, mem);
 
 #ifdef TRACE
@@ -311,10 +385,11 @@ void StepperQueue::startQueue_rmt() {
     Serial.println(mem[i], HEX);
   }
   if (!isRunning()) {
-    Serial.println("STOPPED");
+    Serial.println("STOPPED 1");
   }
 #endif
 
+  bufferContainsSteps[0] = true;
   apply_command(this, false, mem);
 
 #ifdef TRACE
@@ -324,13 +399,14 @@ void StepperQueue::startQueue_rmt() {
   Serial.println(' ');
   Serial.print(RMT.apb_conf.mem_tx_wrap_en);
   Serial.println(' ');
+
   for (uint8_t i = 0; i < 64; i++) {
     Serial.print(i);
     Serial.print(' ');
     Serial.println(mem[i], HEX);
   }
   if (!isRunning()) {
-    Serial.println("STOPPED");
+    Serial.println("STOPPED 2");
   }
 #endif
   if (_isRunning) {
@@ -343,34 +419,10 @@ void StepperQueue::startQueue_rmt() {
   //  RMT.conf_ch[channel].conf1.tx_start = 0;
 }
 void StepperQueue::forceStop_rmt() {
-  // Based on finding in issue #101, the rmt module in esp32 and esp32s2 behaves
-  // differently. Apparently, the esp32 rmt cannot be stopped, while esp32s2
-  // can. So implement a version, which should be able to cope with both
-
-  // try to stop the rmt module. Seems to work only on esp32s2
-  rmt_tx_stop(channel);
-
-  // esp32 will continue to run, so disable the interrupts
-  rmt_set_tx_intr_en(channel, false);
-  rmt_set_tx_thr_intr_en(channel, false, 0);
-
-  // stop esp32 rmt, by let it hit the end
-  RMT.conf_ch[channel].conf1.tx_conti_mode = 0;
-
-  // replace buffer with only pauses, coming from end
-  uint32_t *data = FAS_RMT_MEM(channel) + 63;
-  for (uint8_t i = 0; i < 64; i++) {
-    *data-- = 0x00010001;
-  }
-
-  // the queue is not running anymore
-  _isRunning = false;
+  stop_rmt();
 
   // and empty the buffer
   read_idx = next_write_idx;
-
-  // as the rmt is not running anymore, mark it as stopped
-  _rmtStopped = true;
 }
 bool StepperQueue::isReadyForCommands_rmt() {
   if (_isRunning) {

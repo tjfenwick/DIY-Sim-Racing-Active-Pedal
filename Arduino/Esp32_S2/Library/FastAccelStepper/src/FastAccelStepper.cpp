@@ -21,6 +21,9 @@ FastAccelStepper fas_stepper[MAX_STEPPER];
 void FastAccelStepperEngine::init() {
   _externalCallForPin = NULL;
   fas_init_engine(this, 255);
+  for (uint8_t i = 0; i < MAX_STEPPER; i++) {
+    _stepper[i] = NULL;
+  }
 }
 
 #if defined(SUPPORT_CPU_AFFINITY)
@@ -55,6 +58,7 @@ bool FastAccelStepperEngine::isDirPinBusy(uint8_t dir_pin,
   return false;
 }
 //*************************************************************************************************
+#if !defined(SUPPORT_SELECT_DRIVER_TYPE)
 FastAccelStepper* FastAccelStepperEngine::stepperConnectToPin(
     uint8_t step_pin) {
   // Check if already connected
@@ -71,23 +75,74 @@ FastAccelStepper* FastAccelStepperEngine::stepperConnectToPin(
   }
   int8_t fas_stepper_num = StepperQueue::queueNumForStepPin(step_pin);
   if (fas_stepper_num < 0) {  // flexible, so just choose next
-    if (_next_stepper_num >= MAX_STEPPER) {
+    if (_stepper_cnt >= MAX_STEPPER) {
       return NULL;
     }
-    fas_stepper_num = _next_stepper_num;
+    fas_stepper_num = _stepper_cnt;
   }
-  uint8_t stepper_num = _next_stepper_num;
-  _next_stepper_num++;
+  _stepper_cnt++;
 
   FastAccelStepper* s = &fas_stepper[fas_stepper_num];
-  _stepper[stepper_num] = s;
+  _stepper[fas_stepper_num] = s;
   s->init(this, fas_stepper_num, step_pin);
-  for (uint8_t i = 0; i < _next_stepper_num; i++) {
-    s = _stepper[i];
-    fas_queue[s->_queue_num].adjustSpeedToStepperCount(_next_stepper_num);
+  for (uint8_t i = 0; i < _stepper_cnt; i++) {
+    FastAccelStepper* sx = _stepper[i];
+    fas_queue[sx->_queue_num].adjustSpeedToStepperCount(_stepper_cnt);
   }
   return s;
 }
+#else
+FastAccelStepper* FastAccelStepperEngine::stepperConnectToPin(
+    uint8_t step_pin) {
+  return stepperConnectToPin(step_pin, DRIVER_DONT_CARE);
+}
+
+FastAccelStepper* FastAccelStepperEngine::stepperConnectToPin(
+    uint8_t step_pin, uint8_t driver_type) {
+  // Check if already connected
+  for (uint8_t i = 0; i < MAX_STEPPER; i++) {
+    FastAccelStepper* s = _stepper[i];
+    if (s) {
+      if (s->getStepPin() == step_pin) {
+        return NULL;
+      }
+    }
+  }
+  if (!_isValidStepPin(step_pin)) {
+    return NULL;
+  }
+  uint8_t queue_from = 0;
+  uint8_t queue_to = QUEUES_MCPWM_PCNT + QUEUES_RMT;
+  if (driver_type == DRIVER_MCPWM_PCNT) {
+    queue_to = QUEUES_MCPWM_PCNT;
+  } else if (driver_type == DRIVER_RMT) {
+    queue_from = QUEUES_MCPWM_PCNT;
+  }
+  int8_t fas_stepper_num = -1;
+  for (uint8_t i = queue_from; i < queue_to; i++) {
+    FastAccelStepper* s = _stepper[i];
+    if (s == NULL) {
+      fas_stepper_num = i;
+      break;
+    }
+  }
+  if (fas_stepper_num < 0) {
+    return NULL;
+  }
+  _stepper_cnt++;
+
+  FastAccelStepper* s = &fas_stepper[fas_stepper_num];
+  _stepper[fas_stepper_num] = s;
+  s->init(this, fas_stepper_num, step_pin);
+  for (uint8_t i = 0; i < MAX_STEPPER; i++) {
+    FastAccelStepper* sx = _stepper[i];
+    if (sx) {
+      fas_queue[sx->_queue_num].adjustSpeedToStepperCount(_stepper_cnt);
+    }
+  }
+  return s;
+}
+#endif
 //*************************************************************************************************
 void FastAccelStepperEngine::setDebugLed(uint8_t ledPin) {
   fas_ledPin = ledPin;
@@ -108,7 +163,7 @@ void FastAccelStepperEngine::manageSteppers() {
     }
   }
 #endif
-  for (uint8_t i = 0; i < _next_stepper_num; i++) {
+  for (uint8_t i = 0; i < MAX_STEPPER; i++) {
     FastAccelStepper* s = _stepper[i];
     if (s) {
 #ifdef SUPPORT_EXTERNAL_DIRECTION_PIN
@@ -122,7 +177,7 @@ void FastAccelStepperEngine::manageSteppers() {
   }
 
   // Check for auto disable
-  for (uint8_t i = 0; i < _next_stepper_num; i++) {
+  for (uint8_t i = 0; i < MAX_STEPPER; i++) {
     FastAccelStepper* s = _stepper[i];
     if (s) {
       if (s->needAutoDisable()) {
@@ -131,7 +186,7 @@ void FastAccelStepperEngine::manageSteppers() {
 
         // fasDisableInterrupts(); // TODO
         bool agree = true;
-        for (uint8_t j = 0; j < _next_stepper_num; j++) {
+        for (uint8_t j = 0; j < MAX_STEPPER; j++) {
           if (i != j) {
             FastAccelStepper* other = _stepper[j];
             if (other) {
@@ -146,7 +201,7 @@ void FastAccelStepperEngine::manageSteppers() {
           }
         }
         if (agree) {
-          for (uint8_t j = 0; j < _next_stepper_num; j++) {
+          for (uint8_t j = 0; j < MAX_STEPPER; j++) {
             FastAccelStepper* current = _stepper[j];
             if (current) {
               if (current->usesAutoEnablePin(high_active_pin) ||
@@ -164,7 +219,7 @@ void FastAccelStepperEngine::manageSteppers() {
   }
 
   // Update the auto disable counters
-  for (uint8_t i = 0; i < _next_stepper_num; i++) {
+  for (uint8_t i = 0; i < MAX_STEPPER; i++) {
     FastAccelStepper* s = _stepper[i];
     if (s) {
       fasDisableInterrupts();
@@ -338,7 +393,6 @@ void FastAccelStepper::fill_queue() {
   }
   // check if addition of commands is suspended (due to forceStopAndNewPosition)
   StepperQueue* q = &fas_queue[_queue_num];
-
   // if force stop has been called, then ignore_commands is true and ramp
   // stopped. So the ramp generator will not create a new command, unless new
   // move command has been given after forceStop..(). So we just clear the flag
@@ -377,7 +431,7 @@ void FastAccelStepper::fill_queue() {
 #if (TEST_MEASURE_ISR_SINGLE_FILL == 1)
     // For run time measurement
     runtime_us = micros() - runtime_us;
-    max_micros = max(max_micros, runtime_us);
+    max_micros = fas_max(max_micros, runtime_us);
 #endif
     if (cmd.command.ticks == 0) {
       break;
@@ -388,8 +442,9 @@ void FastAccelStepper::fill_queue() {
         break;
       } else {
 #ifdef SIM_TEST_INPUT
-        Serial.println("Abort ramp due to queue error");
-        Serial.print("Steps=");
+        Serial.println("Abort ramp due to queue error res=");
+        Serial.print(res);
+        Serial.print(" Steps=");
         Serial.print(cmd.command.steps);
         Serial.print(" ticks=");
         Serial.print(cmd.command.ticks);
@@ -569,7 +624,7 @@ void FastAccelStepper::setDelayToDisable(uint16_t delay_ms) {
     // ensure minimum time
     delay_count = 2;
   }
-  _off_delay_count = max(delay_count, (uint16_t)1);
+  _off_delay_count = fas_max(delay_count, (uint16_t)1);
 }
 int8_t FastAccelStepper::runForward() { return _rg.startRun(true); }
 int8_t FastAccelStepper::runBackward() { return _rg.startRun(false); }
@@ -645,6 +700,7 @@ void FastAccelStepper::forceStopAndNewPosition(uint32_t new_pos) {
 
   // set the new position. This is not safe
   q->queue_end.pos = new_pos;
+  _rg.setTargetPosition(new_pos);
 }
 bool FastAccelStepper::disableOutputs() {
   if (isRunning() && _autoEnable) {
@@ -801,8 +857,8 @@ void FastAccelStepper::setCurrentPosition(int32_t new_pos) {
     struct queue_end_s* queue_end = &fas_queue[_queue_num].queue_end;
     fasDisableInterrupts();
     queue_end->pos += delta;
-    fasEnableInterrupts();
     _rg.advanceTargetPosition(delta, queue_end);
+    fasEnableInterrupts();
   }
 }
 void FastAccelStepper::setPositionAfterCommandsCompleted(int32_t new_pos) {
@@ -810,10 +866,10 @@ void FastAccelStepper::setPositionAfterCommandsCompleted(int32_t new_pos) {
   fasDisableInterrupts();
   int32_t delta = new_pos - fas_queue[_queue_num].queue_end.pos;
   queue_end->pos = new_pos;
-  fasEnableInterrupts();
   if (delta != 0) {
     _rg.advanceTargetPosition(delta, queue_end);
   }
+  fasEnableInterrupts();
 }
 uint8_t FastAccelStepper::queueEntries() {
   return fas_queue[_queue_num].queueEntries();

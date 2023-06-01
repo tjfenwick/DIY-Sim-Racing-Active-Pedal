@@ -83,6 +83,16 @@ class FastAccelStepperEngine {
   // the return value of this call.
   FastAccelStepper* stepperConnectToPin(uint8_t step_pin);
 
+  // For e.g. esp32, there are two types of driver.
+  // One using mcpwm and pcnt module. And another using rmt module.
+  // This call allows to select the respective driver
+#if defined(SUPPORT_SELECT_DRIVER_TYPE)
+#define DRIVER_MCPWM_PCNT 0
+#define DRIVER_RMT 1
+#define DRIVER_DONT_CARE 2
+  FastAccelStepper* stepperConnectToPin(uint8_t step_pin, uint8_t driver_type);
+#endif
+
   // Comments to valid pins:
   //
   // clang-format off
@@ -133,7 +143,7 @@ class FastAccelStepperEngine {
  private:
   bool isDirPinBusy(uint8_t dirPin, uint8_t except_stepper);
 
-  uint8_t _next_stepper_num;
+  uint8_t _stepper_cnt;
   FastAccelStepper* _stepper[MAX_STEPPER];
 
   bool _isValidStepPin(uint8_t step_pin);
@@ -144,17 +154,12 @@ class FastAccelStepperEngine {
 
 // ### Return codes of calls to `move()` and `moveTo()`
 //
-// All is OK:
-#define MOVE_OK 0
-
-// Negative direction requested, but no direction pin defined
-#define MOVE_ERR_NO_DIRECTION_PIN -1
-
-// The maximum speed has not been set yet
-#define MOVE_ERR_SPEED_IS_UNDEFINED -2
-
-// The acceleration to use has not been set yet
-#define MOVE_ERR_ACCELERATION_IS_UNDEFINED -3
+// The defined preprocessor macros are MOVE_xxx:
+// MOVE_OK: All is OK:
+// MOVE_ERR_NO_DIRECTION_PIN: Negative direction requested, but no direction pin
+// MOVE_ERR_SPEED_IS_UNDEFINED: The maximum speed has not been set yet
+// MOVE_ERR_ACCELERATION_IS_UNDEFINED: The acceleration to use has not been set
+// yet
 
 // ### Return codes of `rampState()`
 //
@@ -172,9 +177,8 @@ class FastAccelStepperEngine {
 #define RAMP_STATE_IDLE 0
 #define RAMP_STATE_COAST 1
 #define RAMP_STATE_ACCELERATE 2
-#define RAMP_STATE_DECELERATE_TO_STOP 4
-#define RAMP_STATE_DECELERATE (4 + 8)
-#define RAMP_STATE_REVERSE (4 + 16)
+#define RAMP_STATE_DECELERATE 4
+#define RAMP_STATE_REVERSE (4 + 8)
 #define RAMP_STATE_ACCELERATING_FLAG 2
 #define RAMP_STATE_DECELERATING_FLAG 4
 
@@ -183,7 +187,6 @@ class FastAccelStepperEngine {
 #define RAMP_DIRECTION_COUNT_DOWN 64
 
 #include "RampGenerator.h"
-#include "common.h"
 
 //
 // ## Timing values - Architecture dependent
@@ -292,6 +295,11 @@ class FastAccelStepper {
 
   // ## Stepper Position
   // Retrieve the current position of the stepper
+  //
+  // Comment for esp32 with rmt module:
+  // The actual position may be off by the number of steps in the ongoing
+  // command. If precise real time position is needed, attaching a pulse counter
+  // may be of help.
   int32_t getCurrentPosition();
 
   // Set the current position of the stepper - either in standstill or while
@@ -357,7 +365,7 @@ class FastAccelStepper {
   int32_t getCurrentSpeedInMilliHz();
 
   // ## Acceleration
-  //  set Acceleration expects as parameter the change of speed
+  //  setAcceleration() expects as parameter the change of speed
   //  as step/s².
   //  If for example the speed should ramp up from 0 to 10000 steps/s within
   //  10s, then the acceleration is 10000 steps/s / 10s = 1000 steps/s²
@@ -380,6 +388,45 @@ class FastAccelStepper {
   inline int32_t getCurrentAcceleration() {
     return _rg.getCurrentAcceleration();
   }
+
+  // ## Linear Acceleration
+  //  setLinearAcceleration expects as parameter the number of steps,
+  //  where the acceleration is increased linearly from standstill up to the
+  //  configured acceleration value. If this parameter is 0, then there will be
+  //  no linear acceleration phase
+  //
+  //  If for example the acceleration should ramp up from 0 to 10000 steps/s^2
+  //  within 100 steps, then call setLinearAcceleration(100)
+  //
+  //  The speed at which linear acceleration turns into constant acceleration
+  //  can be calculated from the parameter linear_acceleration_steps.
+  //  Let's call this parameter `s_h` for handover steps.
+  //  Then the speed is:
+  //       `v_h = sqrt(1.5 * a * s_h)`
+  //
+  // New value will be used after call to
+  // move/moveTo/runForward/runBackward/applySpeedAcceleration/moveByAcceleration
+  //
+  // note: no update on stopMove()
+  inline void setLinearAcceleration(uint32_t linear_acceleration_steps) {
+    _rg.setLinearAcceleration(linear_acceleration_steps);
+  }
+
+  // ## Jump Start
+  // setJumpStart expects as parameter the ramp step to start from standstill.
+  //
+  // The speed at which the stepper will start can be calculated like this:
+  // - If linear acceleration is not in use:
+  //       start speed `v = sqrt(2 * a * jump_step)`
+  // - If linear acceleration is in use and `jump_step <= s_h`:
+  //       start speed `v = sqrt(1.5*a)/s_h^(1/6) * jump_step^(2/3)`
+  // - If linear acceleration is in use and `jump_step > s_h`:
+  //       start speed `v = sqrt(2 * a * (jump_step - s_h/4))`
+  //
+  //
+  // New value will be used after call to
+  // move/moveTo/runForward/runBackward
+  inline void setJumpStart(uint32_t jump_step) { _rg.setJumpStart(jump_step); }
 
   // ## Apply new speed/acceleration value
   // This function applies new values for speed/acceleration.
@@ -440,7 +487,7 @@ class FastAccelStepper {
   // abruptly stop the running stepper without deceleration.
   // This can be called from an interrupt !
   //
-  // The stepper command queue will be processed, but no furter commands are
+  // The stepper command queue will be processed, but no further commands are
   // added. This means, that the stepper can be expected to stop within approx.
   // 20ms.
   void forceStop();
