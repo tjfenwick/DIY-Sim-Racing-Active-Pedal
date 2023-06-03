@@ -20,4 +20,4 @@ Current Build of Materials ~$250 **Some of these parts will be switched out as I
 
 # Software
 SimHub plugin:
-![image](SimHubPlugin\Images\SimHubPluginOverview.png)
+![image](SimHubPlugin/Images/SimHubPluginOverview.png)
