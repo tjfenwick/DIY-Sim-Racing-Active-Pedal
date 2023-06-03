@@ -15,3 +15,9 @@ Current Build of Materials ~$250 **Some of these parts will be switched out as I
 - Arduino Uno $16.99 (upgrading to a Teensy 4.0 in the future)
 - 2x Micro Limit Switch $5.99
 - DROK 48V Power Supply, AC 110V/220V to DC 0-48V 10A 480W $40.99
+
+
+
+# Software
+SimHub plugin:
+![image](SimHubPlugin\Images\SimHubPluginOverview.png)

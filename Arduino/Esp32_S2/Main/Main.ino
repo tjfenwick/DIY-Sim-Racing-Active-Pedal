@@ -16,7 +16,7 @@ long set = 0;
 bool checkPosition = 1;
 
 
-USBCDC USBSerial;
+//USBCDC USBSerial;
 
 #define MIN_STEPS 5
 
@@ -72,8 +72,8 @@ long stepperPosCurrent = 0;
 /*                         pedal mechanics definitions                                        */
 /*                                                                                            */
 /**********************************************************************************************/
-float startPosRel = 0.3;
-float endPosRel = 0.5;
+float startPosRel = 0.35;
+float endPosRel = 0.8;
 
 float springStiffnesss = 1;
 float springStiffnesssInv = 1;
@@ -178,9 +178,9 @@ double loadcellReading;
 void setup()
 {
   //Serial.begin(115200);
-  //Serial.begin(921600);
+  Serial.begin(921600);
 
-  USBSerial.begin(921600);
+  //USBSerial.begin(921600);
 
   delay(1000);
 
@@ -194,16 +194,16 @@ void setup()
   stepper = engine.stepperConnectToPin(stepPinStepper);
 
 
-  USBSerial.println("Starting ADC");  
+  Serial.println("Starting ADC");  
   adc.initSpi(clockMHZ);
   delay(1000);
-  USBSerial.println("ADS: send SDATAC command");
+  Serial.println("ADS: send SDATAC command");
   //adc.sendCommand(ADS1256_CMD_SDATAC);
 
   
   // start the ADS1256 with data rate of 15kSPS SPS and gain x64
   adc.begin(ADS1256_DRATE_15000SPS,ADS1256_GAIN_64,false); 
-  USBSerial.println("ADC Started");
+  Serial.println("ADC Started");
 
   adc.waitDRDY(); // wait for DRDY to go low before changing multiplexer register
   adc.setChannel(0,1);   // Set the MUX for differential between ch2 and 3 
@@ -211,7 +211,7 @@ void setup()
 
 
 
-  USBSerial.println("ADC: Identify loadcell offset");
+  Serial.println("ADC: Identify loadcell offset");
   // Due to construction and gravity, the loadcell measures an initial voltage difference.
   // To compensate this difference, the difference is estimated by moving average filter.
   float ival = 0;
@@ -219,18 +219,18 @@ void setup()
   for (long i = 0; i < NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION; i++){
     loadcellReading = adc.readCurrentChannel(); // DOUT arriving here are from MUX AIN0 and 
     ival = loadcellReading / (float)NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION;
-    USBSerial.println(loadcellReading,10);
+    Serial.println(loadcellReading,10);
     loadcellOffset += ival;
   }
 
-  USBSerial.print("Offset ");
-  USBSerial.println(loadcellOffset,10);
+  Serial.print("Offset ");
+  Serial.println(loadcellOffset,10);
 
 
 
   // automatically identify sensor noise for KF parameterization
   #ifdef ESTIMATE_LOADCELL_VARIANCE
-    USBSerial.println("ADC: Identify loadcell variance");
+    Serial.println("ADC: Identify loadcell variance");
     float varNormalizer = 1. / (float)(NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION - 1);
     varEstimate = 0.0f;
     for (long i = 0; i < NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION; i++){
@@ -239,7 +239,7 @@ void setup()
       ival = (loadcellReading - loadcellOffset);
       ival *= ival;
       varEstimate += ival * varNormalizer;
-      USBSerial.println(loadcellReading,10);
+      Serial.println(loadcellReading,10);
     }
 
     // make sure estimate is nonzero
@@ -250,15 +250,15 @@ void setup()
   #endif
   stdEstimate = sqrt(varEstimate);
 
-  USBSerial.print("stdEstimate:");
-  USBSerial.println(stdEstimate, 6);
+  Serial.print("stdEstimate:");
+  Serial.println(stdEstimate, 6);
 
 
 
   //FastAccelStepper setup
   if (stepper) {
 
-    USBSerial.println("Setup stepper!");
+    Serial.println("Setup stepper!");
     stepper->setDirectionPin(dirPinStepper, false);
     stepper->setAutoEnable(true);
     
@@ -277,7 +277,7 @@ void setup()
 
   // Find min stepper position
   minEndstopNotTriggered = digitalRead(minPin);
-  USBSerial.print(minEndstopNotTriggered);
+  Serial.print(minEndstopNotTriggered);
   while(minEndstopNotTriggered == true){
     stepper->moveTo(set, true);
     minEndstopNotTriggered = digitalRead(minPin);
@@ -288,15 +288,15 @@ void setup()
   stepperPosMin_global = (long)stepper->getCurrentPosition();
   stepperPosMin = (long)stepper->getCurrentPosition();
 
-  USBSerial.println("The limit switch: Min On");
-  USBSerial.print("Min Position is "); 
-  USBSerial.println( stepperPosMin );
+  Serial.println("The limit switch: Min On");
+  Serial.print("Min Position is "); 
+  Serial.println( stepperPosMin );
 
 
   // Find max stepper position
   set = 0;
   maxEndstopNotTriggered = digitalRead(maxPin);
-  USBSerial.print(maxEndstopNotTriggered);
+  Serial.print(maxEndstopNotTriggered);
   while(maxEndstopNotTriggered == true){
     stepper->moveTo(set, true);
     maxEndstopNotTriggered = digitalRead(maxPin);
@@ -305,16 +305,16 @@ void setup()
   stepperPosMax_global = (long)stepper->getCurrentPosition();
   stepperPosMax = (long)stepper->getCurrentPosition();
 
-  USBSerial.println("The limit switch: Max On");
-  USBSerial.print("Max Position is "); 
-  USBSerial.println( stepperPosMax );
+  Serial.println("The limit switch: Max On");
+  Serial.print("Max Position is "); 
+  Serial.println( stepperPosMax );
 
   
 
   // correct start and end position as requested from the user
   float stepperRange = (stepperPosMax - stepperPosMin);
-  stepperPosMin = stepperPosMin + stepperRange * startPosRel;
-  stepperPosMax = stepperPosMin + stepperRange * endPosRel;
+  stepperPosMin = 0*stepperPosMin + stepperRange * startPosRel;
+  stepperPosMax = 0*stepperPosMin + stepperRange * endPosRel;
 
   // move to initial position
   stepper->moveTo(stepperPosMin, true);
@@ -361,7 +361,7 @@ void setup()
 #endif*/
 
 
-  USBSerial.println("Setup end!");
+  Serial.println("Setup end!");
 
   previousTime = micros();
 
@@ -384,18 +384,18 @@ void setup()
 void loop()
 { 
 
-  //#define RECALIBRATE_POSITION_FROM_USBSerial
-  #ifdef RECALIBRATE_POSITION_FROM_USBSerial
-    byte n = USBSerial.available();
+  //#define RECALIBRATE_POSITION_FROM_Serial
+  #ifdef RECALIBRATE_POSITION_FROM_Serial
+    byte n = Serial.available();
     if(n !=0 )
     {
-      int menuChoice = USBSerial.parseInt();
+      int menuChoice = Serial.parseInt();
       
       switch (menuChoice) {
         // resset minimum position
         case 1:
 
-          //USBSerial.println("Reset position!");
+          //Serial.println("Reset position!");
           set = stepperPosMin_global;
           while(minEndstopNotTriggered == true){
             stepper->moveTo(set, true);
@@ -409,11 +409,11 @@ void loop()
 
         // toggle ABS
         case 2:
-          USBSerial.print("Second case:");
+          Serial.print("Second case:");
           break;
 
         default:
-          USBSerial.print("Default case:");
+          Serial.print("Default case:");
       }
     }
   #endif
@@ -437,13 +437,13 @@ void loop()
 
       averageCycleTime /= (float)maxCycles; 
 
-      //USBSerial.println(averageCycleTime);
-      USBSerial.print("A:");
-      USBSerial.print(loadcellReading,6);
-      USBSerial.print(",B:");
-      USBSerial.print(Force_Current_KF,6);
-      USBSerial.print(",C:");
-      USBSerial.println(Force_Current_KF_dt,6);
+      //Serial.println(averageCycleTime);
+      Serial.print("A:");
+      Serial.print(loadcellReading,6);
+      Serial.print(",B:");
+      Serial.print(Force_Current_KF,6);
+      Serial.print(",C:");
+      Serial.println(Force_Current_KF_dt,6);
 
       
       
@@ -505,7 +505,7 @@ void loop()
 
     // compute target position
     Position_Next = springStiffnesssInv * (Force_Current_KF-Force_Min) + stepperPosMin ;        //Calculates new position using linear function
-    Position_Next -= Force_Current_KF_dt * 0.045f * springStiffnesssInv; // D-gain for stability
+    //Position_Next -= Force_Current_KF_dt * 0.045f * springStiffnesssInv; // D-gain for stability
     Position_Next = (int32_t)constrain(Position_Next, stepperPosMin, stepperPosMax);
 
     
@@ -526,11 +526,11 @@ void loop()
         int16_t pcnt = stepper->readPulseCounter();
         //if (stepperPosMin != pcnt)
         {
-          USBSerial.print('A:');
-          USBSerial.print(stepperPosMin);
-          USBSerial.print('B:');
-          USBSerial.print(pcnt);
-          USBSerial.println(" ");
+          Serial.print('A:');
+          Serial.print(stepperPosMin);
+          Serial.print('B:');
+          Serial.print(pcnt);
+          Serial.println(" ");
         }
       }
       else
@@ -541,8 +541,8 @@ void loop()
     
 
 
-    //float movement = abs( stepperPosCurrent - Position_Next);
-    //if (movement>MIN_STEPS  )
+    long movement = abs( stepperPosCurrent - Position_Next);
+    if (movement>MIN_STEPS  )
     {
       stepper->moveTo(Position_Next, false);
     }
@@ -559,19 +559,19 @@ void loop()
 
   //#define PRINT_DEBUG
   #ifdef PRINT_DEBUG
-    USBSerial.print("elapsedTime:");
-    USBSerial.print(elapsedTime);
-    USBSerial.print(",instantaneousForceMeasured:");
-    USBSerial.print(loadcellReading,6);
-    USBSerial.print(",Kalman_x:");
-    USBSerial.print(Force_Current_KF, 6);
-    USBSerial.print(",Position_Next:");
-    USBSerial.print(Position_Next, 6);
-    USBSerial.println(" ");
+    Serial.print("elapsedTime:");
+    Serial.print(elapsedTime);
+    Serial.print(",instantaneousForceMeasured:");
+    Serial.print(loadcellReading,6);
+    Serial.print(",Kalman_x:");
+    Serial.print(Force_Current_KF, 6);
+    Serial.print(",Position_Next:");
+    Serial.print(Position_Next, 6);
+    Serial.println(" ");
 
     delay(100);
   #endif
 
-  //USBSerial.println("debug message!");
+  //Serial.println("debug message!");
 
 }
