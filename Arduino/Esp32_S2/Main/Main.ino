@@ -15,6 +15,12 @@ long Position_Next = 0;
 long set = 0;
 bool checkPosition = 1;
 
+bool absActive = 0;
+float absFrequency = 2 * PI * 12;
+float absAmplitude = 250;
+float absTime = 0;
+float stepperAbsOffset = 0;
+float absDeltaTimeSinceLastTrigger = 0;
 
 //USBCDC USBSerial;
 
@@ -179,6 +185,9 @@ void setup()
 {
   //Serial.begin(115200);
   Serial.begin(921600);
+  Serial.setTimeout(5);
+
+
 
   //USBSerial.begin(921600);
 
@@ -384,7 +393,16 @@ void setup()
 void loop()
 { 
 
-  //#define RECALIBRATE_POSITION_FROM_Serial
+
+  // obtain time
+  currentTime = micros();
+  elapsedTime = currentTime - previousTime;
+  if (elapsedTime<1){elapsedTime=1;}
+  previousTime = currentTime;
+
+
+  
+  #define RECALIBRATE_POSITION_FROM_Serial
   #ifdef RECALIBRATE_POSITION_FROM_Serial
     byte n = Serial.available();
     if(n !=0 )
@@ -409,7 +427,9 @@ void loop()
 
         // toggle ABS
         case 2:
-          Serial.print("Second case:");
+          //Serial.print("Second case:");
+          absActive = true;
+          absDeltaTimeSinceLastTrigger = 0;
           break;
 
         default:
@@ -418,13 +438,27 @@ void loop()
     }
   #endif
 
+    #define ABS_OSCILLATION
+    #ifdef ABS_OSCILLATION
+    
+    // compute pedal oscillation, when ABS is active
+    if (absActive)
+    {
+      //Serial.print(2);
+      absTime += elapsedTime * 1e-6; 
+      absDeltaTimeSinceLastTrigger += elapsedTime * 1e-6; 
+      stepperAbsOffset = absAmplitude * sin(absFrequency * absTime);
+    }
+    
+    // reset ABS when trigger is not active anymore
+    if (absDeltaTimeSinceLastTrigger > 0.1)
+    {
+      absTime = 0;
+      absActive = false;
+    }
+    #endif
 
-
-    // obtain time
-    currentTime = micros();
-    elapsedTime = currentTime - previousTime;
-    if (elapsedTime<1){elapsedTime=1;}
-    previousTime = currentTime;
+    
 
   // average execution time averaged over multiple cycles 
   //#define PRINT_CYCLETIME
@@ -506,6 +540,10 @@ void loop()
     // compute target position
     Position_Next = springStiffnesssInv * (Force_Current_KF-Force_Min) + stepperPosMin ;        //Calculates new position using linear function
     //Position_Next -= Force_Current_KF_dt * 0.045f * springStiffnesssInv; // D-gain for stability
+    //Position_Next += 1000;
+  #ifdef ABS_OSCILLATION
+    Position_Next += stepperAbsOffset;
+  #endif
     Position_Next = (int32_t)constrain(Position_Next, stepperPosMin, stepperPosMax);
 
     
