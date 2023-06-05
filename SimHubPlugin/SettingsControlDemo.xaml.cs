@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimHub.Plugins.OutputPlugins.Dash.GLCDTemplating;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Windows;
@@ -14,7 +15,7 @@ namespace User.PluginSdkDemo
     {
 
 
-        public bool DashUnitMetric = false;
+        
 
         public DataPluginDemo Plugin { get; }
 
@@ -71,7 +72,7 @@ namespace User.PluginSdkDemo
 
         public void ResetPedalPosition_click(object sender, RoutedEventArgs e)
         {
-            if (DashUnitMetric)
+            if (Plugin.serialPortConnected)
             {
                 Plugin._serialPort.Write("1");
             }
@@ -79,11 +80,34 @@ namespace User.PluginSdkDemo
 
         public void ConnectToPedal_click(object sender, RoutedEventArgs e)
         {
-            DashUnitMetric = !DashUnitMetric;
+            Plugin.serialPortConnected = !Plugin.serialPortConnected;
 
-            if (DashUnitMetric)
+            if (Plugin._serialPort.IsOpen)
+            { 
+            }
+
+            if (Plugin.serialPortConnected)
             {
-                Plugin._serialPort.Open();
+                try
+                {
+                    this.Plugin.PedalMinPosition = 1;
+                    Plugin._serialPort.Open();
+
+                }
+                catch (Exception ex)
+                {
+                    //DisplayData(MessageType.Error, ex.Message);
+                    
+
+                    /*Plugin._serialPort.Dispose();
+                    Plugin._serialPort.Open();
+                    int tmp = 5;*/
+
+                    this.Plugin.PedalMinPosition = 50; 
+
+
+                }
+
             }
             else 
             {
