@@ -16,20 +16,26 @@ long set = 0;
 bool checkPosition = 1;
 
 bool absActive = 0;
-float absFrequency = 2 * PI * 12;
-float absAmplitude = 250;
+float absFrequency = 2 * PI * 5;
+float absAmplitude = 100;
 float absTime = 0;
 float stepperAbsOffset = 0;
 float absDeltaTimeSinceLastTrigger = 0;
+
+
+#include "DiyActivePedal_types.h"
+DAP_config_st dap_config_st;
+
+
+
+
+
 
 //USBCDC USBSerial;
 
 #define MIN_STEPS 5
 
 //#define SUPPORT_ESP32_PULSE_COUNTER
-
-
-
 
 
 
@@ -140,6 +146,7 @@ FastAccelStepperEngine engine = FastAccelStepperEngine();
 FastAccelStepper *stepper = NULL;
 
 
+#define TRAVEL_PER_ROTATION_IN_MM (float)5.0f
 #define STEPS_PER_MOTOR_REVOLUTION (float)800.0f
 #define MAXIMUM_STEPPER_RPM (float)4000.0f
 #define MAXIMUM_STEPPER_SPEED (MAXIMUM_STEPPER_RPM/60*STEPS_PER_MOTOR_REVOLUTION)   //needs to be in us per step || 1 sec = 1000000 us
@@ -171,6 +178,101 @@ double loadcellReading;
   
 
 
+
+
+
+/**********************************************************************************************/
+/*                                                                                            */
+/*                         helper function                                                    */
+/*                                                                                            */
+/**********************************************************************************************/
+
+
+
+// initialize configuration struct at startup
+void initConfig()
+{
+
+  dap_config_st.payloadType = 100;
+  dap_config_st.version = 0;
+  dap_config_st.pedalStartPosition = 35;
+  dap_config_st.pedalEndPosition = 80;
+
+  dap_config_st.maxForce = 90;
+  dap_config_st.preloadForce = 1;
+
+  dap_config_st.relativeForce_p000 = 0;
+  dap_config_st.relativeForce_p020 = 20;
+  dap_config_st.relativeForce_p040 = 40;
+  dap_config_st.relativeForce_p060 = 60;
+  dap_config_st.relativeForce_p080 = 80;
+  dap_config_st.relativeForce_p100 = 100;
+
+  dap_config_st.dampingPress = 0;
+  dap_config_st.dampingPull = 0;
+
+  dap_config_st.absFrequency = 5;
+  dap_config_st.absAmplitude = 100;
+
+  dap_config_st.lengthPedal_AC = 100;
+  dap_config_st.horPos_AB = 150;
+  dap_config_st.verPos_AB = 50;
+  dap_config_st.lengthPedal_CB = 150;
+}
+
+// update the local variables used for computation from the config struct
+void updateComputationalVariablesFromConfig()
+{
+
+  startPosRel = ((float)dap_config_st.pedalStartPosition) / 100.0f;
+  endPosRel = ((float)dap_config_st.pedalEndPosition) / 100.0f;
+
+  Force_Min = ((float)dap_config_st.preloadForce) / 10.0f;
+  Force_Max = ((float)dap_config_st.maxForce) / 10.0f;
+
+  absFrequency = ((float)dap_config_st.absFrequency);
+  absAmplitude = ((float)dap_config_st.absAmplitude);
+
+}
+
+// compute pedal incline angle
+float computePedalInclineAngle(float sledPosInCm)
+{
+
+  // see https://de.wikipedia.org/wiki/Kosinussatz
+  // A: is lower pedal pivot
+  // C: is upper pedal pivot
+  // B: is rear pedal pivot
+  float a = ((float)dap_config_st.lengthPedal_CB) / 10.0f;
+  float b = ((float)dap_config_st.lengthPedal_AC) / 10.0f;
+  float c_ver = ((float)dap_config_st.verPos_AB) / 10.0f;
+  float c_hor = ((float)dap_config_st.horPos_AB) / 10.0f;
+  c_hor += sledPosInCm;
+  float c = sqrtf(c_ver * c_ver + c_hor * c_hor);
+
+
+  float nom = a*a + b*b - c*c;
+  float den = 2 * a * b;
+
+  float gamma = 0;
+   
+  if (abs(den) > 0.01)
+  {
+    gamma = acos( nom / den );
+  }
+
+
+  // add incline due to AB incline --> result is incline realtive to horizontal 
+  if (abs(c_hor)>0.01)
+  {
+    gamma += atan(c_ver / c_hor);
+  }
+  
+  return gamma;
+  
+}
+
+
 /**********************************************************************************************/
 /*                                                                                            */
 /*                         setup function                                                     */
@@ -182,6 +284,9 @@ void setup()
   Serial.begin(921600);
   Serial.setTimeout(5);
 
+  // initialize configuration and update local variables
+  initConfig();
+  updateComputationalVariablesFromConfig();
 
 
   //USBSerial.begin(921600);
@@ -458,6 +563,12 @@ void loop()
     }
     #endif
 
+
+  #define COMPUTE_PEDAL_INCLINE_ANGLE
+  #ifdef COMPUTE_PEDAL_INCLINE_ANGLE
+    float sledPosition = ((float)stepperPosCurrent) / STEPS_PER_MOTOR_REVOLUTION * TRAVEL_PER_ROTATION_IN_MM;
+    float pedalInclineAngle = computePedalInclineAngle(sledPosition);
+  #endif
     
 
   // average execution time averaged over multiple cycles 
