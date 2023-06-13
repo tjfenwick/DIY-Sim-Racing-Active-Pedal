@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.TextFormatting;
@@ -19,9 +20,14 @@ namespace User.PluginSdkDemo
 
         public DataPluginDemo Plugin { get; }
 
+
+        
+
         public SettingsControlDemo()
         {
             InitializeComponent();
+
+            
 
 
 
@@ -37,11 +43,25 @@ namespace User.PluginSdkDemo
                 new SerialPortChoice("COM8", "COM8"),
                 new SerialPortChoice("COM9", "COM9"),
                 new SerialPortChoice("COM10", "COM10"),
-                new SerialPortChoice("COM11", "COM11")
+                new SerialPortChoice("COM11", "COM11"),
+                new SerialPortChoice("COM12", "COM12")
             };
 
             SerialPortSelection.DataContext = SerialPortSelectionArray;
 
+        }
+
+        public byte[] getBytes(DAP_config_st aux)
+        {
+            int length = Marshal.SizeOf(aux);
+            IntPtr ptr = Marshal.AllocHGlobal(length);
+            byte[] myBuffer = new byte[length];
+
+            Marshal.StructureToPtr(aux, ptr, true);
+            Marshal.Copy(ptr, myBuffer, 0, length);
+            Marshal.FreeHGlobal(ptr);
+
+            return myBuffer;
         }
 
         public SettingsControlDemo(DataPluginDemo plugin) : this()
@@ -55,6 +75,12 @@ namespace User.PluginSdkDemo
         {
             get => this.Plugin.TravelDistance;
             set { this.Plugin.TravelDistance = value; }
+        }
+
+        public int PedalForce
+        {
+            get => this.Plugin.PedalMaxForce;
+            set { this.Plugin.dap_config_st.maxForce = (byte)value; }
         }
 
         public int PedalMinPosition
@@ -75,8 +101,40 @@ namespace User.PluginSdkDemo
             if (Plugin.serialPortConnected)
             {
                 Plugin._serialPort.Write("1");
+                int myInt = 1;
+                byte[] b = BitConverter.GetBytes(myInt);
+                Plugin._serialPort.Write(b, 0, 4);
+                Plugin._serialPort.Write("\n");
             }
         }
+
+
+        public void SendConfigToPedal_click(object sender, RoutedEventArgs e)
+        {
+            if (Plugin.serialPortConnected)
+            {
+                // https://stackoverflow.com/questions/17338571/writing-bytes-from-a-struct-into-a-file-with-c-sharp
+                int length = sizeof(byte) * 21;
+                byte[] newBuffer = new byte[length];
+                newBuffer = getBytes(this.Plugin.dap_config_st);
+                Plugin._serialPort.Write(newBuffer, 0, newBuffer.Length);
+                Plugin._serialPort.Write("\n");
+
+                if (Plugin.toogleDebug)
+                {
+                    Plugin.toogleDebug = false;
+                    Plugin.dap_config_st.maxForce = 10;
+
+                }
+                else 
+                {
+                    Plugin.toogleDebug = true;
+                    Plugin.dap_config_st.maxForce = 90;
+                }
+                
+            }
+        }
+
 
         public void ConnectToPedal_click(object sender, RoutedEventArgs e)
         {

@@ -2,7 +2,59 @@
 using SimHub.Plugins;
 using System;
 using System.IO.Ports;
+using System.Runtime.InteropServices;
 using System.Windows.Media;
+
+// https://stackoverflow.com/questions/14344305/best-way-to-structure-class-struct-in-c-sharp
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+[Serializable]
+public struct DAP_config_st
+{
+    // structure identification via payload
+    public byte payloadType;
+
+    // variable to check if structure at receiver matched version from transmitter
+    public byte version;
+
+    // To check if structure is valid
+    public byte checkSum;
+
+    // configure pedal start and endpoint
+    // In percent
+    public byte pedalStartPosition;
+    public byte pedalEndPosition;
+
+    // configure pedal forces
+    public byte maxForce;
+    public byte preloadForce;
+
+    // design force vs travel curve
+    // In percent
+    public byte relativeForce_p000;
+    public byte relativeForce_p020;
+    public byte relativeForce_p040;
+    public byte relativeForce_p060;
+    public byte relativeForce_p080;
+    public byte relativeForce_p100;
+
+    // parameter to configure damping
+    public byte dampingPress;
+    public byte dampingPull;
+
+    // configure ABS effect 
+    public byte absFrequency; // In Hz
+    public byte absAmplitude; // In steps
+
+    // geometric properties of the pedal
+    // in mm
+    public byte lengthPedal_AC;
+    public byte horPos_AB;
+    public byte verPos_AB;
+    public byte lengthPedal_CB;
+
+}
+
+
 
 namespace User.PluginSdkDemo
 {
@@ -16,12 +68,21 @@ namespace User.PluginSdkDemo
         public int TravelDistance = 100;
         public int PedalMinPosition = 100;
         public int PedalMaxPosition = 100;
+        public int PedalMaxForce = 100;
+
+        public DAP_config_st dap_config_st;
+
+        public bool toogleDebug = false;
+
+        
 
 
         //https://www.c-sharpcorner.com/uploadfile/eclipsed4utoo/communicating-with-serial-port-in-C-Sharp/
         public SerialPort _serialPort = new SerialPort("COM7", 921600, Parity.None, 8, StopBits.One);
-       
+        
+    
 
+        public bool serialPortConnected = false;
 
 
         public DataPluginDemoSettings Settings;
@@ -57,11 +118,14 @@ namespace User.PluginSdkDemo
             {
                 if (data.OldData != null && data.NewData != null)
                 {
-                    if (data.OldData.SpeedKmh < Settings.SpeedWarningLevel && data.OldData.SpeedKmh >= Settings.SpeedWarningLevel)
+                    if (data.NewData.ABSActive > 0)
                     {
-                        // Trigger an event
-                        this.TriggerEvent("SpeedWarning");
+                        _serialPort.Write("2");
                     }
+                    /*else
+                    {
+                        _serialPort.Write("3");
+                    }*/
                 }
             }
         }
@@ -129,10 +193,35 @@ namespace User.PluginSdkDemo
             }
             int tmp = 5;
 
+            if (_serialPort.IsOpen)
+            {
+                _serialPort.Close();
+            }
+
 
             //_serialPort.Handshake = Handshake.None;
             _serialPort.ReadTimeout = 500;
             _serialPort.WriteTimeout = 500;
+
+            dap_config_st.payloadType = 100;
+            dap_config_st.version = 0;
+            dap_config_st.pedalStartPosition = 35;
+            dap_config_st.pedalEndPosition = 80;
+            dap_config_st.maxForce = 10;//90;
+            dap_config_st.relativeForce_p000 = 0;
+            dap_config_st.relativeForce_p020 = 20;
+            dap_config_st.relativeForce_p040 = 40;
+            dap_config_st.relativeForce_p060 = 60;
+            dap_config_st.relativeForce_p080 = 80;
+            dap_config_st.relativeForce_p100 = 100;
+            dap_config_st.dampingPress = 0;
+            dap_config_st.dampingPull = 0;
+            dap_config_st.absFrequency = 5;
+            dap_config_st.absAmplitude = 100;
+            dap_config_st.lengthPedal_AC = 150;
+            dap_config_st.horPos_AB = 215;
+            dap_config_st.verPos_AB = 80;
+            dap_config_st.lengthPedal_CB = 200;
 
             /*_serialPort.Open();
             _serialPort.Write("1");

@@ -37,8 +37,10 @@
 
 
 		<styles:SHButtonPrimary Click="ResetPedalPosition_click" HorizontalAlignment="Left" Grid.Row="3">Reset pedal position</styles:SHButtonPrimary>
-
-		<ui:TitledSlider
+        <styles:SHButtonPrimary Click="SendConfigToPedal_click" HorizontalAlignment="Center" Grid.Row="3">Send config to pedal</styles:SHButtonPrimary>
+        
+        
+        <ui:TitledSlider
 			Title="Travel distance"
 			Minimum="0"
 			Maximum="100"
