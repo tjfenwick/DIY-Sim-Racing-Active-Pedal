@@ -22,10 +22,21 @@ float absTime = 0;
 float stepperAbsOffset = 0;
 float absDeltaTimeSinceLastTrigger = 0;
 
+float stepperRange = 0;
+
+bool resetPedalPosition = false;
+bool configUpdateAvailable = false;
+
+
+
+
 
 #include "DiyActivePedal_types.h"
 DAP_config_st dap_config_st;
+DAP_config_st dap_config_st_local;
 
+
+int32_t pcnt = 0;
 
 #define RAD_2_DEG 180.0f / PI
 
@@ -62,7 +73,7 @@ TaskHandle_t Task2;
 //SemaphoreHandle_t batton;
 //SemaphoreHandle_t semaphore_updateJoystick;
 
-//static SemaphoreHandle_t batton=NULL;
+static SemaphoreHandle_t semaphore_updateConfig=NULL;
 static SemaphoreHandle_t semaphore_updateJoystick=NULL;
 
 
@@ -111,7 +122,7 @@ float endPosRel = 0.8;
 float springStiffnesss = 1;
 float springStiffnesssInv = 1;
 float Force_Min = 0.1;    //Min Force in lb to activate Movement
-float Force_Max = 9.;     //Max Force in lb = Max Travel Position
+float Force_Max = 5.;     //Max Force in lb = Max Travel Position
 double conversion = 4000.;
 
 
@@ -173,8 +184,8 @@ FastAccelStepper *stepper = NULL;
 
 
 #define TRAVEL_PER_ROTATION_IN_MM (float)5.0f
-#define STEPS_PER_MOTOR_REVOLUTION (float)800.0f
-#define MAXIMUM_STEPPER_RPM (float)4000.0f
+#define STEPS_PER_MOTOR_REVOLUTION (float)300.0f
+#define MAXIMUM_STEPPER_RPM (float)6000.0f
 #define MAXIMUM_STEPPER_SPEED (MAXIMUM_STEPPER_RPM/60*STEPS_PER_MOTOR_REVOLUTION)   //needs to be in us per step || 1 sec = 1000000 us
 #define SLOW_STEPPER_SPEED (float)(MAXIMUM_STEPPER_SPEED * 0.05f)
 #define MAXIMUM_STEPPER_ACCELERATION (float)1e6
@@ -259,6 +270,9 @@ void updateComputationalVariablesFromConfig()
   absFrequency = ((float)dap_config_st.absFrequency);
   absAmplitude = ((float)dap_config_st.absAmplitude);
 
+  springStiffnesss = (Force_Max-Force_Min) / (float)(stepperPosMax-stepperPosMin);
+  springStiffnesssInv = 1.0 / springStiffnesss;
+
 }
 
 // compute pedal incline angle
@@ -335,6 +349,7 @@ void setup()
   //batton = xSemaphoreCreateBinary();
   //semaphore_updateJoystick = xSemaphoreCreateBinary();
   semaphore_updateJoystick = xSemaphoreCreateMutex();
+  semaphore_updateConfig = xSemaphoreCreateMutex();
 
 
   if(semaphore_updateJoystick==NULL)
@@ -456,7 +471,7 @@ void setup()
     if (varEstimate < LOADCELL_VARIANCE_MIN){varEstimate = LOADCELL_VARIANCE_MIN; }
     varEstimate *= 9;
   #else
-    varEstimate = 0.13f * 0.13f;
+    varEstimate = 0.2f * 0.2f;
   #endif
   stdEstimate = sqrt(varEstimate);
 
@@ -475,6 +490,8 @@ void setup()
     //Stepper Parameters
     stepper->setSpeedInHz(MAXIMUM_STEPPER_SPEED);   // steps/s
     stepper->setAcceleration(MAXIMUM_STEPPER_ACCELERATION);  // 100 steps/s²
+
+    stepper->attachToPulseCounter(1, 0, 0);
 
     delay(5000);
   }
@@ -512,6 +529,7 @@ void setup()
     maxEndstopNotTriggered = digitalRead(maxPin);
     set = set + ENDSTOP_MOVEMENT;
   } 
+  Serial.print(maxEndstopNotTriggered);
   stepperPosMax_global = (long)stepper->getCurrentPosition();
   stepperPosMax = (long)stepper->getCurrentPosition();
 
@@ -522,12 +540,14 @@ void setup()
   
 
   // correct start and end position as requested from the user
-  float stepperRange = (stepperPosMax - stepperPosMin);
+  stepperRange = (stepperPosMax - stepperPosMin);
   stepperPosMin = 0*stepperPosMin + stepperRange * startPosRel;
   stepperPosMax = 0*stepperPosMin + stepperRange * endPosRel;
 
+
   // move to initial position
   stepper->moveTo(stepperPosMin, true);
+  stepper->clearPulseCounter();
   
 
   // compute pedal stiffness parameters
@@ -536,6 +556,8 @@ void setup()
 
   // obtain current stepper position
   stepperPosPrevious = stepper->getCurrentPosition();
+
+  
 
 
 
@@ -589,6 +611,10 @@ void setup()
     delay(500);
 
 
+
+  // equalize pedal config for both tasks
+  dap_config_st_local = dap_config_st;
+
   Serial.println("Setup end!");
 
   previousTime = micros();
@@ -627,14 +653,19 @@ long cycleIdx2 = 0;
   {
 
     for(;;){
+      //delayMicroseconds(100);
 
 
-  // update local variables for this thread
-  // 1. take semaphore
-  //xSemaphoreTake(batton, portMAX_DELAY);
-  // 2. read global variables
-  // 3. release semaphore
-  //xSemaphoreGive(batton);
+  if (configUpdateAvailable == true)
+  {
+    xSemaphoreTake(semaphore_updateConfig, portMAX_DELAY);
+    Serial.println("Update pedal config!");
+    configUpdateAvailable = false;
+    dap_config_st = dap_config_st_local;
+    updateComputationalVariablesFromConfig();
+    xSemaphoreGive(semaphore_updateConfig);
+  }
+  
 
 
   // obtain time
@@ -644,7 +675,38 @@ long cycleIdx2 = 0;
   previousTime = currentTime;
 
 
-    #define ABS_OSCILLATION
+  // if endstop triggered --> recalibrate position
+  maxEndstopNotTriggered = digitalRead(maxPin);
+  //Serial.println(maxEndstopNotTriggered);
+  if (maxEndstopNotTriggered == false)
+  {
+    Serial.println("Recalibrate due to endstop trigger");
+    stepper->forceStopAndNewPosition(stepperPosMax_global);
+    stepper->moveTo(stepperPosMax, true);
+  }
+
+
+
+  if (resetPedalPosition)
+  {
+
+    set = 0;//stepperPosMin_global;
+    minEndstopNotTriggered = digitalRead(minPin);
+    Serial.println(minEndstopNotTriggered);
+    while(minEndstopNotTriggered == true){
+      stepper->moveTo(set, true);
+      minEndstopNotTriggered = digitalRead(minPin);
+      set = set - ENDSTOP_MOVEMENT;
+      //Serial.println(set);
+    }  
+    stepper->forceStopAndNewPosition(stepperPosMin_global);
+
+    resetPedalPosition = false;
+  }
+
+  
+
+    //#define ABS_OSCILLATION
     #ifdef ABS_OSCILLATION
     
     // compute pedal oscillation, when ABS is active
@@ -719,7 +781,21 @@ long cycleIdx2 = 0;
 
 
     // compute target position
+    float stepperRange_local = (stepperPosMax - stepperPosMin);
+    float posDeltaToTmp = stepperPosCurrent - (stepperPosMin + 0.8 * stepperRange_local) ;
+
     Position_Next = springStiffnesssInv * (Force_Current_KF-Force_Min) + stepperPosMin ;        //Calculates new position using linear function
+
+    if (posDeltaToTmp > 0) 
+    {
+      long posCorrention = posDeltaToTmp * 0.95;
+      //Serial.print(posDeltaToTmp);
+      //Serial.print(", ");
+      //Serial.println(posCorrention);
+      Position_Next -= posCorrention;
+    }
+   
+    
     //Position_Next -= Force_Current_KF_dt * 0.045f * springStiffnesssInv; // D-gain for stability
 
     /*cycleIdx2 += 1;
@@ -730,14 +806,21 @@ long cycleIdx2 = 0;
   #ifdef ABS_OSCILLATION
     Position_Next += stepperAbsOffset;
   #endif
-    Position_Next = (int32_t)constrain(Position_Next, stepperPosMin, stepperPosMax);
+    if (Position_Next <= stepperPosMin){ Position_Next = stepperPosMin; }
+    if (Position_Next >= stepperPosMax){ Position_Next = stepperPosMax; }
+    //Position_Next = (int32_t)constrain(Position_Next, stepperPosMin, stepperPosMax);
 
     
 
 
     // get current stepper position
-    //stepperPosCurrent = stepper->getCurrentPosition();
-    stepperPosCurrent = stepper->getPositionAfterCommandsCompleted();
+    stepperPosCurrent = stepper->getCurrentPosition();
+    /*if (stepperPosCurrent == stepperPosMin)
+    {
+      Serial.println(stepper->readPulseCounter());
+    }*/
+    
+    //stepperPosCurrent = stepper->getPositionAfterCommandsCompleted();
     long movement = abs( stepperPosCurrent - Position_Next);
     if (movement>MIN_STEPS  )
     {
@@ -763,17 +846,19 @@ long cycleIdx2 = 0;
 
   //#define PRINT_DEBUG
   #ifdef PRINT_DEBUG
-    Serial.print("elapsedTime:");
-    Serial.print(elapsedTime);
-    Serial.print(",instantaneousForceMeasured:");
+    //Serial.print("elapsedTime:");
+    //Serial.print(elapsedTime);
+    Serial.print(",A:");
     Serial.print(loadcellReading,6);
-    Serial.print(",Kalman_x:");
+    Serial.print(",B:");
     Serial.print(Force_Current_KF, 6);
-    Serial.print(",Position_Next:");
+    Serial.print(",C:");
     Serial.print(Position_Next, 6);
     Serial.println(" ");
-    delay(100);
+    //delay(100);
   #endif
+
+  
 
     }
   }
@@ -805,6 +890,8 @@ long cycleIdx2 = 0;
 
     for(;;){
 
+      //delayMicroseconds(100);
+
 
     // average cycle time averaged over multiple cycles 
     #ifdef PRINT_CYCLETIME
@@ -834,29 +921,35 @@ long cycleIdx2 = 0;
       // read serial input 
       byte n = Serial.available();
 
-      /*// likely config structure 
+      // likely config structure 
       if ( n == sizeof(DAP_config_st) )
       {
-        DAP_config_st * dap_config_st_local;
-        Serial.readBytes((char*)dap_config_st_local, sizeof(DAP_config_st));
+        xSemaphoreTake(semaphore_updateConfig, portMAX_DELAY);
+        DAP_config_st * dap_config_st_local_ptr;
+        dap_config_st_local_ptr = &dap_config_st_local;
+        Serial.readBytes((char*)dap_config_st_local_ptr, sizeof(DAP_config_st));
+
+        Serial.println("Config received!");
 
         // check if data is plausible
         bool structChecker = true;
-        if ( dap_config_st_local->payloadType != dap_config_st.payloadType ){ structChecker = false;}
-        if ( dap_config_st_local->version != dap_config_st.version ){ structChecker = false;}
+        if ( dap_config_st_local.payloadType != dap_config_st.payloadType ){ structChecker = false;}
+        if ( dap_config_st_local.version != dap_config_st.version ){ structChecker = false;}
+
+        //Serial.print("payloadType: ");
+        //Serial.println(dap_config_st_local.payloadType);
+
+        //Serial.print("version: ");
+        //Serial.println(dap_config_st_local.version);
 
         // if checks are successfull, overwrite global configuration struct
         if (structChecker == true)
         {
-          // 1. take semaphore
-          xSemaphoreTake(batton, portMAX_DELAY);
-          // 2. update global variables
-          dap_config_st = *dap_config_st_local;
-          // 3. release semaphore
-          xSemaphoreGive(batton);
+          configUpdateAvailable = true;          
         }
+        xSemaphoreGive(semaphore_updateConfig);
       }
-      else*/
+      else
       {
         if (n!=0)
         {
@@ -864,15 +957,8 @@ long cycleIdx2 = 0;
           switch (menuChoice) {
             // resset minimum position
             case 1:
-              //Serial.println("Reset position!");
-              set = stepperPosMin_global;
-              while(minEndstopNotTriggered == true){
-                stepper->moveTo(set, true);
-                minEndstopNotTriggered = digitalRead(minPin);
-                set = set - ENDSTOP_MOVEMENT;
-              }  
-              stepper->forceStopAndNewPosition(stepperPosMin_global);
-              //stepper->moveTo(0);
+              Serial.println("Reset position!");
+              resetPedalPosition = true;
               break;
 
             // toggle ABS
@@ -883,7 +969,8 @@ long cycleIdx2 = 0;
               break;
 
             default:
-              Serial.print("Default case:");
+              Serial.println("Default case:");
+              break;
           }
 
         }
