@@ -200,7 +200,7 @@ namespace User.PluginSdkDemo
 
 
             //_serialPort.Handshake = Handshake.None;
-            _serialPort.ReadTimeout = 500;
+            _serialPort.ReadTimeout = 2000;
             _serialPort.WriteTimeout = 500;
 
             dap_config_st.payloadType = 100;

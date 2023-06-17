@@ -100,11 +100,26 @@ namespace User.PluginSdkDemo
         {
             if (Plugin.serialPortConnected)
             {
+
+                if (Plugin._serialPort.BytesToRead > 0)
+                {
+                    Plugin._serialPort.DiscardInBuffer();
+                }
+
                 Plugin._serialPort.Write("1");
                 int myInt = 1;
                 byte[] b = BitConverter.GetBytes(myInt);
                 Plugin._serialPort.Write(b, 0, 4);
                 Plugin._serialPort.Write("\n");
+                System.Threading.Thread.Sleep(100);
+                try
+                {
+                    while (Plugin._serialPort.BytesToRead > 0)
+                    {
+                        string message = Plugin._serialPort.ReadLine();
+                    }
+                }
+                catch (TimeoutException) { }
             }
         }
 
@@ -118,7 +133,17 @@ namespace User.PluginSdkDemo
                 byte[] newBuffer = new byte[length];
                 newBuffer = getBytes(this.Plugin.dap_config_st);
                 Plugin._serialPort.Write(newBuffer, 0, newBuffer.Length);
-                Plugin._serialPort.Write("\n");
+                //Plugin._serialPort.Write("\n");
+
+                System.Threading.Thread.Sleep(100);
+                try
+                {
+                    while (Plugin._serialPort.BytesToRead > 0)
+                    {
+                        string message = Plugin._serialPort.ReadLine();
+                    }
+                }
+                catch (TimeoutException) { }
 
                 if (Plugin.toogleDebug)
                 {
@@ -150,6 +175,15 @@ namespace User.PluginSdkDemo
                 {
                     this.Plugin.PedalMinPosition = 1;
                     Plugin._serialPort.Open();
+
+                    try
+                    {
+                        while (Plugin._serialPort.BytesToRead > 0)
+                        {
+                            string message = Plugin._serialPort.ReadLine();
+                        }
+                    }
+                    catch (TimeoutException) { }
 
                 }
                 catch (Exception ex)
