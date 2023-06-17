@@ -395,6 +395,8 @@ void setup()
 
   
 
+  
+
 
   //batton = xSemaphoreCreateBinary();
   //semaphore_updateJoystick = xSemaphoreCreateBinary();
@@ -414,6 +416,9 @@ void setup()
   // initialize configuration and update local variables
   initConfig();
   updateComputationalVariablesFromConfig();
+
+  // init controller
+  SetupController();
 
 
   //USBSerial.begin(921600);
@@ -767,7 +772,6 @@ long cycleIdx2 = 0;
       //Position_Next -= Force_Current_KF_dt * 0.045f * springStiffnesssInv; // D-gain for stability
 
 
-
     #ifdef ABS_OSCILLATION
       Position_Next += stepperAbsOffset;
     #endif
@@ -910,6 +914,7 @@ long cycleIdx2 = 0;
       // transmit controller output
       if (IsControllerReady())
       {
+
         delay(1);
         if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE)
         {
