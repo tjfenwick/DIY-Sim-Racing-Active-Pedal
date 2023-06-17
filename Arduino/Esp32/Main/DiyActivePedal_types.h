@@ -43,3 +43,45 @@ struct DAP_config_st {
   
 
 } ;
+
+
+
+struct DAP_calculationVariables_st
+{
+  float springStiffnesss;
+  float springStiffnesssInv;
+  float Force_Min;
+  float Force_Max;
+  float Force_Range;
+  long stepperPosMinEndstop;
+  long stepperPosMaxEndstop;
+  long stepperPosEndstopRange;
+  
+  long stepperPosMin;
+  long stepperPosMax;
+  float stepperPosRange;
+  float startPosRel;
+  float endPosRel;
+  float absFrequency;
+  float absAmplitude;
+};
+
+
+
+
+void update_pedal_stiffness(DAP_calculationVariables_st * dap_calculationVariables_st_ptr)
+{
+
+  dap_calculationVariables_st_ptr->stepperPosEndstopRange = dap_calculationVariables_st_ptr->stepperPosMaxEndstop - dap_calculationVariables_st_ptr->stepperPosMinEndstop;
+
+  dap_calculationVariables_st_ptr->stepperPosMin = dap_calculationVariables_st_ptr->stepperPosEndstopRange * dap_calculationVariables_st_ptr->startPosRel;
+  dap_calculationVariables_st_ptr->stepperPosMax = dap_calculationVariables_st_ptr->stepperPosEndstopRange * dap_calculationVariables_st_ptr->endPosRel;
+  dap_calculationVariables_st_ptr->stepperPosRange = dap_calculationVariables_st_ptr->stepperPosMax - dap_calculationVariables_st_ptr->stepperPosMin; 
+
+  dap_calculationVariables_st_ptr->Force_Range = dap_calculationVariables_st_ptr->Force_Max - dap_calculationVariables_st_ptr->Force_Min;
+
+  dap_calculationVariables_st_ptr->springStiffnesss = dap_calculationVariables_st_ptr->Force_Range / dap_calculationVariables_st_ptr->stepperPosRange;
+  dap_calculationVariables_st_ptr->springStiffnesssInv = 1.0 / dap_calculationVariables_st_ptr->springStiffnesss;
+  
+
+}
