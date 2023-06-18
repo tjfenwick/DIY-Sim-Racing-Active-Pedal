@@ -20,14 +20,41 @@ namespace User.PluginSdkDemo
 
         public DataPluginDemo Plugin { get; }
 
-
+        public DAP_config_st dap_config_st;
         
+
+
+
+
+
 
         public SettingsControlDemo()
         {
+            
+
+            dap_config_st.payloadType = 100;
+            dap_config_st.version = 0;
+            dap_config_st.pedalStartPosition = 35;
+            dap_config_st.pedalEndPosition = 80;
+            dap_config_st.maxForce = 90;//90;
+            dap_config_st.relativeForce_p000 = 0;
+            dap_config_st.relativeForce_p020 = 20;
+            dap_config_st.relativeForce_p040 = 40;
+            dap_config_st.relativeForce_p060 = 60;
+            dap_config_st.relativeForce_p080 = 80;
+            dap_config_st.relativeForce_p100 = 100;
+            dap_config_st.dampingPress = 0;
+            dap_config_st.dampingPull = 0;
+            dap_config_st.absFrequency = 5;
+            dap_config_st.absAmplitude = 100;
+            dap_config_st.lengthPedal_AC = 150;
+            dap_config_st.horPos_AB = 215;
+            dap_config_st.verPos_AB = 80;
+            dap_config_st.lengthPedal_CB = 200;
+
             InitializeComponent();
 
-            
+
 
 
 
@@ -80,7 +107,7 @@ namespace User.PluginSdkDemo
         public int PedalForce
         {
             get => this.Plugin.PedalMaxForce;
-            set { this.Plugin.dap_config_st.maxForce = (byte)value; }
+            set { this.dap_config_st.maxForce = (byte)value; }
         }
 
         public int PedalMinPosition
@@ -93,6 +120,42 @@ namespace User.PluginSdkDemo
         {
             get => this.Plugin.PedalMaxPosition;
             set { this.Plugin.PedalMaxPosition = value; }
+        }
+		
+		
+		private void Slider_PedalMaxForce(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.maxForce = Convert.ToByte(e.NewValue);
+
+            if (dap_config_st.maxForce < dap_config_st.preloadForce)
+            {
+                dap_config_st.maxForce = dap_config_st.preloadForce;
+            }
+        }
+
+        private void Slider_PedalMaxPos(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.pedalEndPosition = Convert.ToByte(e.NewValue);
+
+            if (dap_config_st.pedalEndPosition < dap_config_st.pedalStartPosition)
+            {
+                dap_config_st.pedalEndPosition = dap_config_st.pedalStartPosition;
+            }
+        }
+		
+		private void Slider_AbsAmplitude(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.absAmplitude = Convert.ToByte(e.NewValue);
+        }
+
+        private void Slider_AbsFrequency(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.absFrequency = Convert.ToByte(e.NewValue);
+        }
+
+        public void TestAbs_click(object sender, RoutedEventArgs e)
+        {
+            Plugin.sendAbsSignal = !Plugin.sendAbsSignal;
         }
 
 
@@ -131,7 +194,7 @@ namespace User.PluginSdkDemo
                 // https://stackoverflow.com/questions/17338571/writing-bytes-from-a-struct-into-a-file-with-c-sharp
                 int length = sizeof(byte) * 21;
                 byte[] newBuffer = new byte[length];
-                newBuffer = getBytes(this.Plugin.dap_config_st);
+                newBuffer = getBytes(this.dap_config_st);
                 Plugin._serialPort.Write(newBuffer, 0, newBuffer.Length);
                 //Plugin._serialPort.Write("\n");
 
@@ -145,17 +208,7 @@ namespace User.PluginSdkDemo
                 }
                 catch (TimeoutException) { }
 
-                if (Plugin.toogleDebug)
-                {
-                    Plugin.toogleDebug = false;
-                    Plugin.dap_config_st.maxForce = 10;
-
-                }
-                else 
-                {
-                    Plugin.toogleDebug = true;
-                    Plugin.dap_config_st.maxForce = 90;
-                }
+   
                 
             }
         }
