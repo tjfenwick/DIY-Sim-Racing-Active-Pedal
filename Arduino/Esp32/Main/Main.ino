@@ -202,7 +202,7 @@ using namespace BLA;
 #define KF_CONST_VEL
 #define Nstate 2 // length of the state vector
 #define Nobs 1   // length of the measurement vector
-#define KF_MODEL_NOISE_FORCE_ACCELERATION (float)500.0f // adjust model noise here
+#define KF_MODEL_NOISE_FORCE_ACCELERATION (float)( 2.0f * 9.0f / 0.05f/ 0.05f )// adjust model noise here s = 0.5 * a * delta_t^2 --> a = 2 * s / delta_t^2
 
 KALMAN<Nstate,Nobs> K; // your Kalman filter
 BLA::Matrix<Nobs, 1> obs; // observation vector
@@ -237,11 +237,12 @@ FastAccelStepper *stepper = NULL;
 
 
 #define TRAVEL_PER_ROTATION_IN_MM (float)5.0f
-#define STEPS_PER_MOTOR_REVOLUTION (float)300.0f
-#define MAXIMUM_STEPPER_RPM (float)6000.0f
-#define MAXIMUM_STEPPER_SPEED (MAXIMUM_STEPPER_RPM/60*STEPS_PER_MOTOR_REVOLUTION)   //needs to be in us per step || 1 sec = 1000000 us
+//#define STEPS_PER_MOTOR_REVOLUTION (float)300.0f
+#define STEPS_PER_MOTOR_REVOLUTION (float)1600.0f
+#define MAXIMUM_STEPPER_RPM (float)7000.0f
+#define MAXIMUM_STEPPER_SPEED (MAXIMUM_STEPPER_RPM / 60.0*STEPS_PER_MOTOR_REVOLUTION)   //needs to be in us per step || 1 sec = 1000000 us
 #define SLOW_STEPPER_SPEED (float)(MAXIMUM_STEPPER_SPEED * 0.05f)
-#define MAXIMUM_STEPPER_ACCELERATION (float)1e6
+#define MAXIMUM_STEPPER_ACCELERATION (float)1e8
 
 
 
@@ -767,6 +768,8 @@ long cycleIdx2 = 0;
       K.update(obs);
       Force_Current_KF = K.x(0,0);
       Force_Current_KF_dt = K.x(0,1);
+
+      //Force_Current_KF = loadcellReading;
 
       Position_Next = dap_calculationVariables_st.springStiffnesssInv * (Force_Current_KF - dap_calculationVariables_st.Force_Min) + dap_calculationVariables_st.stepperPosMin ;        //Calculates new position using linear function
       //Position_Next -= Force_Current_KF_dt * 0.045f * springStiffnesssInv; // D-gain for stability
