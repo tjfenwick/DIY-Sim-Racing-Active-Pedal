@@ -55,6 +55,29 @@ int32_t pcnt = 0;
 
 /**********************************************************************************************/
 /*                                                                                            */
+/*                         iterpolation  definitions                                          */
+/*                                                                                            */
+/**********************************************************************************************/
+
+//#define INTERP_SPRING_STIFFNESS
+#ifdef INTERP_SPRING_STIFFNESS
+  #include "InterpolationLib.h"
+
+  #define INTERPOLATION_NUMBER_OF_SOURCE_VALUES 6
+  #define INTERPOLATION_NUMBER_OF_TARGET_VALUES 30
+
+  double xValues[INTERPOLATION_NUMBER_OF_SOURCE_VALUES] = { 0, 20, 40, 60, 80, 100 };
+  double yValues[INTERPOLATION_NUMBER_OF_SOURCE_VALUES] = { 0, 20, 40, 60, 80, 100 };
+
+  float interpTargetValues[INTERPOLATION_NUMBER_INTERPOLATION_NUMBER_OF_TARGET_VALUESOF_SOURCE_VALUES];
+  float interpSpringStiffness[INTERPOLATION_NUMBER_INTERPOLATION_NUMBER_OF_TARGET_VALUESOF_SOURCE_VALUES];
+
+#endif
+
+
+
+/**********************************************************************************************/
+/*                                                                                            */
 /*                         multitasking  definitions                                          */
 /*                                                                                            */
 /**********************************************************************************************/
@@ -322,6 +345,9 @@ void updateComputationalVariablesFromConfig()
 
   dap_calculationVariables_st.absFrequency = 2 * PI * ((float)dap_config_st.absFrequency);
   dap_calculationVariables_st.absAmplitude = ((float)dap_config_st.absAmplitude)/ TRAVEL_PER_ROTATION_IN_MM * STEPS_PER_MOTOR_REVOLUTION; // in mm
+
+  dap_calculationVariables_st.dampingPress = ((float)dap_config_st.dampingPress) / 400.0f;
+  
 
   // update force variables
   dap_calculationVariables_st.Force_Min = ((float)dap_config_st.preloadForce) / 10.0f;
@@ -620,6 +646,26 @@ void setup()
 
 
 
+
+  // initialize the interpolation curve
+  //
+  #ifdef INTERP_SPRING_STIFFNESS
+
+    for (uint interpStep = 0; interpStep < INTERPOLATION_NUMBER_OF_TARGET_VALUES; interpStep++)
+    {
+      interpTargetValues[interpStep] = Interpolation::ConstrainedSpline(xValues, yValues, INTERPOLATION_NUMBER_OF_TARGET_VALUES, interpStep);
+
+      interpSpringStiffness[interpStep] = 
+      Serial.print(interpStep);
+      Serial.print("   ");
+      Serial.println(interpTargetValues[interpStep]);
+    }
+    
+
+  #endif
+
+
+
   // equalize pedal config for both tasks
   dap_config_st_local = dap_config_st;
 
@@ -771,10 +817,29 @@ long cycleIdx2 = 0;
       Force_Current_KF = K.x(0,0);
       Force_Current_KF_dt = K.x(0,1);
 
-      //Force_Current_KF = loadcellReading;
+      float spingStiffnessInv_lcl = dap_calculationVariables_st.springStiffnesssInv;
+      // use interpolation to determine local linearized spring stiffness
+      #ifdef INTERP_SPRING_STIFFNESS
 
-      Position_Next = dap_calculationVariables_st.springStiffnesssInv * (Force_Current_KF - dap_calculationVariables_st.Force_Min) + dap_calculationVariables_st.stepperPosMin ;        //Calculates new position using linear function
-      //Position_Next -= Force_Current_KF_dt * 0.045f * springStiffnesssInv; // D-gain for stability
+        stepperPosCurrent = stepper->getCurrentPosition();
+        float interpPosition = stepperPosCurrent - dap_calculationVariables_st.stepperPosMin;
+        interpPosition /= (dap_calculationVariables_st.stepperPosMax - dap_calculationVariables_st.stepperPosMin);
+
+        spingStiffnessInv_lcl = spingStiffnessInv_lcl * interpTargetValues[interpStep];
+      #endif
+
+      // caclulate pedal position
+      Position_Next = spingStiffnessInv_lcl * (Force_Current_KF - dap_calculationVariables_st.Force_Min) + dap_calculationVariables_st.stepperPosMin ;        //Calculates new position using linear function
+      
+      
+
+      // add dampening
+      if (dap_calculationVariables_st.dampingPress  > 0.0001)
+      {
+        // dampening is proportional to velocity --> D-gain for stability
+        Position_Next -= dap_calculationVariables_st.dampingPress * Force_Current_KF_dt * dap_calculationVariables_st.springStiffnesssInv;
+      }
+      
 
 
     #ifdef ABS_OSCILLATION
@@ -817,7 +882,7 @@ long cycleIdx2 = 0;
 
 /**********************************************************************************************/
 /*                                                                                            */
-/*                         pedal update task                                                  */
+/*                         communication task                                                 */
 /*                                                                                            */
 /**********************************************************************************************/
 

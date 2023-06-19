@@ -64,6 +64,8 @@ struct DAP_calculationVariables_st
   float endPosRel;
   float absFrequency;
   float absAmplitude;
+
+  float dampingPress;
 };
 
 
