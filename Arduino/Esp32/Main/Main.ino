@@ -241,8 +241,8 @@ FastAccelStepper *stepper = NULL;
 #define STEPS_PER_MOTOR_REVOLUTION (float)1600.0f
 #define MAXIMUM_STEPPER_RPM (float)7000.0f
 #define MAXIMUM_STEPPER_SPEED (MAXIMUM_STEPPER_RPM / 60.0*STEPS_PER_MOTOR_REVOLUTION)   //needs to be in us per step || 1 sec = 1000000 us
-#define SLOW_STEPPER_SPEED (float)(MAXIMUM_STEPPER_SPEED * 0.05f)
-#define MAXIMUM_STEPPER_ACCELERATION (float)1e8
+#define SLOW_STEPPER_SPEED (float)(MAXIMUM_STEPPER_SPEED * 0.15f)
+#define MAXIMUM_STEPPER_ACCELERATION (float)1e9
 
 
 
@@ -302,8 +302,10 @@ void initConfig()
   dap_config_st.dampingPress = 0;
   dap_config_st.dampingPull = 0;
 
-  dap_config_st.absFrequency = 5;
-  dap_config_st.absAmplitude = 100;
+  dap_config_st.absFrequency = 2 * PI * 10;
+  dap_config_st.absAmplitude = 2.0f / TRAVEL_PER_ROTATION_IN_MM * STEPS_PER_MOTOR_REVOLUTION; // in mm
+
+
 
   dap_config_st.lengthPedal_AC = 150;
   dap_config_st.horPos_AB = 215;
@@ -318,8 +320,8 @@ void updateComputationalVariablesFromConfig()
   dap_calculationVariables_st.startPosRel = ((float)dap_config_st.pedalStartPosition) / 100.0f;
   dap_calculationVariables_st.endPosRel = ((float)dap_config_st.pedalEndPosition) / 100.0f;
 
-  dap_calculationVariables_st.absFrequency = ((float)dap_config_st.absFrequency);
-  dap_calculationVariables_st.absAmplitude = ((float)dap_config_st.absAmplitude);
+  dap_calculationVariables_st.absFrequency = 2 * PI * ((float)dap_config_st.absFrequency);
+  dap_calculationVariables_st.absAmplitude = ((float)dap_config_st.absAmplitude)/ TRAVEL_PER_ROTATION_IN_MM * STEPS_PER_MOTOR_REVOLUTION; // in mm
 
   // update force variables
   dap_calculationVariables_st.Force_Min = ((float)dap_config_st.preloadForce) / 10.0f;
