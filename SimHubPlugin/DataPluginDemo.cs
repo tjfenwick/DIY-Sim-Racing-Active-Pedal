@@ -70,9 +70,9 @@ namespace User.PluginSdkDemo
         public int PedalMaxPosition = 100;
         public int PedalMaxForce = 100;
 
-        public DAP_config_st dap_config_st;
 
         public bool toogleDebug = false;
+        public bool sendAbsSignal = false;
 
         
 
@@ -120,12 +120,23 @@ namespace User.PluginSdkDemo
                 {
                     if (data.NewData.ABSActive > 0)
                     {
-                        _serialPort.Write("2");
+                        if (_serialPort.IsOpen)
+                        {
+                            _serialPort.Write("2");
+                        }
                     }
                     /*else
                     {
                         _serialPort.Write("3");
                     }*/
+                }
+            }
+
+            if (sendAbsSignal)
+            {
+                if (_serialPort.IsOpen)
+                {
+                    _serialPort.Write("2");
                 }
             }
         }
@@ -203,25 +214,6 @@ namespace User.PluginSdkDemo
             _serialPort.ReadTimeout = 2000;
             _serialPort.WriteTimeout = 500;
 
-            dap_config_st.payloadType = 100;
-            dap_config_st.version = 0;
-            dap_config_st.pedalStartPosition = 35;
-            dap_config_st.pedalEndPosition = 80;
-            dap_config_st.maxForce = 10;//90;
-            dap_config_st.relativeForce_p000 = 0;
-            dap_config_st.relativeForce_p020 = 20;
-            dap_config_st.relativeForce_p040 = 40;
-            dap_config_st.relativeForce_p060 = 60;
-            dap_config_st.relativeForce_p080 = 80;
-            dap_config_st.relativeForce_p100 = 100;
-            dap_config_st.dampingPress = 0;
-            dap_config_st.dampingPull = 0;
-            dap_config_st.absFrequency = 5;
-            dap_config_st.absAmplitude = 100;
-            dap_config_st.lengthPedal_AC = 150;
-            dap_config_st.horPos_AB = 215;
-            dap_config_st.verPos_AB = 80;
-            dap_config_st.lengthPedal_CB = 200;
 
             /*_serialPort.Open();
             _serialPort.Write("1");
