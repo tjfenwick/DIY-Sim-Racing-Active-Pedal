@@ -121,15 +121,36 @@ namespace User.PluginSdkDemo
             get => this.Plugin.PedalMaxPosition;
             set { this.Plugin.PedalMaxPosition = value; }
         }
-		
-		
-		private void Slider_PedalMaxForce(object sender, RoutedPropertyChangedEventArgs<double> e)
+
+
+        private void Slider_PedalMinForce(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.preloadForce = Convert.ToByte(e.NewValue);
+
+            if (dap_config_st.preloadForce > dap_config_st.maxForce)
+            {
+                dap_config_st.preloadForce = dap_config_st.maxForce;
+            }
+        }
+
+        private void Slider_PedalMaxForce(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             dap_config_st.maxForce = Convert.ToByte(e.NewValue);
 
             if (dap_config_st.maxForce < dap_config_st.preloadForce)
             {
                 dap_config_st.maxForce = dap_config_st.preloadForce;
+            }
+        }
+
+
+        private void Slider_PedalMinPos(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.pedalStartPosition = Convert.ToByte(e.NewValue);
+
+            if (dap_config_st.pedalStartPosition > dap_config_st.pedalEndPosition)
+            {
+                dap_config_st.pedalStartPosition = dap_config_st.pedalEndPosition;
             }
         }
 
@@ -157,6 +178,46 @@ namespace User.PluginSdkDemo
         {
             Plugin.sendAbsSignal = !Plugin.sendAbsSignal;
         }
+
+        public void Slider_Dampening(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.dampingPress = Convert.ToByte(e.NewValue);
+            dap_config_st.dampingPull = Convert.ToByte(e.NewValue);
+        }
+
+
+
+
+
+        public void Slider_Force000(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p000 = Convert.ToByte(e.NewValue);
+        }
+        public void Slider_Force020(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p020 = Convert.ToByte(e.NewValue);
+        }
+        public void Slider_Force040(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p040 = Convert.ToByte(e.NewValue);
+        }
+        public void Slider_Force060(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p060 = Convert.ToByte(e.NewValue);
+        }
+        public void Slider_Force080(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p080 = Convert.ToByte(e.NewValue);
+        }
+        public void Slider_Force100(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p100 = Convert.ToByte(e.NewValue);
+        }
+
+
+
+
+
 
 
         public void ResetPedalPosition_click(object sender, RoutedEventArgs e)
@@ -226,7 +287,6 @@ namespace User.PluginSdkDemo
             {
                 try
                 {
-                    this.Plugin.PedalMinPosition = 1;
                     Plugin._serialPort.Open();
 
                     try
