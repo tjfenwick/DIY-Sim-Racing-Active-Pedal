@@ -57,18 +57,44 @@
 
         <TextBlock HorizontalAlignment="Left" 
                    VerticalAlignment="Top" 
-                   Margin="30,0,0,0" 
+                   Margin="5,0,0,0" 
+                   Text="Pedal min force:" 
+                   Grid.Row="4" 
+                   Grid.Column="0" 
+                   Width="120" 
+                   Foreground="White"/>
+        <Slider 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Center" 
+            Margin="5,0,0,0" 
+            Grid.Row="4" 
+            Grid.Column="0" 
+            Width="120" 
+            ValueChanged="Slider_PedalMinForce" 
+            AutoToolTipPlacement="TopLeft" 
+            AutoToolTipPrecision="0"
+            Minimum="0"
+			Maximum="100"
+            TickPlacement="BottomRight"
+			TickFrequency="10" RenderTransformOrigin="0.508,0.525"
+            Value="5"
+            />
+
+
+        <TextBlock HorizontalAlignment="Right" 
+                   VerticalAlignment="Top" 
+                   Margin="5,0,0,0" 
                    Text="Pedal max force:" 
                    Grid.Row="4" 
                    Grid.Column="0" 
-                   Width="180" 
+                   Width="120" 
                    Foreground="White"/>
         <Slider 
-            HorizontalAlignment="Center" 
-            Margin="145,23,0,0" 
+            HorizontalAlignment="Right" 
+            VerticalAlignment="Center" 
+            Margin="5,0,0,0" 
             Grid.Row="4" 
             Grid.Column="0" 
-            VerticalAlignment="Top" 
             Width="120" 
             ValueChanged="Slider_PedalMaxForce" 
             AutoToolTipPlacement="TopLeft" 
@@ -81,18 +107,18 @@
             />
 
 
-        <TextBlock HorizontalAlignment="Left" 
+        <TextBlock HorizontalAlignment="Right" 
                    VerticalAlignment="Top" 
-                   Margin="30,0,0,0" 
+                   Margin="5,0,0,0" 
                    Text="Pedal max position:" 
                    Grid.Row="4" 
                    Grid.Column="1" 
-                   Width="180" 
+                   Width="120" 
                    Foreground="White"/>
         <Slider 
-            HorizontalAlignment="Center" 
+            HorizontalAlignment="Right" 
             VerticalAlignment="Center" 
-            Margin="145,23,0,0" 
+            Margin="5,0,0,0" 
             Grid.Row="4" 
             Grid.Column="1" 
             Width="120" 
@@ -106,21 +132,46 @@
             Value="75"
             />
 
+        <TextBlock HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="5,0,0,0" 
+                   Text="Pedal min position:" 
+                   Grid.Row="4" 
+                   Grid.Column="1" 
+                   Width="120" 
+                   Foreground="White"/>
+        <Slider 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Center" 
+            Margin="5,0,0,0" 
+            Grid.Row="4" 
+            Grid.Column="1" 
+            Width="120" 
+            ValueChanged="Slider_PedalMinPos" 
+            AutoToolTipPlacement="TopLeft" 
+            AutoToolTipPrecision="0"
+            Minimum="0"
+			Maximum="100"
+            TickPlacement="BottomRight"
+			TickFrequency="10" RenderTransformOrigin="0.508,0.525"
+            Value="35"
+            />
+
 
 
 
         <TextBlock HorizontalAlignment="Left" 
                    VerticalAlignment="Top" 
-                   Margin="30,0,0,0" 
+                   Margin="5,0,0,0" 
                    Text="Abs amplitude:" 
                    Grid.Row="5" 
                    Grid.Column="0" 
                    Width="180" 
                    Foreground="White"/>
         <Slider 
-            HorizontalAlignment="Center" 
+            HorizontalAlignment="Left" 
             VerticalAlignment="Center" 
-            Margin="145,23,0,0" 
+            Margin="5,0,0,0" 
             Grid.Row="5" 
             Grid.Column="0" 
             Width="120" 
@@ -136,20 +187,20 @@
 
 
 
-        <TextBlock HorizontalAlignment="Left" 
+        <TextBlock HorizontalAlignment="Right" 
                    VerticalAlignment="Top" 
-                   Margin="30,0,0,0" 
+                   Margin="5,0,0,0" 
                    Text="Abs frequency:" 
                    Grid.Row="5" 
-                   Grid.Column="1" 
-                   Width="180" 
+                   Grid.Column="0" 
+                   Width="120" 
                    Foreground="White"/>
         <Slider 
-            HorizontalAlignment="Center" 
+            HorizontalAlignment="Right" 
             VerticalAlignment="Center" 
-            Margin="145,23,0,0" 
+            Margin="5,0,0,0" 
             Grid.Row="5" 
-            Grid.Column="1" 
+            Grid.Column="0" 
             Width="120" 
             ValueChanged="Slider_AbsFrequency" 
             AutoToolTipPlacement="TopLeft" 
@@ -162,13 +213,37 @@
             />
 
 
-        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="30,0,0,0" Text="ABS test signal" Grid.Row="5" Grid.Column="2" Width="180" />
-        <CheckBox x:Name="TestAbs" Click="TestAbs_click" Grid.Column="2" HorizontalAlignment="right" Grid.Row="5"
+        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" Text="ABS test signal" Grid.Row="5" Grid.Column="1" Width="180" />
+        <CheckBox x:Name="TestAbs" Click="TestAbs_click" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="5"
                   Width="50"
-                  Height="25" Margin="5" VerticalAlignment="Top"/>
+                  Height="25" Margin="100,10,0,0" VerticalAlignment="Top"/>
 
 
 
+        <TextBlock HorizontalAlignment="Right" 
+                   VerticalAlignment="Top" 
+                   Margin="5,0,0,0" 
+                   Text="Dampening:" 
+                   Grid.Row="6" 
+                   Grid.Column="0" 
+                   Width="120" 
+                   Foreground="White"/>
+        <Slider 
+            HorizontalAlignment="Right" 
+            VerticalAlignment="Center" 
+            Margin="5,0,0,0" 
+            Grid.Row="6" 
+            Grid.Column="0" 
+            Width="120" 
+            ValueChanged="Slider_Dampening" 
+            AutoToolTipPlacement="TopLeft" 
+            AutoToolTipPrecision="0"
+            Minimum="0"
+			Maximum="255"
+            TickPlacement="BottomRight"
+			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
+            Value="0"
+            />
 
 
 

@@ -121,15 +121,36 @@ namespace User.PluginSdkDemo
             get => this.Plugin.PedalMaxPosition;
             set { this.Plugin.PedalMaxPosition = value; }
         }
-		
-		
-		private void Slider_PedalMaxForce(object sender, RoutedPropertyChangedEventArgs<double> e)
+
+
+        private void Slider_PedalMinForce(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.preloadForce = Convert.ToByte(e.NewValue);
+
+            if (dap_config_st.preloadForce > dap_config_st.maxForce)
+            {
+                dap_config_st.preloadForce = dap_config_st.maxForce;
+            }
+        }
+
+        private void Slider_PedalMaxForce(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             dap_config_st.maxForce = Convert.ToByte(e.NewValue);
 
             if (dap_config_st.maxForce < dap_config_st.preloadForce)
             {
                 dap_config_st.maxForce = dap_config_st.preloadForce;
+            }
+        }
+
+
+        private void Slider_PedalMinPos(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.pedalStartPosition = Convert.ToByte(e.NewValue);
+
+            if (dap_config_st.pedalStartPosition > dap_config_st.pedalEndPosition)
+            {
+                dap_config_st.pedalStartPosition = dap_config_st.pedalEndPosition;
             }
         }
 
@@ -156,6 +177,12 @@ namespace User.PluginSdkDemo
         public void TestAbs_click(object sender, RoutedEventArgs e)
         {
             Plugin.sendAbsSignal = !Plugin.sendAbsSignal;
+        }
+
+        public void Slider_Dampening(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.dampingPress = Convert.ToByte(e.NewValue);
+            dap_config_st.dampingPull = Convert.ToByte(e.NewValue);
         }
 
 
