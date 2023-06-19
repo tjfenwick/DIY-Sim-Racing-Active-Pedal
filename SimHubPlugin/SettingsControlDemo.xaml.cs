@@ -186,6 +186,40 @@ namespace User.PluginSdkDemo
         }
 
 
+
+
+
+        public void Slider_Force000(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p000 = Convert.ToByte(e.NewValue);
+        }
+        public void Slider_Force020(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p020 = Convert.ToByte(e.NewValue);
+        }
+        public void Slider_Force040(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p040 = Convert.ToByte(e.NewValue);
+        }
+        public void Slider_Force060(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p060 = Convert.ToByte(e.NewValue);
+        }
+        public void Slider_Force080(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p080 = Convert.ToByte(e.NewValue);
+        }
+        public void Slider_Force100(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st.relativeForce_p100 = Convert.ToByte(e.NewValue);
+        }
+
+
+
+
+
+
+
         public void ResetPedalPosition_click(object sender, RoutedEventArgs e)
         {
             if (Plugin.serialPortConnected)
@@ -253,7 +287,6 @@ namespace User.PluginSdkDemo
             {
                 try
                 {
-                    this.Plugin.PedalMinPosition = 1;
                     Plugin._serialPort.Open();
 
                     try
