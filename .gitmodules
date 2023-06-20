@@ -16,3 +16,9 @@
 [submodule "Arduino/libs/Arduino-Interpolation"]
 	path = Arduino/libs/Arduino-Interpolation
 	url = https://github.com/luisllamasbinaburo/Arduino-Interpolation.git
+[submodule "Arduino/libs/ESP32-BLE-Gamepad"]
+	path = Arduino/libs/ESP32-BLE-Gamepad
+	url = https://github.com/lemmingDev/ESP32-BLE-Gamepad.git
+[submodule "Arduino/libs/NimBLE-Arduino"]
+	path = Arduino/libs/NimBLE-Arduino
+	url = https://github.com/h2zero/NimBLE-Arduino.git

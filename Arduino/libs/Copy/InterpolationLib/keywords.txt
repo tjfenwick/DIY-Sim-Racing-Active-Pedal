@@ -1,0 +1,22 @@
+#######################################
+# Syntax Coloring Map MyName
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+Interpolation	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+function	KEYWORD2
+Step	KEYWORD2
+SmoothStep	KEYWORD2
+Linear	KEYWORD2
+CatmullSpline	KEYWORD2
+ConstrainedSpline	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
