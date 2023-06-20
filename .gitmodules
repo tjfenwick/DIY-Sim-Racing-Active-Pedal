@@ -1,15 +1,18 @@
-[submodule "Arduino/Esp32_S2/libs/FastAccelStepper"]
-	path = Arduino/Esp32_S2/libs/FastAccelStepper
+[submodule "Arduino/libs/FastAccelStepper"]
+	path = Arduino/libs/FastAccelStepper
 	url = https://github.com/gin66/FastAccelStepper.git
-[submodule "Arduino/Esp32_S2/libs/Kalman"]
-	path = Arduino/Esp32_S2/libs/Kalman
+[submodule "Arduino/libs/Kalman"]
+	path = Arduino/libs/Kalman
 	url = https://github.com/rfetick/Kalman.git
-[submodule "Arduino/Esp32_S2/libs/BasicLinearAlgebra"]
-	path = Arduino/Esp32_S2/libs/BasicLinearAlgebra
+[submodule "Arduino/libs/BasicLinearAlgebra"]
+	path = Arduino/libs/BasicLinearAlgebra
 	url = https://github.com/tomstewart89/BasicLinearAlgebra.git
-[submodule "Arduino/Esp32_S2/libs/Joystick_ESP32S2"]
-	path = Arduino/Esp32_S2/libs/Joystick_ESP32S2
+[submodule "Arduino/libs/Joystick_ESP32S2"]
+	path = Arduino/libs/Joystick_ESP32S2
 	url = https://github.com/schnoog/Joystick_ESP32S2.git
-[submodule "Arduino/Esp32_S2/libs/ADS1255-ADS1256-master"]
-	path = Arduino/Esp32_S2/libs/ADS1255-ADS1256-master
+[submodule "Arduino/libs/ADS1255-ADS1256-master"]
+	path = Arduino/libs/ADS1255-ADS1256-master
 	url = https://github.com/ADS1xxx-Series-ADC-Libraries/ADS1255-ADS1256.git
+[submodule "Arduino/libs/Arduino-Interpolation-master/Arduino-Interpolation"]
+	path = Arduino/libs/Arduino-Interpolation-master/Arduino-Interpolation
+	url = https://github.com/luisllamasbinaburo/Arduino-Interpolation.git
