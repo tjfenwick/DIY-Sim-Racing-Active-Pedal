@@ -10,9 +10,9 @@
 [submodule "Arduino/libs/Joystick_ESP32S2"]
 	path = Arduino/libs/Joystick_ESP32S2
 	url = https://github.com/schnoog/Joystick_ESP32S2.git
-[submodule "Arduino/libs/ADS1255-ADS1256-master"]
-	path = Arduino/libs/ADS1255-ADS1256-master
+[submodule "Arduino/libs/ADS1255-ADS1256"]
+	path = Arduino/libs/ADS1255-ADS1256
 	url = https://github.com/ADS1xxx-Series-ADC-Libraries/ADS1255-ADS1256.git
-[submodule "Arduino/libs/Arduino-Interpolation-master/Arduino-Interpolation"]
-	path = Arduino/libs/Arduino-Interpolation-master/Arduino-Interpolation
+[submodule "Arduino/libs/Arduino-Interpolation"]
+	path = Arduino/libs/Arduino-Interpolation
 	url = https://github.com/luisllamasbinaburo/Arduino-Interpolation.git
