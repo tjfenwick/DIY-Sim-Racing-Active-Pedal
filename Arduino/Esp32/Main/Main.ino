@@ -823,6 +823,7 @@ long cycleIdx2 = 0;
       }
 
 
+
       // if reset pedal position was requested, reset pedal now
       // This function is implemented, so that in case of lost steps, the user can request a reset of the pedal psotion
       if (resetPedalPosition)
@@ -839,6 +840,25 @@ long cycleIdx2 = 0;
         resetPedalPosition = false;
       }
 
+
+      //#define RECALIBRATE_POSITION
+      #ifdef RECALIBRATE_POSITION
+        // in case the stepper loses its position and therefore an endstop is triggered reset position
+        minEndstopNotTriggered = digitalRead(minPin);
+        maxEndstopNotTriggered = digitalRead(maxPin);
+
+        if (minEndstopNotTriggered == false)
+        {
+          stepper->forceStopAndNewPosition(stepperPosMin_global);
+          stepper->moveTo(stepperPosMin, true);
+        }
+        if (maxEndstopNotTriggered == false)
+        {
+          stepper->forceStopAndNewPosition(stepperPosMax_global);
+          stepper->moveTo(stepperPosMax, true);
+        }
+
+      #endif
   
 
       // compute pedal oscillation, when ABS is active
