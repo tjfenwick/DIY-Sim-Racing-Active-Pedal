@@ -201,7 +201,6 @@ static SemaphoreHandle_t semaphore_updateJoystick=NULL;
 /*                         controller  definitions                                            */
 /*                                                                                            */
 /**********************************************************************************************/
-#include <BleGamepad.h>
 
 #define JOYSTICK_MIN_VALUE 0
 #define JOYSTICK_MAX_VALUE 10000
@@ -615,7 +614,9 @@ void setup()
     stepper->setSpeedInHz(MAXIMUM_STEPPER_SPEED);   // steps/s
     stepper->setAcceleration(MAXIMUM_STEPPER_ACCELERATION);  // 100 steps/s²
 
+#if defined(SUPPORT_ESP32_PULSE_COUNTER)
     stepper->attachToPulseCounter(1, 0, 0);
+#endif
 
     delay(5000);
   }
@@ -667,7 +668,9 @@ void setup()
 
   // move to initial position
   stepper->moveTo(dap_calculationVariables_st.stepperPosMin, true);
+#if defined(SUPPORT_ESP32_PULSE_COUNTER)
   stepper->clearPulseCounter();
+#endif
 
   // obtain current stepper position
   stepperPosPrevious = stepper->getCurrentPosition();
@@ -1115,6 +1118,3 @@ long cycleIdx2 = 0;
 
     }
   }
-
-
-
