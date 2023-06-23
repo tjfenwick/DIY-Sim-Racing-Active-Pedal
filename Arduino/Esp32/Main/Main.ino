@@ -265,9 +265,8 @@ static SemaphoreHandle_t semaphore_updateJoystick=NULL;
 /*                         pedal mechanics definitions                                        */
 /*                                                                                            */
 /**********************************************************************************************/
-float startPosRel = 0.35;
-float endPosRel = 0.8;
-double conversion = 4000.;
+
+static const float TRAVEL_PER_ROTATION_IN_MM = 5.0;
 
 
 /**********************************************************************************************/
@@ -304,6 +303,7 @@ BLA::Matrix<Nobs, 1> obs; // observation vector
 #define LOADCELL_STD_MIN 0.001f
 #define LOADCELL_VARIANCE_MIN LOADCELL_STD_MIN*LOADCELL_STD_MIN
 
+double conversion = 4000.;
 float loadcellOffset = 0.0f;     //offset value
 float varEstimate = 0.0f; // estimated loadcell variance
 float stdEstimate = 0.0f;
@@ -316,35 +316,8 @@ float stdEstimate = 0.0f;
 /*                                                                                            */
 /**********************************************************************************************/
 
-#include "FastAccelStepper.h"
-
-//no clue what this does
-FastAccelStepperEngine engine = FastAccelStepperEngine();
-FastAccelStepper *stepper = NULL;
-
-
-#define TRAVEL_PER_ROTATION_IN_MM (float)5.0f
-//#define STEPS_PER_MOTOR_REVOLUTION (float)300.0f
-#define STEPS_PER_MOTOR_REVOLUTION (float)1600.0f
-#define MAXIMUM_STEPPER_RPM (float)7000.0f
-#define MAXIMUM_STEPPER_SPEED (MAXIMUM_STEPPER_RPM / 60.0*STEPS_PER_MOTOR_REVOLUTION)   //needs to be in us per step || 1 sec = 1000000 us
-#define SLOW_STEPPER_SPEED (float)(MAXIMUM_STEPPER_SPEED * 0.15f)
-#define MAXIMUM_STEPPER_ACCELERATION (float)1e9
-
-
-
-
-/**********************************************************************************************/
-/*                                                                                            */
-/*                         endstop definitions                                                */
-/*                                                                                            */
-/**********************************************************************************************/
-#define ENDSTOP_MOVEMENT STEPS_PER_MOTOR_REVOLUTION / 100.0f // movement per cycle to find endstop positions
-
-bool minEndstopNotTriggered = false;
-bool maxEndstopNotTriggered = false;
-long stepperPosPrevious = 0;
-long stepperPosCurrent = 0;
+#include "StepperWithLimits.h"
+StepperWithLimits* stepper = NULL;
 
 
 /**********************************************************************************************/
@@ -531,15 +504,7 @@ void setup()
 
   delay(1000);
 
-
-  // define endstop switch
-  pinMode(minPin, INPUT);
-  pinMode(maxPin, INPUT);
-
-
-  engine.init();
-  stepper = engine.stepperConnectToPin(stepPinStepper);
-  //stepper = engine.stepperConnectToPin(stepPinStepper, DRIVER_RMT);
+  stepper = new StepperWithLimits(stepPinStepper, dirPinStepper, minPin, maxPin);
 
 
   Serial.println("Starting ADC");  
@@ -602,61 +567,12 @@ void setup()
   Serial.println(stdEstimate, 6);
 
 
+  stepper->findMinMaxLimits(dap_config_st.pedalStartPosition, dap_config_st.pedalEndPosition);
+  dap_calculationVariables_st.stepperPosMinEndstop = stepper->getLimitMin();
+  dap_calculationVariables_st.stepperPosMaxEndstop = stepper->getLimitMax();
 
-  //FastAccelStepper setup
-  if (stepper) {
-
-    Serial.println("Setup stepper!");
-    stepper->setDirectionPin(dirPinStepper, false);
-    stepper->setAutoEnable(true);
-    
-    //Stepper Parameters
-    stepper->setSpeedInHz(MAXIMUM_STEPPER_SPEED);   // steps/s
-    stepper->setAcceleration(MAXIMUM_STEPPER_ACCELERATION);  // 100 steps/s²
-
-#if defined(SUPPORT_ESP32_PULSE_COUNTER)
-    stepper->attachToPulseCounter(1, 0, 0);
-#endif
-
-    delay(5000);
-  }
-
-
-
-
-
-  
-
-  // Find min stepper position
-  minEndstopNotTriggered = digitalRead(minPin);
-  Serial.print(minEndstopNotTriggered);
-  while(minEndstopNotTriggered == true){
-    stepper->moveTo(set, true);
-    minEndstopNotTriggered = digitalRead(minPin);
-    set = set - ENDSTOP_MOVEMENT;
-  }
-  stepper->forceStopAndNewPosition(0);
-  stepper->moveTo(0);
-  dap_calculationVariables_st.stepperPosMinEndstop = (long)stepper->getCurrentPosition();
-
-  Serial.println("The limit switch: Min On");
   Serial.print("Min Position is "); 
   Serial.println( dap_calculationVariables_st.stepperPosMinEndstop );
-
-
-  // Find max stepper position
-  set = 0;
-  maxEndstopNotTriggered = digitalRead(maxPin);
-  Serial.print(maxEndstopNotTriggered);
-  while(maxEndstopNotTriggered == true){
-    stepper->moveTo(set, true);
-    maxEndstopNotTriggered = digitalRead(maxPin);
-    set = set + ENDSTOP_MOVEMENT;
-  } 
-  Serial.print(maxEndstopNotTriggered);
-  dap_calculationVariables_st.stepperPosMaxEndstop = (long)stepper->getCurrentPosition();
-  
-  Serial.println("The limit switch: Max On");
   Serial.print("Max Position is "); 
   Serial.println( dap_calculationVariables_st.stepperPosMaxEndstop );
 
@@ -666,14 +582,6 @@ void setup()
     generateStiffnessCurve();
   #endif
 
-  // move to initial position
-  stepper->moveTo(dap_calculationVariables_st.stepperPosMin, true);
-#if defined(SUPPORT_ESP32_PULSE_COUNTER)
-  stepper->clearPulseCounter();
-#endif
-
-  // obtain current stepper position
-  stepperPosPrevious = stepper->getCurrentPosition();
 
   
 
@@ -695,16 +603,6 @@ void setup()
   K.R = {varEstimate};
 
 
-
-
-
-
-
-
-
-/*#if defined(SUPPORT_ESP32_PULSE_COUNTER)
-  stepper->attachToPulseCounter(1, 0, 0);
-#endif*/
 
 
   //create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
@@ -829,38 +727,15 @@ long cycleIdx2 = 0;
 
       // if reset pedal position was requested, reset pedal now
       // This function is implemented, so that in case of lost steps, the user can request a reset of the pedal psotion
-      if (resetPedalPosition)
-      {
-        set = 0;
-        minEndstopNotTriggered = digitalRead(minPin);
-        Serial.println(minEndstopNotTriggered);
-        while(minEndstopNotTriggered == true){
-          stepper->moveTo(set, true);
-          minEndstopNotTriggered = digitalRead(minPin);
-          set = set - ENDSTOP_MOVEMENT;
-        }  
-        stepper->forceStopAndNewPosition(dap_calculationVariables_st.stepperPosMinEndstop);
+      if (resetPedalPosition) {
+        stepper->refindMinLimit();
         resetPedalPosition = false;
       }
 
 
       //#define RECALIBRATE_POSITION
       #ifdef RECALIBRATE_POSITION
-        // in case the stepper loses its position and therefore an endstop is triggered reset position
-        minEndstopNotTriggered = digitalRead(minPin);
-        maxEndstopNotTriggered = digitalRead(maxPin);
-
-        if (minEndstopNotTriggered == false)
-        {
-          stepper->forceStopAndNewPosition(stepperPosMin_global);
-          stepper->moveTo(stepperPosMin, true);
-        }
-        if (maxEndstopNotTriggered == false)
-        {
-          stepper->forceStopAndNewPosition(stepperPosMax_global);
-          stepper->moveTo(stepperPosMax, true);
-        }
-
+        stepper->checkLimitsAndResetIfNecessary();
       #endif
   
 
@@ -886,7 +761,7 @@ long cycleIdx2 = 0;
     // compute the pedal incline angle 
     //#define COMPUTE_PEDAL_INCLINE_ANGLE
     #ifdef COMPUTE_PEDAL_INCLINE_ANGLE
-      float sledPosition = ((float)stepperPosCurrent) / STEPS_PER_MOTOR_REVOLUTION * TRAVEL_PER_ROTATION_IN_MM;
+      float sledPosition = float(stepper->getCurrentPositionSteps()) / STEPS_PER_MOTOR_REVOLUTION * TRAVEL_PER_ROTATION_IN_MM;
       float pedalInclineAngle = computePedalInclineAngle(sledPosition);
     #endif
     
@@ -930,11 +805,9 @@ long cycleIdx2 = 0;
 
       #else
 
-        stepperPosCurrent = stepper->getCurrentPosition();
-        float interpPosition = stepperPosCurrent - dap_calculationVariables_st.stepperPosMin;
-        interpPosition /= (dap_calculationVariables_st.stepperPosMax - dap_calculationVariables_st.stepperPosMin);
-        interpPosition *= (float)INTERPOLATION_NUMBER_OF_TARGET_VALUES;
-        uint8_t  sriffnessArrayPos = (uint8_t)constrain(interpPosition, 0, INTERPOLATION_NUMBER_OF_TARGET_VALUES-1);
+        double stepperPosFraction = stepper->getCurrentPositionFraction();
+        double interpPosition = stepperPosFraction * INTERPOLATION_NUMBER_OF_TARGET_VALUES;
+        uint8_t sriffnessArrayPos = (uint8_t)constrain(interpPosition, 0, INTERPOLATION_NUMBER_OF_TARGET_VALUES-1);
 
 
 
@@ -972,8 +845,8 @@ long cycleIdx2 = 0;
 
 
       // get current stepper position right before sheduling a new move
-      //stepperPosCurrent = stepper->getCurrentPosition();
-      stepperPosCurrent = stepper->getPositionAfterCommandsCompleted();
+      //int32_t stepperPosCurrent = stepper->getCurrentPositionSteps();
+      int32_t stepperPosCurrent = stepper->getTargetPositionSteps();
       long movement = abs( stepperPosCurrent - Position_Next);
       if (movement>MIN_STEPS  )
       {
