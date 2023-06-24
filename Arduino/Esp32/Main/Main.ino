@@ -53,95 +53,11 @@ int32_t pcnt = 0;
 /*                                                                                            */
 /**********************************************************************************************/
 
+#include "ForceCurve.h"
+
+ForceCurve_Interpolated* forceCurve;
+
 #define INTERP_SPRING_STIFFNESS
-#ifdef INTERP_SPRING_STIFFNESS
-  #include "InterpolationLib.h"
-
-  #define INTERPOLATION_NUMBER_OF_SOURCE_VALUES 6
-  #define INTERPOLATION_NUMBER_OF_TARGET_VALUES 30
-
-  double xValues[INTERPOLATION_NUMBER_OF_SOURCE_VALUES] = { 0, 20, 40, 60, 80, 100 };
-  double yValues[INTERPOLATION_NUMBER_OF_SOURCE_VALUES] = { 0, 20, 40, 60, 80, 100 };
-
-  float interpTargetValues[INTERPOLATION_NUMBER_OF_TARGET_VALUES];
-  float interpSpringStiffness[INTERPOLATION_NUMBER_OF_TARGET_VALUES];
-  float interpStepperPos[INTERPOLATION_NUMBER_OF_TARGET_VALUES];
-
-  
-
-
-  // stiffness = Force_Range / stepperPosRange
-  // 
-  void generateStiffnessCurve()
-  {
-
-    xValues[0] = dap_calculationVariables_st.stepperPosMin + 0.00 * dap_calculationVariables_st.stepperPosRange;
-    xValues[1] = dap_calculationVariables_st.stepperPosMin + 0.20 * dap_calculationVariables_st.stepperPosRange;
-    xValues[2] = dap_calculationVariables_st.stepperPosMin + 0.40 * dap_calculationVariables_st.stepperPosRange;
-    xValues[3] = dap_calculationVariables_st.stepperPosMin + 0.60 * dap_calculationVariables_st.stepperPosRange;
-    xValues[4] = dap_calculationVariables_st.stepperPosMin + 0.80 * dap_calculationVariables_st.stepperPosRange;
-    xValues[5] = dap_calculationVariables_st.stepperPosMin + 1.00 * dap_calculationVariables_st.stepperPosRange;
-
-
-    
-    yValues[0] = dap_calculationVariables_st.Force_Min + ((float)dap_config_st.relativeForce_p000) / 100.0f * dap_calculationVariables_st.Force_Range;
-    yValues[1] = dap_calculationVariables_st.Force_Min + ((float)dap_config_st.relativeForce_p020) / 100.0f * dap_calculationVariables_st.Force_Range;
-    yValues[2] = dap_calculationVariables_st.Force_Min + ((float)dap_config_st.relativeForce_p040) / 100.0f* dap_calculationVariables_st.Force_Range;
-    yValues[3] = dap_calculationVariables_st.Force_Min + ((float)dap_config_st.relativeForce_p060) / 100.0f * dap_calculationVariables_st.Force_Range;
-    yValues[4] = dap_calculationVariables_st.Force_Min + ((float)dap_config_st.relativeForce_p080) / 100.0f * dap_calculationVariables_st.Force_Range;
-    yValues[5] = dap_calculationVariables_st.Force_Min + ((float)dap_config_st.relativeForce_p100) / 100.0f * dap_calculationVariables_st.Force_Range;
-
-    for (uint8_t tmp = 0; tmp < 6; tmp++)
-    {
-      
-      Serial.print(xValues[tmp]);
-      Serial.print("  ");
-      Serial.print(yValues[tmp]);
-      Serial.println(" ");  
-    }
-
-    Serial.println(" ");
-    Serial.println(" ");
-    Serial.println("Interp values: ");
-    for (uint interpStep = 0; interpStep < INTERPOLATION_NUMBER_OF_TARGET_VALUES; interpStep++)
-    {
-      double xValueSample = ((double)interpStep) / ((double)INTERPOLATION_NUMBER_OF_TARGET_VALUES);
-      xValueSample = dap_calculationVariables_st.stepperPosMin + xValueSample * dap_calculationVariables_st.stepperPosRange;
-
-      //interpTargetValues[interpStep] = Interpolation::Linear(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample, false);
-      //interpTargetValues[interpStep] = Interpolation::SmoothStep(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample);
-      interpTargetValues[interpStep] = Interpolation::CatmullSpline(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample);
-      //interpTargetValues[interpStep] = Interpolation::ConstrainedSpline(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample);
-      
-      interpStepperPos[interpStep] = xValueSample;
-      
-      Serial.print(xValueSample);
-      Serial.print("   ");
-      Serial.println(interpTargetValues[interpStep]);
-    }
-
-
-    Serial.println(" ");
-    Serial.println(" ");
-    Serial.println("Stiffness: ");
-    Serial.println(dap_calculationVariables_st.springStiffnesss);
-
-
-    for (uint interpStep = 0; interpStep < (INTERPOLATION_NUMBER_OF_TARGET_VALUES-1); interpStep++)
-    {
-      interpSpringStiffness[interpStep] = abs( interpTargetValues[interpStep+1] - interpTargetValues[interpStep]);
-      interpSpringStiffness[interpStep] /=  dap_calculationVariables_st.stepperPosRange / ( INTERPOLATION_NUMBER_OF_TARGET_VALUES-1);
-
-      Serial.print(interpStep);
-      Serial.print("   ");
-      Serial.println(interpSpringStiffness[interpStep]);
-
-    }
-    interpSpringStiffness[INTERPOLATION_NUMBER_OF_TARGET_VALUES-1] = interpSpringStiffness[INTERPOLATION_NUMBER_OF_TARGET_VALUES-2];
-  }
-
-#endif
-
 
 
 /**********************************************************************************************/
@@ -364,7 +280,7 @@ void setup()
   // compute pedal stiffness parameters
   update_pedal_stiffness(&dap_calculationVariables_st);
   #ifdef INTERP_SPRING_STIFFNESS
-    generateStiffnessCurve();
+    forceCurve = new ForceCurve_Interpolated(dap_config_st, dap_calculationVariables_st);
   #endif
 
   kalman = new KalmanFilter(loadcell->getVarianceEstimate());
@@ -390,21 +306,6 @@ void setup()
                     &Task2,    
                     1);     
     delay(500);
-
-
-
-
-  // initialize the interpolation curve
-  //
-  #ifdef INTERP_SPRING_STIFFNESS
-
-    
-
-
-
-    
-
-  #endif
 
 
 
@@ -482,7 +383,8 @@ long cycleIdx2 = 0;
           updateComputationalVariablesFromConfig();
           update_pedal_stiffness(&dap_calculationVariables_st);
           #ifdef INTERP_SPRING_STIFFNESS
-            generateStiffnessCurve();
+            delete forceCurve;
+            forceCurve = new ForceCurve_Interpolated(dap_config_st, dap_calculationVariables_st);
           #endif
           xSemaphoreGive(semaphore_updateConfig);
         }
@@ -538,30 +440,23 @@ long cycleIdx2 = 0;
 
       // use interpolation to determine local linearized spring stiffness
       #ifndef INTERP_SPRING_STIFFNESS
-
         float spingStiffnessInv_lcl = dap_calculationVariables_st.springStiffnesssInv;
         // caclulate pedal position
         Position_Next = spingStiffnessInv_lcl * (filteredReading - dap_calculationVariables_st.Force_Min) + dap_calculationVariables_st.stepperPosMin ;        //Calculates new position using linear function
 
       #else
-
         double stepperPosFraction = stepper->getCurrentPositionFraction();
-        double interpPosition = stepperPosFraction * INTERPOLATION_NUMBER_OF_TARGET_VALUES;
-        uint8_t sriffnessArrayPos = (uint8_t)constrain(interpPosition, 0, INTERPOLATION_NUMBER_OF_TARGET_VALUES-1);
-
-
-
         
         float spingStiffnessInv_lcl = dap_calculationVariables_st.springStiffnesssInv;
-        if (interpSpringStiffness[sriffnessArrayPos] > 0)
-        {
-          //spingStiffnessInv_lcl *= (1.0f / interpSpringStiffness[sriffnessArrayPos]);
-          spingStiffnessInv_lcl = (1.0f / interpSpringStiffness[sriffnessArrayPos]);
+        float springStiffnessInterp = forceCurve->stiffnessAtPosition(stepperPosFraction);
+        if (springStiffnessInterp > 0) {
+          spingStiffnessInv_lcl = (1.0f / springStiffnessInterp);
         }
-        
 
         // caclulate pedal position
-        Position_Next = spingStiffnessInv_lcl * (filteredReading - interpTargetValues[sriffnessArrayPos]) + interpStepperPos[sriffnessArrayPos] ;
+        float pedalForceInterp = forceCurve->forceAtPosition(stepperPosFraction);
+        float stepperPosInterp = forceCurve->stepperPos(stepperPosFraction);
+        Position_Next = spingStiffnessInv_lcl * (filteredReading - pedalForceInterp) + stepperPosInterp;
 
       #endif
 
