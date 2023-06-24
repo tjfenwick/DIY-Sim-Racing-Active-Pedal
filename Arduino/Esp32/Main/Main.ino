@@ -6,8 +6,6 @@ uint64_t maxCycles = 1000;
 uint64_t cycleIdx = 0;
 
 long Position_Next = 0;
-long set = 0;
-bool checkPosition = 1;
 
 bool absActive = 0;
 float absTime = 0;
@@ -28,17 +26,9 @@ DAP_config_st dap_config_st_local;
 DAP_calculationVariables_st dap_calculationVariables_st;
 
 
-int32_t pcnt = 0;
 
-
-
-
-
-//USBCDC USBSerial;
 
 #define MIN_STEPS 5
-
-//#define SUPPORT_ESP32_PULSE_COUNTER
 
 
 //#define PRINT_CYCLETIME
@@ -65,16 +55,8 @@ ForceCurve_Interpolated* forceCurve;
 /**********************************************************************************************/
 #include "soc/rtc_wdt.h"
 
-//rtc_wdt_protect_off();    // Turns off the automatic wdt service
-//rtc_wdt_enable();         // Turn it on manually
-//rtc_wdt_set_time(RTC_WDT_STAGE0, 20000);  // Define how long you desire to let dog wait.
-
-
-
 TaskHandle_t Task1;
 TaskHandle_t Task2;
-//SemaphoreHandle_t batton;
-//SemaphoreHandle_t semaphore_updateJoystick;
 
 static SemaphoreHandle_t semaphore_updateConfig=NULL;
 
@@ -168,11 +150,6 @@ void setup()
 
   
 
-  
-
-
-  //batton = xSemaphoreCreateBinary();
-  //semaphore_updateJoystick = xSemaphoreCreateBinary();
   semaphore_updateJoystick = xSemaphoreCreateMutex();
   semaphore_updateConfig = xSemaphoreCreateMutex();
 
@@ -193,8 +170,6 @@ void setup()
   // init controller
   SetupController();
 
-
-  //USBSerial.begin(921600);
 
   delay(1000);
 
@@ -249,10 +224,6 @@ void setup()
   Serial.println("Setup end!");
 
   previousTime = micros();
-
-
-
-
 }
 
 
@@ -275,8 +246,6 @@ void loop() {
 /*                         pedal update task                                                  */
 /*                                                                                            */
 /**********************************************************************************************/
-
-long cycleIdx2 = 0;
 
 
   //void loop()
