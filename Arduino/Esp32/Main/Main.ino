@@ -43,8 +43,6 @@ int32_t pcnt = 0;
 
 //#define PRINT_CYCLETIME
 
-#define ABS_SCALING 50
-
 
 
 /**********************************************************************************************/
@@ -159,66 +157,6 @@ StepperWithLimits* stepper = NULL;
 
 /**********************************************************************************************/
 /*                                                                                            */
-/*                         helper function                                                    */
-/*                                                                                            */
-/**********************************************************************************************/
-
-
-
-// initialize configuration struct at startup
-void initConfig()
-{
-
-  dap_config_st.payloadType = 100;
-  dap_config_st.version = 0;
-  dap_config_st.pedalStartPosition = 35;
-  dap_config_st.pedalEndPosition = 80;
-
-  dap_config_st.maxForce = 90;
-  dap_config_st.preloadForce = 1;
-
-  dap_config_st.relativeForce_p000 = 0;
-  dap_config_st.relativeForce_p020 = 20;
-  dap_config_st.relativeForce_p040 = 40;
-  dap_config_st.relativeForce_p060 = 60;
-  dap_config_st.relativeForce_p080 = 80;
-  dap_config_st.relativeForce_p100 = 100;
-
-  dap_config_st.dampingPress = 0;
-  dap_config_st.dampingPull = 0;
-
-  dap_config_st.absFrequency = 2 * PI * 10;
-  dap_config_st.absAmplitude = 100.0f;
-
-
-
-  dap_config_st.lengthPedal_AC = 150;
-  dap_config_st.horPos_AB = 215;
-  dap_config_st.verPos_AB = 80;
-  dap_config_st.lengthPedal_CB = 200;
-}
-
-// update the local variables used for computation from the config struct
-void updateComputationalVariablesFromConfig()
-{
-
-  dap_calculationVariables_st.startPosRel = ((float)dap_config_st.pedalStartPosition) / 100.0f;
-  dap_calculationVariables_st.endPosRel = ((float)dap_config_st.pedalEndPosition) / 100.0f;
-
-  dap_calculationVariables_st.absFrequency = 2 * PI * ((float)dap_config_st.absFrequency);
-  dap_calculationVariables_st.absAmplitude = ((float)dap_config_st.absAmplitude)/ TRAVEL_PER_ROTATION_IN_MM * STEPS_PER_MOTOR_REVOLUTION / ABS_SCALING; // in mm
-
-  dap_calculationVariables_st.dampingPress = ((float)dap_config_st.dampingPress) / 400.0f;
-  
-
-  // update force variables
-  dap_calculationVariables_st.Force_Min = ((float)dap_config_st.preloadForce) / 10.0f;
-  dap_calculationVariables_st.Force_Max = ((float)dap_config_st.maxForce) / 10.0f;
-}
-
-
-/**********************************************************************************************/
-/*                                                                                            */
 /*                         setup function                                                     */
 /*                                                                                            */
 /**********************************************************************************************/
@@ -249,8 +187,8 @@ void setup()
 
 
   // initialize configuration and update local variables
-  initConfig();
-  updateComputationalVariablesFromConfig();
+  dap_config_st.initialiseDefaults();
+  dap_calculationVariables_st.updateFromConfig(dap_config_st);
 
   // init controller
   SetupController();
@@ -269,16 +207,12 @@ void setup()
   #endif
 
   stepper->findMinMaxLimits(dap_config_st.pedalStartPosition, dap_config_st.pedalEndPosition);
-  dap_calculationVariables_st.stepperPosMinEndstop = stepper->getLimitMin();
-  dap_calculationVariables_st.stepperPosMaxEndstop = stepper->getLimitMax();
 
-  Serial.print("Min Position is "); 
-  Serial.println( dap_calculationVariables_st.stepperPosMinEndstop );
-  Serial.print("Max Position is "); 
-  Serial.println( dap_calculationVariables_st.stepperPosMaxEndstop );
+  Serial.print("Min Position is "); Serial.println(stepper->getLimitMin());
+  Serial.print("Max Position is "); Serial.println(stepper->getLimitMax());
 
   // compute pedal stiffness parameters
-  update_pedal_stiffness(&dap_calculationVariables_st);
+  dap_calculationVariables_st.updateEndstops(stepper->getLimitMin(), stepper->getLimitMax());
   #ifdef INTERP_SPRING_STIFFNESS
     forceCurve = new ForceCurve_Interpolated(dap_config_st, dap_calculationVariables_st);
   #endif
@@ -380,8 +314,8 @@ long cycleIdx2 = 0;
           Serial.println("Update pedal config!");
           configUpdateAvailable = false;
           dap_config_st = dap_config_st_local;
-          updateComputationalVariablesFromConfig();
-          update_pedal_stiffness(&dap_calculationVariables_st);
+          dap_calculationVariables_st.updateFromConfig(dap_config_st);
+          dap_calculationVariables_st.updateStiffness();
           #ifdef INTERP_SPRING_STIFFNESS
             delete forceCurve;
             forceCurve = new ForceCurve_Interpolated(dap_config_st, dap_calculationVariables_st);

@@ -45,9 +45,8 @@ struct DAP_config_st {
   uint8_t verPos_AB;
   uint8_t lengthPedal_CB;
   
-
-} ;
-
+  void initialiseDefaults();
+};
 
 
 struct DAP_calculationVariables_st
@@ -70,8 +69,8 @@ struct DAP_calculationVariables_st
   float absAmplitude;
 
   float dampingPress;
+
+  void updateFromConfig(DAP_config_st& config_st);
+  void updateEndstops(long newMinEndstop, long newMaxEndstop);
+  void updateStiffness();
 };
-
-
-
-void update_pedal_stiffness(DAP_calculationVariables_st * dap_calculationVariables_st_ptr);
