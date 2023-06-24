@@ -31,8 +31,6 @@ DAP_calculationVariables_st dap_calculationVariables_st;
 
 int32_t pcnt = 0;
 
-#define RAD_2_DEG 180.0f / PI
-
 
 
 
@@ -261,7 +259,7 @@ static SemaphoreHandle_t semaphore_updateJoystick=NULL;
 /*                                                                                            */
 /**********************************************************************************************/
 
-static const float TRAVEL_PER_ROTATION_IN_MM = 5.0;
+#include "PedalGeometry.h"
 
 
 /**********************************************************************************************/
@@ -354,62 +352,6 @@ void updateComputationalVariablesFromConfig()
   // update force variables
   dap_calculationVariables_st.Force_Min = ((float)dap_config_st.preloadForce) / 10.0f;
   dap_calculationVariables_st.Force_Max = ((float)dap_config_st.maxForce) / 10.0f;
-}
-
-// compute pedal incline angle
-float computePedalInclineAngle(float sledPosInCm)
-{
-
-  // see https://de.wikipedia.org/wiki/Kosinussatz
-  // A: is lower pedal pivot
-  // C: is upper pedal pivot
-  // B: is rear pedal pivot
-  float a = ((float)dap_config_st.lengthPedal_CB) / 10.0f;
-  float b = ((float)dap_config_st.lengthPedal_AC) / 10.0f;
-  float c_ver = ((float)dap_config_st.verPos_AB) / 10.0f;
-  float c_hor = ((float)dap_config_st.horPos_AB) / 10.0f;
-  c_hor += sledPosInCm / 10.0f;
-  float c = sqrtf(c_ver * c_ver + c_hor * c_hor);
-
-  /*Serial.print("a: ");
-  Serial.print(a);
-
-  Serial.print(", b: ");
-  Serial.print(b);
-
-  Serial.print(", c: ");
-  Serial.print(c);
-
-  Serial.print(", sledPosInCm: ");
-  Serial.print(sledPosInCm);*/
-
-  float nom = b*b + c*c - a*a;
-  float den = 2 * b * c;
-
-  float alpha = 0;
-   
-  if (abs(den) > 0.01)
-  {
-    alpha = acos( nom / den );
-  }
-
-  
-  /*Serial.print(", alpha1: ");
-  Serial.print(alpha * RAD_2_DEG);*/
-
-
-  // add incline due to AB incline --> result is incline realtive to horizontal 
-  if (abs(c_hor)>0.01)
-  {
-    alpha += atan(c_ver / c_hor);
-  }
-
-  /*Serial.print(", alpha2: ");
-  Serial.print(alpha * RAD_2_DEG);
-  Serial.println(" ");*/
-  
-  return alpha * RAD_2_DEG;
-  
 }
 
 
@@ -638,8 +580,8 @@ long cycleIdx2 = 0;
     // compute the pedal incline angle 
     //#define COMPUTE_PEDAL_INCLINE_ANGLE
     #ifdef COMPUTE_PEDAL_INCLINE_ANGLE
-      float sledPosition = float(stepper->getCurrentPositionSteps()) / STEPS_PER_MOTOR_REVOLUTION * TRAVEL_PER_ROTATION_IN_MM;
-      float pedalInclineAngle = computePedalInclineAngle(sledPosition);
+      float sledPosition = sledPositionInMM(stepper);
+      float pedalInclineAngle = pedalInclineAngleDeg(sledPosition, dap_config_st);
     #endif
     
     float loadcellReading = loadcell->getReadingKg();
