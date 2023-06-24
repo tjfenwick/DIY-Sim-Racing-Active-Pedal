@@ -7,10 +7,9 @@ uint64_t cycleIdx = 0;
 
 long Position_Next = 0;
 
-bool absActive = 0;
-float absTime = 0;
-float stepperAbsOffset = 0;
-float absDeltaTimeSinceLastTrigger = 0;
+#include "ABSOscillation.h"
+ABSOscillation absOscillation;
+#define ABS_OSCILLATION
 
 
 bool resetPedalPosition = false;
@@ -310,21 +309,8 @@ void loop() {
   
 
       // compute pedal oscillation, when ABS is active
-    #define ABS_OSCILLATION
-    #ifdef ABS_OSCILLATION  
-      if (absActive)
-      {
-        absTime += elapsedTime * 1e-6; 
-        absDeltaTimeSinceLastTrigger += elapsedTime * 1e-6; 
-        stepperAbsOffset = dap_calculationVariables_st.absAmplitude * sin(dap_calculationVariables_st.absFrequency * absTime);
-      }
-      
-      // reset ABS when trigger is not active anymore
-      if (absDeltaTimeSinceLastTrigger > 0.1)
-      {
-        absTime = 0;
-        absActive = false;
-      }
+    #ifdef ABS_OSCILLATION
+      int32_t stepperAbsOffset = absOscillation.stepperOffset(dap_calculationVariables_st);
     #endif
 
 
@@ -493,8 +479,7 @@ void loop() {
             // toggle ABS
             case 2:
               //Serial.print("Second case:");
-              absActive = true;
-              absDeltaTimeSinceLastTrigger = 0;
+              absOscillation.trigger();
               break;
 
             default:

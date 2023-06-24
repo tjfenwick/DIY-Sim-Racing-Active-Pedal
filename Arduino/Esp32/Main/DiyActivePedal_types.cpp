@@ -25,7 +25,7 @@ void DAP_config_st::initialiseDefaults() {
   dampingPress = 0;
   dampingPull = 0;
 
-  absFrequency = 2 * PI * 10;
+  absFrequency = 60;
   absAmplitude = 100.0f;
 
   lengthPedal_AC = 150;
