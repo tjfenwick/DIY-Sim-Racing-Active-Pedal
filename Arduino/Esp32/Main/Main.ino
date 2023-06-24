@@ -4,7 +4,6 @@ long previousTime = 0;
 float averageCycleTime = 0.0f;
 uint64_t maxCycles = 1000;
 uint64_t cycleIdx = 0;
-int32_t joystickNormalizedToInt32 = 0;
 
 long Position_Next = 0;
 long set = 0;
@@ -164,7 +163,9 @@ TaskHandle_t Task2;
 //SemaphoreHandle_t semaphore_updateJoystick;
 
 static SemaphoreHandle_t semaphore_updateConfig=NULL;
+
 static SemaphoreHandle_t semaphore_updateJoystick=NULL;
+  int32_t joystickNormalizedToInt32 = 0;                           // semaphore protected data
 
 
 /**********************************************************************************************/
@@ -179,13 +180,11 @@ static SemaphoreHandle_t semaphore_updateJoystick=NULL;
   #define maxPin 10
   #define dirPinStepper    8//17//8//12//3 
   #define stepPinStepper   9//16//9//13//2  // step pin must be pin 9
-  #define USB_JOYSTICK
 #elif CONFIG_IDF_TARGET_ESP32
   #define minPin 34
   #define maxPin 35
   #define dirPinStepper    0//8
   #define stepPinStepper   4//9
-  #define BLUETOOTH_GAMEPAD
 #endif
 
 
@@ -195,60 +194,7 @@ static SemaphoreHandle_t semaphore_updateJoystick=NULL;
 /*                                                                                            */
 /**********************************************************************************************/
 
-#define JOYSTICK_MIN_VALUE 0
-#define JOYSTICK_MAX_VALUE 10000
-
-#if defined USB_JOYSTICK
-  #include <Joystick_ESP32S2.h>
-  
-  Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD,
-                   0, 0,                 // Button Count, Hat Switch Count
-                   false, false, false,  // X and Y, but no Z Axis
-                   false, false, false,  // No Rx, Ry, or Rz
-                   false, false,         // No rudder or throttle
-                   false, true, false);  // No accelerator, brake, or steering
-  
-  void SetupController() {
-    Joystick.setBrakeRange(JOYSTICK_MIN_VALUE, JOYSTICK_MAX_VALUE);
-    delay(100);
-    Joystick.begin();
-  }
-  bool IsControllerReady() { return true; }
-  void SetControllerOutputValue(int32_t value) {
-    Joystick.setBrake(value);
-  }
-  
-#elif defined BLUETOOTH_GAMEPAD
-  #include <BleGamepad.h>
-
-  BleGamepad bleGamepad("DiyActiveBrake", "DiyActiveBrake", 100);
-  
-  void SetupController() {
-    BleGamepadConfiguration bleGamepadConfig;
-    bleGamepadConfig.setControllerType(CONTROLLER_TYPE_MULTI_AXIS); // CONTROLLER_TYPE_JOYSTICK, CONTROLLER_TYPE_GAMEPAD (DEFAULT), CONTROLLER_TYPE_MULTI_AXIS
-    bleGamepadConfig.setAxesMin(JOYSTICK_MIN_VALUE); // 0 --> int16_t - 16 bit signed integer - Can be in decimal or hexadecimal
-    bleGamepadConfig.setAxesMax(JOYSTICK_MAX_VALUE); // 32767 --> int16_t - 16 bit signed integer - Can be in decimal or hexadecimal 
-    //bleGamepadConfig.setWhichSpecialButtons(false, false, false, false, false, false, false, false);
-    //bleGamepadConfig.setWhichAxes(false, false, false, false, false, false, false, false);
-    bleGamepadConfig.setWhichSimulationControls(false, false, false, true, false); // only brake active 
-    bleGamepadConfig.setButtonCount(0);
-    bleGamepadConfig.setHatSwitchCount(0);
-    bleGamepadConfig.setAutoReport(false);
-    bleGamepad.begin(&bleGamepadConfig);
-  }
-
-  bool IsControllerReady() { return bleGamepad.isConnected(); }
-
-  void SetControllerOutputValue(int32_t value) {
-    //bleGamepad.setBrake(value);
-    bleGamepad.setAxes(value, 0, 0, 0, 0, 0, 0, 0);
-    bleGamepad.sendReport();
-    //Serial.println(value);
-  }
-  
-#endif
-
-
+#include "Controller.h"
 
 
 
@@ -648,14 +594,9 @@ long cycleIdx2 = 0;
       }
 
       // compute controller output
-      if(abs( dap_calculationVariables_st.Force_Range )>0.01)
-      {     
-        int32_t joystickNormalizedToInt32_local = ( filteredReading - dap_calculationVariables_st.Force_Min) / dap_calculationVariables_st.Force_Range * JOYSTICK_MAX_VALUE;
-        if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE)
-        {
-          joystickNormalizedToInt32 = (int32_t)constrain(joystickNormalizedToInt32_local, JOYSTICK_MIN_VALUE, JOYSTICK_MAX_VALUE);
-          xSemaphoreGive(semaphore_updateJoystick);
-        }
+      if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE) {
+        joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max);
+        xSemaphoreGive(semaphore_updateJoystick);
       }
     }
   }
@@ -680,7 +621,6 @@ long cycleIdx2 = 0;
   unsigned long sc_elapsedTime = 0;
   unsigned long sc_cycleIdx = 0;
   float sc_averageCycleTime = 0;
-  int32_t joystickNormalizedToInt32_local = 0;
 
   void serialCommunicationTask( void * pvParameters )
   {
@@ -771,16 +711,15 @@ long cycleIdx2 = 0;
 
 
       // transmit controller output
-      if (IsControllerReady())
-      {
-
+      if (IsControllerReady()) {
         delay(1);
         if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE)
         {
-          joystickNormalizedToInt32_local = joystickNormalizedToInt32;
+          int32_t joystickNormalizedToInt32_local = joystickNormalizedToInt32;
           xSemaphoreGive(semaphore_updateJoystick);
+          
+          SetControllerOutputValue(joystickNormalizedToInt32_local);
         }
-        SetControllerOutputValue(joystickNormalizedToInt32_local);  
       }
 
     }
