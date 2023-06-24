@@ -1,10 +1,3 @@
-long currentTime = 0;
-long elapsedTime = 0;
-long previousTime = 0;
-float averageCycleTime = 0.0f;
-uint64_t maxCycles = 1000;
-uint64_t cycleIdx = 0;
-
 long Position_Next = 0;
 
 #include "ABSOscillation.h"
@@ -30,6 +23,7 @@ DAP_calculationVariables_st dap_calculationVariables_st;
 #define MIN_STEPS 5
 
 
+#include "CycleTimer.h"
 //#define PRINT_CYCLETIME
 
 
@@ -221,8 +215,6 @@ void setup()
   dap_config_st_local = dap_config_st;
 
   Serial.println("Setup end!");
-
-  previousTime = micros();
 }
 
 
@@ -252,25 +244,10 @@ void loop() {
   {
 
     for(;;){
-
-      // obtain time
-      currentTime = micros();
-      elapsedTime = currentTime - previousTime;
-      if (elapsedTime<1){elapsedTime=1;}
-      previousTime = currentTime;
-
       // print the execution time averaged over multiple cycles 
       #ifdef PRINT_CYCLETIME
-        averageCycleTime += elapsedTime;
-        cycleIdx++;
-        if (maxCycles< cycleIdx)
-        {
-          cycleIdx = 0;
-          averageCycleTime /= (float)maxCycles; 
-          Serial.print("PU cycle time: ");
-          Serial.println(averageCycleTime);
-          averageCycleTime = 0;
-        }
+        static CycleTimer timerPU("PU cycle time");
+        timerPU.Bump();
       #endif
 
 
@@ -400,12 +377,6 @@ void loop() {
 /*                                                                                            */
 /**********************************************************************************************/
 
-  unsigned long sc_currentTime = 0;
-  unsigned long sc_previousTime = 0;
-  unsigned long sc_elapsedTime = 0;
-  unsigned long sc_cycleIdx = 0;
-  float sc_averageCycleTime = 0;
-
   void serialCommunicationTask( void * pvParameters )
   {
 
@@ -413,23 +384,8 @@ void loop() {
 
     // average cycle time averaged over multiple cycles 
     #ifdef PRINT_CYCLETIME
-
-      // obtain time
-      sc_currentTime = micros();
-      sc_elapsedTime = sc_currentTime - sc_previousTime;
-      if (sc_elapsedTime<1){sc_elapsedTime=1;}
-      sc_previousTime = sc_currentTime;
-      
-      sc_averageCycleTime += sc_elapsedTime;
-      sc_cycleIdx++;
-      if (maxCycles < sc_cycleIdx)
-      {
-        sc_cycleIdx = 0;
-        sc_averageCycleTime /= (float)maxCycles; 
-        Serial.print("SC cycle time: ");
-        Serial.println(sc_averageCycleTime);
-        sc_averageCycleTime = 0;
-      }
+      static CycleTimer timerSC("SC cycle time");
+      timerSC.Bump();
     #endif
 
 
