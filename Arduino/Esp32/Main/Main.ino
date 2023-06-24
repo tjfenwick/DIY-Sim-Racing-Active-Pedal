@@ -1,16 +1,11 @@
 long currentTime = 0;
 long elapsedTime = 0;
 long previousTime = 0;
-double Force_Current_KF = 0.;
-double Force_Current_KF_dt = 0.;
 float averageCycleTime = 0.0f;
 uint64_t maxCycles = 1000;
 uint64_t cycleIdx = 0;
 int32_t joystickNormalizedToInt32 = 0;
-float delta_t = 0.;
-float delta_t_pow2 = 0.;
-float delta_t_pow3 = 0.;
-float delta_t_pow4 = 0.;
+
 long Position_Next = 0;
 long set = 0;
 bool checkPosition = 1;
@@ -274,24 +269,9 @@ static const float TRAVEL_PER_ROTATION_IN_MM = 5.0;
 /*                         Kalman filter definitions                                          */
 /*                                                                                            */
 /**********************************************************************************************/
-#include <Kalman.h>
-using namespace BLA;
-// Configuration of Kalman filter
-// assume constant rate of change 
-// observed states:
-// x = [force, d force / dt]
-// state transition matrix
-// x_k+1 = [1, delta_t; 0, 1] * x_k
 
-
-// Dimensions of the matrices
-#define KF_CONST_VEL
-#define Nstate 2 // length of the state vector
-#define Nobs 1   // length of the measurement vector
-#define KF_MODEL_NOISE_FORCE_ACCELERATION (float)( 2.0f * 9.0f / 0.05f/ 0.05f )// adjust model noise here s = 0.5 * a * delta_t^2 --> a = 2 * s / delta_t^2
-
-KALMAN<Nstate,Nobs> K; // your Kalman filter
-BLA::Matrix<Nobs, 1> obs; // observation vector
+#include "SignalFilter.h"
+KalmanFilter* kalman = NULL;
 
 
 
@@ -499,27 +479,7 @@ void setup()
     generateStiffnessCurve();
   #endif
 
-
-  
-
-
-
-    // Kalman filter setup
-    // example of evolution matrix. Size is <Nstate,Nstate>
-    K.F = {1.0, 0.0,
-          0.0, 1.0};
-          
-    // example of measurement matrix. Size is <Nobs,Nstate>
-    K.H = {1.0, 0.0};
-
-    // example of model covariance matrix. Size is <Nstate,Nstate>
-    K.Q = {1.0f,   0.0,
-            0.0,  1.0};
-
-  // example of measurement covariance matrix. Size is <Nobs,Nobs>
-  K.R = { loadcell->getVarianceEstimate() };
-
-
+  kalman = new KalmanFilter(loadcell->getVarianceEstimate());
 
 
   //create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
@@ -683,29 +643,9 @@ long cycleIdx2 = 0;
     #endif
     
     float loadcellReading = loadcell->getReadingKg();
-
-
-      // Kalman filter  
-      // update state transition and system covariance matrices
-      delta_t = (float)elapsedTime / 1000000.0f; // convert to seconds
-      delta_t_pow2 = delta_t * delta_t;
-      delta_t_pow3 = delta_t_pow2 * delta_t;
-      delta_t_pow4 = delta_t_pow2 * delta_t_pow2;
-
-      K.F = {1.0,  delta_t, 
-            0.0,  1.0};
-
-      double K_Q_11 = KF_MODEL_NOISE_FORCE_ACCELERATION * 0.5f * delta_t_pow3;
-      K.Q = {KF_MODEL_NOISE_FORCE_ACCELERATION * 0.25f * delta_t_pow4,   K_Q_11,
-            K_Q_11, KF_MODEL_NOISE_FORCE_ACCELERATION * delta_t_pow2};
-            
-
-      // APPLY KALMAN FILTER
-      obs(0) = loadcellReading;
-      K.update(obs);
-      Force_Current_KF = K.x(0,0);
-      Force_Current_KF_dt = K.x(0,1);
-
+    
+    float filteredReading = kalman->filteredValue(loadcellReading);
+    float changeVelocity = kalman->changeVelocity();
       
 
       // use interpolation to determine local linearized spring stiffness
@@ -713,7 +653,7 @@ long cycleIdx2 = 0;
 
         float spingStiffnessInv_lcl = dap_calculationVariables_st.springStiffnesssInv;
         // caclulate pedal position
-        Position_Next = spingStiffnessInv_lcl * (Force_Current_KF - dap_calculationVariables_st.Force_Min) + dap_calculationVariables_st.stepperPosMin ;        //Calculates new position using linear function
+        Position_Next = spingStiffnessInv_lcl * (filteredReading - dap_calculationVariables_st.Force_Min) + dap_calculationVariables_st.stepperPosMin ;        //Calculates new position using linear function
 
       #else
 
@@ -733,7 +673,7 @@ long cycleIdx2 = 0;
         
 
         // caclulate pedal position
-        Position_Next = spingStiffnessInv_lcl * (Force_Current_KF - interpTargetValues[sriffnessArrayPos]) + interpStepperPos[sriffnessArrayPos] ;
+        Position_Next = spingStiffnessInv_lcl * (filteredReading - interpTargetValues[sriffnessArrayPos]) + interpStepperPos[sriffnessArrayPos] ;
 
       #endif
 
@@ -744,7 +684,7 @@ long cycleIdx2 = 0;
       if (dap_calculationVariables_st.dampingPress  > 0.0001)
       {
         // dampening is proportional to velocity --> D-gain for stability
-        Position_Next -= dap_calculationVariables_st.dampingPress * Force_Current_KF_dt * dap_calculationVariables_st.springStiffnesssInv;
+        Position_Next -= dap_calculationVariables_st.dampingPress * changeVelocity * dap_calculationVariables_st.springStiffnesssInv;
       }
       
 
@@ -768,7 +708,7 @@ long cycleIdx2 = 0;
       // compute controller output
       if(abs( dap_calculationVariables_st.Force_Range )>0.01)
       {     
-        int32_t joystickNormalizedToInt32_local = ( Force_Current_KF - dap_calculationVariables_st.Force_Min) / dap_calculationVariables_st.Force_Range * JOYSTICK_MAX_VALUE;
+        int32_t joystickNormalizedToInt32_local = ( filteredReading - dap_calculationVariables_st.Force_Min) / dap_calculationVariables_st.Force_Range * JOYSTICK_MAX_VALUE;
         if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE)
         {
           joystickNormalizedToInt32 = (int32_t)constrain(joystickNormalizedToInt32_local, JOYSTICK_MIN_VALUE, JOYSTICK_MAX_VALUE);
