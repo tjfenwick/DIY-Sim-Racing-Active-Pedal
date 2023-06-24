@@ -300,13 +300,9 @@ BLA::Matrix<Nobs, 1> obs; // observation vector
 /*                         loadcell definitions                                               */
 /*                                                                                            */
 /**********************************************************************************************/
-#define LOADCELL_STD_MIN 0.001f
-#define LOADCELL_VARIANCE_MIN LOADCELL_STD_MIN*LOADCELL_STD_MIN
 
-double conversion = 4000.;
-float loadcellOffset = 0.0f;     //offset value
-float varEstimate = 0.0f; // estimated loadcell variance
-float stdEstimate = 0.0f;
+#include "LoadCell.h"
+LoadCell_ADS1256* loadcell = NULL;
 
 
 
@@ -318,30 +314,6 @@ float stdEstimate = 0.0f;
 
 #include "StepperWithLimits.h"
 StepperWithLimits* stepper = NULL;
-
-
-/**********************************************************************************************/
-/*                                                                                            */
-/*                         ADC definitions                                                    */
-/*                                                                                            */
-/**********************************************************************************************/
-#include <SPI.h>
-#include <ADS1256.h>
-#define NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION 1000
-
-float clockMHZ = 7.68; // crystal frequency used on ADS1256
-float vRef = 2.5; // voltage reference
-
-// Construct and init ADS1256 object
-ADS1256 adc(clockMHZ,vRef,false); // RESETPIN is permanently tied to 3.3v
-double loadcellReading;
-
-
-
-
-  
-
-
 
 
 
@@ -505,67 +477,12 @@ void setup()
   delay(1000);
 
   stepper = new StepperWithLimits(stepPinStepper, dirPinStepper, minPin, maxPin);
+  loadcell = new LoadCell_ADS1256();
 
-
-  Serial.println("Starting ADC");  
-  adc.initSpi(clockMHZ);
-  delay(1000);
-  Serial.println("ADS: send SDATAC command");
-  //adc.sendCommand(ADS1256_CMD_SDATAC);
-
-  
-  // start the ADS1256 with data rate of 15kSPS SPS and gain x64
-  adc.begin(ADS1256_DRATE_15000SPS,ADS1256_GAIN_64,false); 
-  Serial.println("ADC Started");
-
-  adc.waitDRDY(); // wait for DRDY to go low before changing multiplexer register
-  adc.setChannel(0,1);   // Set the MUX for differential between ch2 and 3 
-  adc.setConversionFactor(conversion);
-
-
-
-  Serial.println("ADC: Identify loadcell offset");
-  // Due to construction and gravity, the loadcell measures an initial voltage difference.
-  // To compensate this difference, the difference is estimated by moving average filter.
-  float ival = 0;
-  loadcellOffset = 0.0f;
-  for (long i = 0; i < NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION; i++){
-    loadcellReading = adc.readCurrentChannel(); // DOUT arriving here are from MUX AIN0 and 
-    ival = loadcellReading / (float)NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION;
-    //Serial.println(loadcellReading,10);
-    loadcellOffset += ival;
-  }
-
-  Serial.print("Offset ");
-  Serial.println(loadcellOffset,10);
-
-
-
-  // automatically identify sensor noise for KF parameterization
+  loadcell->setZeroPoint();
   #ifdef ESTIMATE_LOADCELL_VARIANCE
-    Serial.println("ADC: Identify loadcell variance");
-    float varNormalizer = 1. / (float)(NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION - 1);
-    varEstimate = 0.0f;
-    for (long i = 0; i < NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION; i++){
-      adc.waitDRDY(); // wait for DRDY to go low before next register read
-      loadcellReading = adc.readCurrentChannel(); // DOUT arriving here are from MUX AIN0 and 
-      ival = (loadcellReading - loadcellOffset);
-      ival *= ival;
-      varEstimate += ival * varNormalizer;
-      //Serial.println(loadcellReading,10);
-    }
-
-    // make sure estimate is nonzero
-    if (varEstimate < LOADCELL_VARIANCE_MIN){varEstimate = LOADCELL_VARIANCE_MIN; }
-    varEstimate *= 9;
-  #else
-    varEstimate = 0.2f * 0.2f;
+    loadcell->estimateVariance();       // automatically identify sensor noise for KF parameterization
   #endif
-  stdEstimate = sqrt(varEstimate);
-
-  Serial.print("stdEstimate:");
-  Serial.println(stdEstimate, 6);
-
 
   stepper->findMinMaxLimits(dap_config_st.pedalStartPosition, dap_config_st.pedalEndPosition);
   dap_calculationVariables_st.stepperPosMinEndstop = stepper->getLimitMin();
@@ -600,7 +517,7 @@ void setup()
             0.0,  1.0};
 
   // example of measurement covariance matrix. Size is <Nobs,Nobs>
-  K.R = {varEstimate};
+  K.R = { loadcell->getVarianceEstimate() };
 
 
 
@@ -765,12 +682,7 @@ long cycleIdx2 = 0;
       float pedalInclineAngle = computePedalInclineAngle(sledPosition);
     #endif
     
-
-
-      // read ADC value
-      adc.waitDRDY(); // wait for DRDY to go low before next register read
-      loadcellReading = adc.readCurrentChannel(); // read as voltage according to gain and vref
-      loadcellReading -= loadcellOffset;
+    float loadcellReading = loadcell->getReadingKg();
 
 
       // Kalman filter  
