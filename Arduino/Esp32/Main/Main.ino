@@ -26,6 +26,7 @@ DAP_calculationVariables_st dap_calculationVariables_st;
 #include "CycleTimer.h"
 //#define PRINT_CYCLETIME
 
+#include "RTDebugOutput.h"
 
 
 /**********************************************************************************************/
@@ -302,6 +303,12 @@ void loop() {
     
     float filteredReading = kalman->filteredValue(loadcellReading);
     float changeVelocity = kalman->changeVelocity();
+
+//    #define DEBUG_FILTER
+    #ifdef DEBUG_FILTER
+      static RTDebugOutput<float, 2> rtDebugFilter({ "rawReading_g", "filtered_g" });
+      rtDebugFilter.offerData({ loadcellReading * 1000, filteredReading * 1000 });
+    #endif
       
 
       // use interpolation to determine local linearized spring stiffness
