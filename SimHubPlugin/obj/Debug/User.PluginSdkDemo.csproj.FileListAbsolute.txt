@@ -1,5 +1,3 @@
-C:\Program Files (x86)\SimHub\User.PluginSdkDemo.dll
-C:\Program Files (x86)\SimHub\User.PluginSdkDemo.pdb
 C:\Users\chris\OneDrive\Desktop\GIT\DIY-Sim-Racing-Active-Pedal\SimHubPlugin\obj\Debug\User.PluginSdkDemo.csproj.AssemblyReference.cache
 C:\Users\chris\OneDrive\Desktop\GIT\DIY-Sim-Racing-Active-Pedal\SimHubPlugin\obj\Debug\SettingsControlDemo.g.cs
 C:\Users\chris\OneDrive\Desktop\GIT\DIY-Sim-Racing-Active-Pedal\SimHubPlugin\obj\Debug\User.PluginSdkDemo_MarkupCompile.cache
@@ -12,3 +10,18 @@ C:\Users\chris\OneDrive\Desktop\GIT\DIY-Sim-Racing-Active-Pedal\SimHubPlugin\obj
 C:\Users\chris\OneDrive\Desktop\GIT\DIY-Sim-Racing-Active-Pedal\SimHubPlugin\obj\Debug\User.PluginSdkDemo.csproj.CopyComplete
 C:\Users\chris\OneDrive\Desktop\GIT\DIY-Sim-Racing-Active-Pedal\SimHubPlugin\obj\Debug\User.PluginSdkDemo.dll
 C:\Users\chris\OneDrive\Desktop\GIT\DIY-Sim-Racing-Active-Pedal\SimHubPlugin\obj\Debug\User.PluginSdkDemo.pdb
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\User.PluginSdkDemo.csproj.AssemblyReference.cache
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\SettingsControlDemo.g.cs
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\User.PluginSdkDemo_MarkupCompile.cache
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\User.PluginSdkDemo_MarkupCompile.lref
+C:\Program Files (x86)\SimHub\User.PluginSdkDemo.dll.config
+C:\Program Files (x86)\SimHub\User.PluginSdkDemo.dll
+C:\Program Files (x86)\SimHub\User.PluginSdkDemo.pdb
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\SettingsControlDemo.baml
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\User.PluginSdkDemo.g.resources
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\User.PluginSdkDemo.Properties.Resources.resources
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\User.PluginSdkDemo.csproj.GenerateResource.cache
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\User.PluginSdkDemo.csproj.CoreCompileInputs.cache
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\User.PluginSdkDemo.csproj.CopyComplete
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\User.PluginSdkDemo.dll
+C:\Users\chris\Downloads\DIY-Sim-Racing-Active-Pedal-main (1)\DIY-Sim-Racing-Active-Pedal-main\SimHubPlugin\obj\Debug\User.PluginSdkDemo.pdb

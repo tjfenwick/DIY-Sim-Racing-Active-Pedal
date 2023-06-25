@@ -12,3 +12,4 @@ C:\Users\chris\OneDrive\Desktop\GIT\DIY-Sim-Racing-Active-Pedal\SimHubPlugin\obj
 C:\Users\chris\OneDrive\Desktop\GIT\DIY-Sim-Racing-Active-Pedal\SimHubPlugin\obj\Release\User.PluginSdkDemo.dll
 C:\Users\chris\OneDrive\Desktop\GIT\DIY-Sim-Racing-Active-Pedal\SimHubPlugin\obj\Release\User.PluginSdkDemo.pdb
 C:\Program Files (x86)\SimHub\User.PluginSdkDemo.pdb
+C:\Program Files (x86)\SimHub\User.PluginSdkDemo.dll.config

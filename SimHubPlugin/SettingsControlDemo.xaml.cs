@@ -6,6 +6,14 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.TextFormatting;
+using System.Text.Json;
+using FMOD;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.IO;
+using System.Text;
+using System.Web;
+
 
 namespace User.PluginSdkDemo
 {
@@ -219,7 +227,102 @@ namespace User.PluginSdkDemo
 
 
 
+        public void SaveStructToJson_click(object sender, RoutedEventArgs e)
+        {
+            // https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/how-to?pivots=dotnet-8-0
 
+
+            try
+            {
+                // which config file is seleced
+                string dirName = "C:\\Program Files (x86)\\SimHub\\PluginsData\\Common";
+                string jsonFileName = ComboBox_JsonFileSelected.Text;
+                string fileName = dirName + "\\" + jsonFileName + ".json";
+
+                // https://stackoverflow.com/questions/3275863/does-net-4-have-a-built-in-json-serializer-deserializer
+                // https://learn.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-serialize-and-deserialize-json-data?redirectedfrom=MSDN
+                var stream1 = new MemoryStream();
+                var ser = new DataContractJsonSerializer(typeof(DAP_config_st));
+                ser.WriteObject(stream1, dap_config_st);
+
+
+
+                stream1.Position = 0;
+                StreamReader sr = new StreamReader(stream1);
+
+                string jsonString = sr.ReadToEnd();
+
+
+
+                // Check if file already exists. If yes, delete it.     
+                if (File.Exists(fileName))
+                {
+                    File.Delete(fileName);
+                }
+
+
+                System.IO.File.WriteAllText(fileName, jsonString);
+                
+                TextBox1.Text = "Config exported!";
+
+            }
+            catch (Exception caughtEx)
+            {
+
+                string errorMessage = caughtEx.Message;
+                TextBox1.Text = errorMessage;
+            }
+
+        }
+
+        public void ReadStructFromJson_click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/how-to?pivots=dotnet-8-0
+                // https://www.educative.io/answers/how-to-read-a-json-file-in-c-sharp
+
+                string dirName = "C:\\Program Files (x86)\\SimHub\\PluginsData\\Common";
+                string jsonFileName = ComboBox_JsonFileSelected.Text;
+                string fileName = dirName + "\\" + jsonFileName + ".json";
+
+                string text = System.IO.File.ReadAllText(fileName);
+
+                DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(DAP_config_st));
+                var ms = new MemoryStream(Encoding.UTF8.GetBytes(text));
+                dap_config_st = (DAP_config_st)deserializer.ReadObject(ms);
+                TextBox1.Text = "Config loaded!";
+
+                // update the sliders
+                PedalMinForce_Slider.Value = dap_config_st.preloadForce;
+                PedalMaxForce_Slider.Value = dap_config_st.maxForce;
+
+                PedalMinPos_Slider.Value = dap_config_st.pedalStartPosition;
+                PedalMaxPos_Slider.Value = dap_config_st.pedalEndPosition;
+
+                PedalAbsAmplitude_Slider.Value = dap_config_st.absAmplitude;
+                PedalAbsFrequency_Slider.Value = dap_config_st.absFrequency;
+
+                PedalDampening_Slider.Value = dap_config_st.dampingPress;
+
+                PedalForceCurve000_Slider.Value = dap_config_st.relativeForce_p000;
+                PedalForceCurve020_Slider.Value = dap_config_st.relativeForce_p020;
+                PedalForceCurve040_Slider.Value = dap_config_st.relativeForce_p040;
+                PedalForceCurve060_Slider.Value = dap_config_st.relativeForce_p060;
+                PedalForceCurve080_Slider.Value = dap_config_st.relativeForce_p080;
+                PedalForceCurve100_Slider.Value = dap_config_st.relativeForce_p100;
+
+
+            }
+            catch (Exception caughtEx)
+            {
+
+                string errorMessage = caughtEx.Message;
+                TextBox1.Text = errorMessage;
+            }
+
+
+        }
         public void ResetPedalPosition_click(object sender, RoutedEventArgs e)
         {
             if (Plugin.serialPortConnected)
