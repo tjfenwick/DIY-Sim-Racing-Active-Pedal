@@ -1,26 +1,14 @@
-long Position_Next = 0;
-
 #include "ABSOscillation.h"
 ABSOscillation absOscillation;
 #define ABS_OSCILLATION
 
 
-bool resetPedalPosition = false;
-bool configUpdateAvailable = false;
-
-
-
-
 
 #include "DiyActivePedal_types.h"
 DAP_config_st dap_config_st;
-DAP_config_st dap_config_st_local;
 DAP_calculationVariables_st dap_calculationVariables_st;
 
 
-
-
-#define MIN_STEPS 5
 
 
 #include "CycleTimer.h"
@@ -53,9 +41,13 @@ TaskHandle_t Task1;
 TaskHandle_t Task2;
 
 static SemaphoreHandle_t semaphore_updateConfig=NULL;
+  bool configUpdateAvailable = false;                              // semaphore protected data
+  DAP_config_st dap_config_st_local;
 
 static SemaphoreHandle_t semaphore_updateJoystick=NULL;
   int32_t joystickNormalizedToInt32 = 0;                           // semaphore protected data
+
+bool resetPedalPosition = false;
 
 
 /**********************************************************************************************/
@@ -128,7 +120,7 @@ LoadCell_ADS1256* loadcell = NULL;
 
 #include "StepperWithLimits.h"
 StepperWithLimits* stepper = NULL;
-
+static const int32_t MIN_STEPS = 5;
 
 
 /**********************************************************************************************/
@@ -315,7 +307,7 @@ void loop() {
       #ifndef INTERP_SPRING_STIFFNESS
         float spingStiffnessInv_lcl = dap_calculationVariables_st.springStiffnesssInv;
         // caclulate pedal position
-        Position_Next = spingStiffnessInv_lcl * (filteredReading - dap_calculationVariables_st.Force_Min) + dap_calculationVariables_st.stepperPosMin ;        //Calculates new position using linear function
+        int32_t Position_Next = spingStiffnessInv_lcl * (filteredReading - dap_calculationVariables_st.Force_Min) + dap_calculationVariables_st.stepperPosMin ;        //Calculates new position using linear function
 
       #else
         double stepperPosFraction = stepper->getCurrentPositionFraction();
@@ -329,7 +321,7 @@ void loop() {
         // caclulate pedal position
         float pedalForceInterp = forceCurve->forceAtPosition(stepperPosFraction);
         float stepperPosInterp = forceCurve->stepperPos(stepperPosFraction);
-        Position_Next = spingStiffnessInv_lcl * (filteredReading - pedalForceInterp) + stepperPosInterp;
+        int32_t Position_Next = spingStiffnessInv_lcl * (filteredReading - pedalForceInterp) + stepperPosInterp;
 
       #endif
 
@@ -355,8 +347,8 @@ void loop() {
       // get current stepper position right before sheduling a new move
       //int32_t stepperPosCurrent = stepper->getCurrentPositionSteps();
       int32_t stepperPosCurrent = stepper->getTargetPositionSteps();
-      long movement = abs( stepperPosCurrent - Position_Next);
-      if (movement>MIN_STEPS  )
+      int32_t movement = abs(stepperPosCurrent - Position_Next);
+      if (movement > MIN_STEPS)
       {
         stepper->moveTo(Position_Next, false);
       }
