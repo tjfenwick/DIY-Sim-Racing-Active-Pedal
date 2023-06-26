@@ -13,7 +13,8 @@ using System.Runtime.Serialization.Json;
 using System.IO;
 using System.Text;
 using System.Web;
-
+using MahApps.Metro.Controls;
+using System.Runtime.CompilerServices;
 
 namespace User.PluginSdkDemo
 {
@@ -195,31 +196,97 @@ namespace User.PluginSdkDemo
 
 
 
+        private void Update_BrakeForceCurve()
+        {
+            for (int pointIdx = 0; pointIdx < 6; pointIdx++)
+            {
 
+                // http://www.csharphelper.com/howtos/wpf_let_user_draw_polyline.html
+                // https://stackoverflow.com/questions/1267687/how-to-move-all-coordinate-from-a-wpf-polyline-object
+                Point p = this.Polyline_BrakeForceCurve.Points[pointIdx];
+                //p.Y = e.NewValue;
+
+                double pointPos = 0;
+                switch (pointIdx)
+                {
+                    case 0:
+                        pointPos = dap_config_st.relativeForce_p000;
+                        break;
+                    case 1:
+                        pointPos = dap_config_st.relativeForce_p020;
+                        break;
+                    case 2:
+                        pointPos = dap_config_st.relativeForce_p040;
+                        break;
+                    case 3:
+                        pointPos = dap_config_st.relativeForce_p060;
+                        break;
+                    case 4:
+                        pointPos = dap_config_st.relativeForce_p080;
+                        break;
+                    case 5:
+                        pointPos = dap_config_st.relativeForce_p100;
+                        break;
+                    default:
+                        pointPos = 0;
+                        break;
+                }
+
+                p.Y = pointPos;
+
+                this.Polyline_BrakeForceCurve.Points[pointIdx] = p;// = e.NewValue;}
+
+            }
+
+        }
 
         public void Slider_Force000(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.relativeForce_p000 = Convert.ToByte(e.NewValue);
+            try
+            {
+                dap_config_st.relativeForce_p000 = Convert.ToByte(e.NewValue);
+
+            // http://www.csharphelper.com/howtos/wpf_let_user_draw_polyline.html
+            // https://stackoverflow.com/questions/1267687/how-to-move-all-coordinate-from-a-wpf-polyline-object
+            //Point p = this.Polyline_BrakeForceCurve.Points[0];
+            //p.Y = e.NewValue;
+            //this.Polyline_BrakeForceCurve.Points[0] = p;// = e.NewValue;
+
+            Update_BrakeForceCurve();
+
+            }
+            catch (Exception caughtEx)
+            {
+                string errorMessage = caughtEx.Message;
+                TextBox1.Text = errorMessage;
+            }
         }
+
         public void Slider_Force020(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            
             dap_config_st.relativeForce_p020 = Convert.ToByte(e.NewValue);
+            Update_BrakeForceCurve();
         }
         public void Slider_Force040(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             dap_config_st.relativeForce_p040 = Convert.ToByte(e.NewValue);
+            Update_BrakeForceCurve();
         }
         public void Slider_Force060(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             dap_config_st.relativeForce_p060 = Convert.ToByte(e.NewValue);
+            Update_BrakeForceCurve();
         }
         public void Slider_Force080(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             dap_config_st.relativeForce_p080 = Convert.ToByte(e.NewValue);
+            Update_BrakeForceCurve();
         }
         public void Slider_Force100(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             dap_config_st.relativeForce_p100 = Convert.ToByte(e.NewValue);
+            Update_BrakeForceCurve();
         }
 
 
@@ -312,6 +379,7 @@ namespace User.PluginSdkDemo
                 PedalForceCurve080_Slider.Value = dap_config_st.relativeForce_p080;
                 PedalForceCurve100_Slider.Value = dap_config_st.relativeForce_p100;
 
+                Update_BrakeForceCurve();
 
             }
             catch (Exception caughtEx)

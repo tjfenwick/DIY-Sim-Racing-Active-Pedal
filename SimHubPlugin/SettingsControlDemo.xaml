@@ -251,6 +251,68 @@
 
 
 
+        <Canvas Height="100" Width="400" Background="#FF333333" HorizontalAlignment="Center" Grid.Row="8" Opacity="0.5" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="0,90,0,0" Grid.Column="1" >
+            <Canvas.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Canvas.RenderTransform>
+
+
+
+            <TextBlock HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Text="Force ->" 
+                   Width="60" 
+                   Foreground="White" RenderTransformOrigin="0.5,0.5" Canvas.Left="-40" Canvas.Top="35">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+
+
+            <TextBlock HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Text="Travel ->" 
+                   Width="60" 
+                   Foreground="White" RenderTransformOrigin="0.5,0.5" Canvas.Left="170" Canvas.Top="105">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="0"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+
+
+
+            <Polyline x:Name="Polyline_BrakeForceCurve"
+                      Height="400" Width="400"
+                    Points="0,0 80,20 160,40 240,60 320,80 400,100"
+                    Stroke="#FF1585B5"
+                    StrokeThickness="4" RenderTransformOrigin="1,0.5" Canvas.Top="-300" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                <Polyline.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="-1"/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform X="0"/>
+                    </TransformGroup>
+                </Polyline.RenderTransform>
+            </Polyline>
+
+        </Canvas>
+
 
 
 
@@ -362,10 +424,22 @@
             Value="100"
             />
         <ComboBox x:Name="ComboBox_JsonFileSelected" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="2" VerticalAlignment="Center" Width="179" Margin="5,0,0,0" >
-            <ComboBoxItem IsSelected="True"> DiyPedalConfig_1 </ComboBoxItem>
+            <ComboBoxItem IsSelected="True">DiyPedalConfig_1</ComboBoxItem>
             <ComboBoxItem>DiyPedalConfig_2</ComboBoxItem>
             <ComboBoxItem>DiyPedalConfig_3</ComboBoxItem>
         </ComboBox>
+        <!--<TabControl>
+            <TabItem Header="Clutch" FontSize="12">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Brake" FontSize="12">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Gas" FontSize="8">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+        </TabControl>-->
+
 
 
 
