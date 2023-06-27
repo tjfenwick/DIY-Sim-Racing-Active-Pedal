@@ -450,7 +450,7 @@ void loop() {
 
       // transmit controller output
       if (IsControllerReady()) {
-        delay(1);
+        //delay(1);
         if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE)
         {
           int32_t joystickNormalizedToInt32_local = joystickNormalizedToInt32;
