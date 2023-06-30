@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 
 template <typename TVALUE, int NVALS>
 class RTDebugOutput {
