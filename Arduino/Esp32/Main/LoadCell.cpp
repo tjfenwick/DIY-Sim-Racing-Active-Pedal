@@ -20,7 +20,11 @@ static const int NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION = 1000;
 
 static const float LOADCELL_VARIANCE_MIN = 0.001f;
 
-static const float CONVERSION_FACTOR = 4000;      // temporarily hardcoded - this should be adjusted according to load cell rating etc
+static const float LOADCELL_EXCITATION_V = 5;
+static const float LOADCELL_WEIGHT_RATING_KG = 40;
+static const float LOADCELL_SENSITIVITY_MV_V = 2;
+
+static const float CONVERSION_FACTOR = LOADCELL_WEIGHT_RATING_KG / (LOADCELL_EXCITATION_V * (LOADCELL_SENSITIVITY_MV_V/1000));
 
 
 ADS1256& ADC() {
