@@ -1,4 +1,5 @@
 #include "LoadCell.h"
+#include "PedalConfig.h"
 
 #include <SPI.h>
 #include <ADS1256.h>
@@ -7,7 +8,16 @@ static const float ADC_CLOCK_MHZ = 7.68;  // crystal frequency used on ADS1256
 static const float ADC_VREF = 2.5;        // voltage reference
 
 static const int NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION = 1000;
-static const float DEFAULT_VARIANCE_ESTIMATE = 0.2f * 0.2f;
+
+ #ifdef PEDAL_IS_BRAKE
+    static const float DEFAULT_VARIANCE_ESTIMATE = 0.2f * 0.2f;
+  #endif
+
+  #ifdef PEDAL_IS_ACCELERATOR
+    static const float DEFAULT_VARIANCE_ESTIMATE = 0.2f * 0.2f;
+  #endif
+
+
 static const float LOADCELL_VARIANCE_MIN = 0.001f;
 
 static const float CONVERSION_FACTOR = 4000;      // temporarily hardcoded - this should be adjusted according to load cell rating etc
@@ -26,7 +36,8 @@ ADS1256& ADC() {
     //adc.sendCommand(ADS1256_CMD_SDATAC);
     
     // start the ADS1256 with data rate of 15kSPS SPS and gain x64
-    adc.begin(ADS1256_DRATE_15000SPS,ADS1256_GAIN_64,false); 
+    adc.begin(ADS1256_DRATE_15000SPS,ADS1256_GAIN_64,false);     
+    
     Serial.println("ADC Started");
     
     adc.waitDRDY(); // wait for DRDY to go low before changing multiplexer register
@@ -75,8 +86,11 @@ void LoadCell_ADS1256::estimateVariance() {
   float varEstimate = 0.0f;
   for (long i = 0; i < NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION; i++){
     float loadcellReading = getReadingKg();
+    Serial.println(loadcellReading);
     varEstimate += sq(loadcellReading) * varNormalizer;
   }
+
+  Serial.println(varEstimate);
 
   // make sure estimate is nonzero
   if (varEstimate < LOADCELL_VARIANCE_MIN) { 

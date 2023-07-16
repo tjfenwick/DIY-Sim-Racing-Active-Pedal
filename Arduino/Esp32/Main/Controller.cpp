@@ -1,4 +1,5 @@
 #include "Controller.h"
+#include "PedalConfig.h"
 
 static const int16_t JOYSTICK_MIN_VALUE = 0;
 static const int16_t JOYSTICK_MAX_VALUE = 10000;
@@ -30,7 +31,16 @@ static const int16_t JOYSTICK_RANGE = JOYSTICK_MAX_VALUE - JOYSTICK_MIN_VALUE;
 #elif defined BLUETOOTH_GAMEPAD
   #include <BleGamepad.h>
 
-  BleGamepad bleGamepad("DiyActiveBrake", "DiyActiveBrake", 100);
+
+  #ifdef PEDAL_IS_BRAKE
+    BleGamepad bleGamepad("DiyActiveBrake", "DiyActiveBrake", 100);
+  #endif
+
+  #ifdef PEDAL_IS_ACCELERATOR
+    BleGamepad bleGamepad("DiyActiveAccelerator", "DiyActiveAccelerator", 100);
+  #endif
+
+  
   
   void SetupController() {
     BleGamepadConfiguration bleGamepadConfig;

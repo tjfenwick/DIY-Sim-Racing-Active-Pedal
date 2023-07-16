@@ -1,9 +1,4 @@
-#pragma once
-
-#include <stdint.h>
-
-struct payloadHeader {
-  
+struct DAP_config_st {
   // structure identification via payload
   uint8_t payloadType;
 
@@ -11,10 +6,8 @@ struct payloadHeader {
   uint8_t version;
 
   // To check if structure is valid
-  uint16_t checkSum;
-};
+  uint8_t checkSum;
 
-struct payloadPedalConfig {
   // configure pedal start and endpoint
   // In percent
   uint8_t pedalStartPosition;
@@ -47,20 +40,10 @@ struct payloadPedalConfig {
   uint8_t horPos_AB;
   uint8_t verPos_AB;
   uint8_t lengthPedal_CB;
-};
-
-
-
-struct DAP_config_st {
-
-  payloadHeader payLoadHeader_;
-  payloadPedalConfig payLoadPedalConfig_;
-
   
-  
-  void initialiseDefaults();
-  void initialiseDefaults_Accelerator();
-};
+
+} ;
+
 
 
 struct DAP_calculationVariables_st
@@ -83,8 +66,24 @@ struct DAP_calculationVariables_st
   float absAmplitude;
 
   float dampingPress;
-
-  void updateFromConfig(DAP_config_st& config_st);
-  void updateEndstops(long newMinEndstop, long newMaxEndstop);
-  void updateStiffness();
 };
+
+
+
+
+void update_pedal_stiffness(DAP_calculationVariables_st * dap_calculationVariables_st_ptr)
+{
+
+  dap_calculationVariables_st_ptr->stepperPosEndstopRange = dap_calculationVariables_st_ptr->stepperPosMaxEndstop - dap_calculationVariables_st_ptr->stepperPosMinEndstop;
+
+  dap_calculationVariables_st_ptr->stepperPosMin = dap_calculationVariables_st_ptr->stepperPosEndstopRange * dap_calculationVariables_st_ptr->startPosRel;
+  dap_calculationVariables_st_ptr->stepperPosMax = dap_calculationVariables_st_ptr->stepperPosEndstopRange * dap_calculationVariables_st_ptr->endPosRel;
+  dap_calculationVariables_st_ptr->stepperPosRange = dap_calculationVariables_st_ptr->stepperPosMax - dap_calculationVariables_st_ptr->stepperPosMin; 
+
+  dap_calculationVariables_st_ptr->Force_Range = dap_calculationVariables_st_ptr->Force_Max - dap_calculationVariables_st_ptr->Force_Min;
+
+  dap_calculationVariables_st_ptr->springStiffnesss = dap_calculationVariables_st_ptr->Force_Range / dap_calculationVariables_st_ptr->stepperPosRange;
+  dap_calculationVariables_st_ptr->springStiffnesssInv = 1.0 / dap_calculationVariables_st_ptr->springStiffnesss;
+  
+
+}

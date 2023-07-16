@@ -1,3 +1,7 @@
+#include "PedalConfig.h"
+//#define ESTIMATE_LOADCELL_VARIANCE
+
+
 #include "ABSOscillation.h"
 ABSOscillation absOscillation;
 #define ABS_OSCILLATION
@@ -13,6 +17,14 @@ DAP_calculationVariables_st dap_calculationVariables_st;
 
 #include "CycleTimer.h"
 //#define PRINT_CYCLETIME
+
+static CycleTimer timerPU("PU cycle time");
+static CycleTimer timerSC("SC cycle time");
+
+// target cycle time for pedal update task, to get constant cycle times, required for FIR filtering
+#define PUT_TARGET_CYCLE_TIME_IN_US 100
+
+
 
 #include "RTDebugOutput.h"
 
@@ -100,6 +112,16 @@ bool resetPedalPosition = false;
 KalmanFilter* kalman = NULL;
 
 
+/**********************************************************************************************/
+/*                                                                                            */
+/*                         FIR notch filter definitions                                       */
+/*                                                                                            */
+/**********************************************************************************************/
+
+#include "SignalFilterFirNotch.h"
+FirNotchFilter* firNotchFilter = NULL;
+
+
 
 /**********************************************************************************************/
 /*                                                                                            */
@@ -150,7 +172,14 @@ void setup()
 
 
   // initialize configuration and update local variables
-  dap_config_st.initialiseDefaults();
+  #ifdef PEDAL_IS_BRAKE
+    dap_config_st.initialiseDefaults();
+  #endif
+
+  #ifdef PEDAL_IS_ACCELERATOR
+    dap_config_st.initialiseDefaults_Accelerator();
+  #endif
+
   dap_calculationVariables_st.updateFromConfig(dap_config_st);
 
   // init controller
@@ -167,7 +196,7 @@ void setup()
     loadcell->estimateVariance();       // automatically identify sensor noise for KF parameterization
   #endif
 
-  stepper->findMinMaxLimits(dap_config_st.pedalStartPosition, dap_config_st.pedalEndPosition);
+  stepper->findMinMaxLimits(dap_config_st.payLoadPedalConfig_.pedalStartPosition, dap_config_st.payLoadPedalConfig_.pedalEndPosition);
 
   Serial.print("Min Position is "); Serial.println(stepper->getLimitMin());
   Serial.print("Max Position is "); Serial.println(stepper->getLimitMax());
@@ -179,6 +208,12 @@ void setup()
   #endif
 
   kalman = new KalmanFilter(loadcell->getVarianceEstimate());
+
+
+  firNotchFilter = new FirNotchFilter(15);
+
+
+
 
 
   //create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
@@ -208,6 +243,9 @@ void setup()
   dap_config_st_local = dap_config_st;
 
   Serial.println("Setup end!");
+
+
+  
 }
 
 
@@ -232,14 +270,36 @@ void loop() {
 /**********************************************************************************************/
 
 
+  //long lastCallTime = micros();
+  unsigned long cycleTimeLastCall = micros();
+  unsigned long minCyclesForFirToInit = 1000;
+  unsigned long firCycleIncrementer = 0;
+
+  
+
   //void loop()
   void pedalUpdateTask( void * pvParameters )
   {
 
     for(;;){
+
+
+      // controll cycle time. Delay did not work with the multi tasking, thus this workaround was integrated
+      unsigned long now = micros();
+      if (now - cycleTimeLastCall < PUT_TARGET_CYCLE_TIME_IN_US) // 100us = 10kHz
+      {
+        // skip 
+        continue;
+      }
+      {
+        // if target cycle time is reached, update last time
+        last = now;
+      }
+
+      
+
       // print the execution time averaged over multiple cycles 
       #ifdef PRINT_CYCLETIME
-        static CycleTimer timerPU("PU cycle time");
         timerPU.Bump();
       #endif
 
@@ -253,6 +313,7 @@ void loop() {
           configUpdateAvailable = false;
           dap_config_st = dap_config_st_local;
           dap_calculationVariables_st.updateFromConfig(dap_config_st);
+          dap_calculationVariables_st.updateEndstops(stepper->getLimitMin(), stepper->getLimitMax());
           dap_calculationVariables_st.updateStiffness();
           #ifdef INTERP_SPRING_STIFFNESS
             delete forceCurve;
@@ -289,12 +350,49 @@ void loop() {
     #ifdef COMPUTE_PEDAL_INCLINE_ANGLE
       float sledPosition = sledPositionInMM(stepper);
       float pedalInclineAngle = pedalInclineAngleDeg(sledPosition, dap_config_st);
+
+      // compute angular velocity & acceleration of incline angke
+      float pedalInclineAngle_Accel = pedalInclineAngleAccel(pedalInclineAngle);
+
+      //float legRotationalMoment = 0.0000001;
+      //float forceCorrection = pedalInclineAngle_Accel * legRotationalMoment;
+
+      //Serial.print(pedalInclineAngle_Accel);
+      //Serial.println(" ");
+
+    #endif
+
+    float loadcellReading = loadcell->getReadingKg();
+
+    float filteredReading = kalman->filteredValue(loadcellReading, 0);
+    float changeVelocity = kalman->changeVelocity();
+
+
+
+    // Apply FIR notch filter to reduce force oscillation caused by ABS
+    #ifdef APPLY_FIR_FILTER
+      float filteredReading2 = firNotchFilter->filterValue(filteredReading);
+      if (firCycleIncrementer > minCyclesForFirToInit)
+      {
+        filteredReading = filteredReading2;
+      }
+      else
+      {
+          firCycleIncrementer++;
+      }
+
+      firCycleIncrementer++;
+      if (firCycleIncrementer % 500 == 0)
+      { 
+        firCycleIncrementer = 0;
+        Serial.print(filteredReading);
+        Serial.print(",   ");
+        Serial.print(filteredReading2);
+        Serial.println("   ");
+      }
+      
     #endif
     
-    float loadcellReading = loadcell->getReadingKg();
-    
-    float filteredReading = kalman->filteredValue(loadcellReading);
-    float changeVelocity = kalman->changeVelocity();
 
 //    #define DEBUG_FILTER
     #ifdef DEBUG_FILTER
@@ -375,15 +473,31 @@ void loop() {
 /*                         communication task                                                 */
 /*                                                                                            */
 /**********************************************************************************************/
+// https://www.tutorialspoint.com/cyclic-redundancy-check-crc-in-arduino
+uint16_t checksumCalculator(uint8_t * data, uint16_t length)
+{
+   uint16_t curr_crc = 0x0000;
+   uint8_t sum1 = (uint8_t) curr_crc;
+   uint8_t sum2 = (uint8_t) (curr_crc >> 8);
+   int index;
+   for(index = 0; index < length; index = index+1)
+   {
+      sum1 = (sum1 + data[index]) % 255;
+      sum2 = (sum2 + sum1) % 255;
+   }
+   return (sum2 << 8) | sum1;
+}
 
   void serialCommunicationTask( void * pvParameters )
   {
 
     for(;;){
 
+      
+      
+
     // average cycle time averaged over multiple cycles 
     #ifdef PRINT_CYCLETIME
-      static CycleTimer timerSC("SC cycle time");
       timerSC.Bump();
     #endif
 
@@ -404,16 +518,30 @@ void loop() {
           dap_config_st_local_ptr = &dap_config_st_local;
           Serial.readBytes((char*)dap_config_st_local_ptr, sizeof(DAP_config_st));
 
-          Serial.println("Config received!");
+          
 
           // check if data is plausible
           bool structChecker = true;
-          if ( dap_config_st_local.payloadType != dap_config_st.payloadType ){ structChecker = false;}
-          if ( dap_config_st_local.version != dap_config_st.version ){ structChecker = false;}
+          if ( dap_config_st_local.payLoadHeader_.payloadType != dap_config_st.payLoadHeader_.payloadType ){ structChecker = false;}
+          if ( dap_config_st_local.payLoadHeader_.version != dap_config_st.payLoadHeader_.version ){ structChecker = false;}
+
+          // checksum validation
+          uint16_t crc = checksumCalculator((uint8_t*)(&(dap_config_st_local_ptr->payLoadPedalConfig_)), sizeof(dap_config_st_local.payLoadPedalConfig_) );
+          if (crc != dap_config_st_local.payLoadHeader_.checkSum){ structChecker = false;}
+        
+          /*Serial.println("Config received!");
+          Serial.print("Payload type: ");
+          Serial.print(dap_config_st.payLoadHeader_.payloadType);
+          Serial.print(",    CRC received: ");
+          Serial.print(dap_config_st_local.payLoadHeader_.checkSum);
+          Serial.print(",    CRC calcluated: ");
+          Serial.println(crc);*/
+
 
           // if checks are successfull, overwrite global configuration struct
           if (structChecker == true)
           {
+            //Serial.println("Update pedal config!");
             configUpdateAvailable = true;          
           }
           xSemaphoreGive(semaphore_updateConfig);

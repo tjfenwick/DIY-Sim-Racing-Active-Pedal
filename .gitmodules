@@ -22,3 +22,6 @@
 [submodule "Arduino/libs/NimBLE-Arduino"]
 	path = Arduino/libs/NimBLE-Arduino
 	url = https://github.com/h2zero/NimBLE-Arduino.git
+[submodule "Arduino/libs/Arduino-Filters"]
+	path = Arduino/libs/Arduino-Filters
+	url = https://github.com/tttapa/Arduino-Filters.git
