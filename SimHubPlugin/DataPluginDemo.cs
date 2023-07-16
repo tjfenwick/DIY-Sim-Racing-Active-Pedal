@@ -8,7 +8,8 @@ using System.Windows.Media;
 // https://stackoverflow.com/questions/14344305/best-way-to-structure-class-struct-in-c-sharp
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 [Serializable]
-public struct DAP_config_st
+
+public struct payloadHeader
 {
     // structure identification via payload
     public byte payloadType;
@@ -17,8 +18,11 @@ public struct DAP_config_st
     public byte version;
 
     // To check if structure is valid
-    public byte checkSum;
+    public UInt16 checkSum;
+}
 
+public struct payloadPedalConfig
+{
     // configure pedal start and endpoint
     // In percent
     public byte pedalStartPosition;
@@ -51,7 +55,12 @@ public struct DAP_config_st
     public byte horPos_AB;
     public byte verPos_AB;
     public byte lengthPedal_CB;
+}
 
+public struct DAP_config_st
+{
+    public payloadHeader payloadHeader_;
+    public payloadPedalConfig payloadPedalConfig_;
 }
 
 
