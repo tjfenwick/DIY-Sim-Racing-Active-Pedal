@@ -15,6 +15,7 @@ using System.Text;
 using System.Web;
 using MahApps.Metro.Controls;
 using System.Runtime.CompilerServices;
+using System.CodeDom.Compiler;
 
 namespace User.PluginSdkDemo
 {
@@ -41,25 +42,26 @@ namespace User.PluginSdkDemo
         {
             
 
-            dap_config_st.payloadType = 100;
-            dap_config_st.version = 0;
-            dap_config_st.pedalStartPosition = 35;
-            dap_config_st.pedalEndPosition = 80;
-            dap_config_st.maxForce = 90;//90;
-            dap_config_st.relativeForce_p000 = 0;
-            dap_config_st.relativeForce_p020 = 20;
-            dap_config_st.relativeForce_p040 = 40;
-            dap_config_st.relativeForce_p060 = 60;
-            dap_config_st.relativeForce_p080 = 80;
-            dap_config_st.relativeForce_p100 = 100;
-            dap_config_st.dampingPress = 0;
-            dap_config_st.dampingPull = 0;
-            dap_config_st.absFrequency = 5;
-            dap_config_st.absAmplitude = 100;
-            dap_config_st.lengthPedal_AC = 150;
-            dap_config_st.horPos_AB = 215;
-            dap_config_st.verPos_AB = 80;
-            dap_config_st.lengthPedal_CB = 200;
+            dap_config_st.payloadHeader_.payloadType = 100;
+            dap_config_st.payloadHeader_.version = 0;
+
+            dap_config_st.payloadPedalConfig_.pedalStartPosition = 35;
+            dap_config_st.payloadPedalConfig_.pedalEndPosition = 80;
+            dap_config_st.payloadPedalConfig_.maxForce = 90;//90;
+            dap_config_st.payloadPedalConfig_.relativeForce_p000 = 0;
+            dap_config_st.payloadPedalConfig_.relativeForce_p020 = 20;
+            dap_config_st.payloadPedalConfig_.relativeForce_p040 = 40;
+            dap_config_st.payloadPedalConfig_.relativeForce_p060 = 60;
+            dap_config_st.payloadPedalConfig_.relativeForce_p080 = 80;
+            dap_config_st.payloadPedalConfig_.relativeForce_p100 = 100;
+            dap_config_st.payloadPedalConfig_.dampingPress = 0;
+            dap_config_st.payloadPedalConfig_.dampingPull = 0;
+            dap_config_st.payloadPedalConfig_.absFrequency = 5;
+            dap_config_st.payloadPedalConfig_.absAmplitude = 100;
+            dap_config_st.payloadPedalConfig_.lengthPedal_AC = 150;
+            dap_config_st.payloadPedalConfig_.horPos_AB = 215;
+            dap_config_st.payloadPedalConfig_.verPos_AB = 80;
+            dap_config_st.payloadPedalConfig_.lengthPedal_CB = 200;
 
             InitializeComponent();
 
@@ -86,6 +88,20 @@ namespace User.PluginSdkDemo
             SerialPortSelection.DataContext = SerialPortSelectionArray;
 
         }
+
+        public byte[] getBytesPayload(payloadPedalConfig aux)
+        {
+            int length = Marshal.SizeOf(aux);
+            IntPtr ptr = Marshal.AllocHGlobal(length);
+            byte[] myBuffer = new byte[length];
+
+            Marshal.StructureToPtr(aux, ptr, true);
+            Marshal.Copy(ptr, myBuffer, 0, length);
+            Marshal.FreeHGlobal(ptr);
+
+            return myBuffer;
+        }
+
 
         public byte[] getBytes(DAP_config_st aux)
         {
@@ -116,7 +132,7 @@ namespace User.PluginSdkDemo
         public int PedalForce
         {
             get => this.Plugin.PedalMaxForce;
-            set { this.dap_config_st.maxForce = (byte)value; }
+            set { this.dap_config_st.payloadPedalConfig_.maxForce = (byte)value; }
         }
 
         public int PedalMinPosition
@@ -134,53 +150,53 @@ namespace User.PluginSdkDemo
 
         private void Slider_PedalMinForce(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.preloadForce = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.preloadForce = Convert.ToByte(e.NewValue);
 
-            if (dap_config_st.preloadForce > dap_config_st.maxForce)
+            if (dap_config_st.payloadPedalConfig_.preloadForce > dap_config_st.payloadPedalConfig_.maxForce)
             {
-                dap_config_st.preloadForce = dap_config_st.maxForce;
+                dap_config_st.payloadPedalConfig_.preloadForce = dap_config_st.payloadPedalConfig_.maxForce;
             }
         }
 
         private void Slider_PedalMaxForce(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.maxForce = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.maxForce = Convert.ToByte(e.NewValue);
 
-            if (dap_config_st.maxForce < dap_config_st.preloadForce)
+            if (dap_config_st.payloadPedalConfig_.maxForce < dap_config_st.payloadPedalConfig_.preloadForce)
             {
-                dap_config_st.maxForce = dap_config_st.preloadForce;
+                dap_config_st.payloadPedalConfig_.maxForce = dap_config_st.payloadPedalConfig_.preloadForce;
             }
         }
 
 
         private void Slider_PedalMinPos(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.pedalStartPosition = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.pedalStartPosition = Convert.ToByte(e.NewValue);
 
-            if (dap_config_st.pedalStartPosition > dap_config_st.pedalEndPosition)
+            if (dap_config_st.payloadPedalConfig_.pedalStartPosition > dap_config_st.payloadPedalConfig_.pedalEndPosition)
             {
-                dap_config_st.pedalStartPosition = dap_config_st.pedalEndPosition;
+                dap_config_st.payloadPedalConfig_.pedalStartPosition = dap_config_st.payloadPedalConfig_.pedalEndPosition;
             }
         }
 
         private void Slider_PedalMaxPos(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.pedalEndPosition = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.pedalEndPosition = Convert.ToByte(e.NewValue);
 
-            if (dap_config_st.pedalEndPosition < dap_config_st.pedalStartPosition)
+            if (dap_config_st.payloadPedalConfig_.pedalEndPosition < dap_config_st.payloadPedalConfig_.pedalStartPosition)
             {
-                dap_config_st.pedalEndPosition = dap_config_st.pedalStartPosition;
+                dap_config_st.payloadPedalConfig_.pedalEndPosition = dap_config_st.payloadPedalConfig_.pedalStartPosition;
             }
         }
 		
 		private void Slider_AbsAmplitude(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.absAmplitude = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.absAmplitude = Convert.ToByte(e.NewValue);
         }
 
         private void Slider_AbsFrequency(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.absFrequency = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.absFrequency = Convert.ToByte(e.NewValue);
         }
 
         public void TestAbs_click(object sender, RoutedEventArgs e)
@@ -190,8 +206,8 @@ namespace User.PluginSdkDemo
 
         public void Slider_Dampening(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.dampingPress = Convert.ToByte(e.NewValue);
-            dap_config_st.dampingPull = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.dampingPress = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.dampingPull = Convert.ToByte(e.NewValue);
         }
 
 
@@ -210,22 +226,22 @@ namespace User.PluginSdkDemo
                 switch (pointIdx)
                 {
                     case 0:
-                        pointPos = dap_config_st.relativeForce_p000;
+                        pointPos = dap_config_st.payloadPedalConfig_.relativeForce_p000;
                         break;
                     case 1:
-                        pointPos = dap_config_st.relativeForce_p020;
+                        pointPos = dap_config_st.payloadPedalConfig_.relativeForce_p020;
                         break;
                     case 2:
-                        pointPos = dap_config_st.relativeForce_p040;
+                        pointPos = dap_config_st.payloadPedalConfig_.relativeForce_p040;
                         break;
                     case 3:
-                        pointPos = dap_config_st.relativeForce_p060;
+                        pointPos = dap_config_st.payloadPedalConfig_.relativeForce_p060;
                         break;
                     case 4:
-                        pointPos = dap_config_st.relativeForce_p080;
+                        pointPos = dap_config_st.payloadPedalConfig_.relativeForce_p080;
                         break;
                     case 5:
-                        pointPos = dap_config_st.relativeForce_p100;
+                        pointPos = dap_config_st.payloadPedalConfig_.relativeForce_p100;
                         break;
                     default:
                         pointPos = 0;
@@ -244,7 +260,7 @@ namespace User.PluginSdkDemo
         {
             try
             {
-                dap_config_st.relativeForce_p000 = Convert.ToByte(e.NewValue);
+                dap_config_st.payloadPedalConfig_.relativeForce_p000 = Convert.ToByte(e.NewValue);
 
             // http://www.csharphelper.com/howtos/wpf_let_user_draw_polyline.html
             // https://stackoverflow.com/questions/1267687/how-to-move-all-coordinate-from-a-wpf-polyline-object
@@ -259,33 +275,33 @@ namespace User.PluginSdkDemo
             {
                 string errorMessage = caughtEx.Message;
                 TextBox1.Text = errorMessage;
-            }
+            }    
         }
 
         public void Slider_Force020(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             
-            dap_config_st.relativeForce_p020 = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.relativeForce_p020 = Convert.ToByte(e.NewValue);
             Update_BrakeForceCurve();
         }
         public void Slider_Force040(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.relativeForce_p040 = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.relativeForce_p040 = Convert.ToByte(e.NewValue);
             Update_BrakeForceCurve();
         }
         public void Slider_Force060(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.relativeForce_p060 = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.relativeForce_p060 = Convert.ToByte(e.NewValue);
             Update_BrakeForceCurve();
         }
         public void Slider_Force080(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.relativeForce_p080 = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.relativeForce_p080 = Convert.ToByte(e.NewValue);
             Update_BrakeForceCurve();
         }
         public void Slider_Force100(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            dap_config_st.relativeForce_p100 = Convert.ToByte(e.NewValue);
+            dap_config_st.payloadPedalConfig_.relativeForce_p100 = Convert.ToByte(e.NewValue);
             Update_BrakeForceCurve();
         }
 
@@ -361,23 +377,23 @@ namespace User.PluginSdkDemo
                 TextBox1.Text = "Config loaded!";
 
                 // update the sliders
-                PedalMinForce_Slider.Value = dap_config_st.preloadForce;
-                PedalMaxForce_Slider.Value = dap_config_st.maxForce;
+                PedalMinForce_Slider.Value = dap_config_st.payloadPedalConfig_.preloadForce;
+                PedalMaxForce_Slider.Value = dap_config_st.payloadPedalConfig_.maxForce;
 
-                PedalMinPos_Slider.Value = dap_config_st.pedalStartPosition;
-                PedalMaxPos_Slider.Value = dap_config_st.pedalEndPosition;
+                PedalMinPos_Slider.Value = dap_config_st.payloadPedalConfig_.pedalStartPosition;
+                PedalMaxPos_Slider.Value = dap_config_st.payloadPedalConfig_.pedalEndPosition;
 
-                PedalAbsAmplitude_Slider.Value = dap_config_st.absAmplitude;
-                PedalAbsFrequency_Slider.Value = dap_config_st.absFrequency;
+                PedalAbsAmplitude_Slider.Value = dap_config_st.payloadPedalConfig_.absAmplitude;
+                PedalAbsFrequency_Slider.Value = dap_config_st.payloadPedalConfig_.absFrequency;
 
-                PedalDampening_Slider.Value = dap_config_st.dampingPress;
+                PedalDampening_Slider.Value = dap_config_st.payloadPedalConfig_.dampingPress;
 
-                PedalForceCurve000_Slider.Value = dap_config_st.relativeForce_p000;
-                PedalForceCurve020_Slider.Value = dap_config_st.relativeForce_p020;
-                PedalForceCurve040_Slider.Value = dap_config_st.relativeForce_p040;
-                PedalForceCurve060_Slider.Value = dap_config_st.relativeForce_p060;
-                PedalForceCurve080_Slider.Value = dap_config_st.relativeForce_p080;
-                PedalForceCurve100_Slider.Value = dap_config_st.relativeForce_p100;
+                PedalForceCurve000_Slider.Value = dap_config_st.payloadPedalConfig_.relativeForce_p000;
+                PedalForceCurve020_Slider.Value = dap_config_st.payloadPedalConfig_.relativeForce_p020;
+                PedalForceCurve040_Slider.Value = dap_config_st.payloadPedalConfig_.relativeForce_p040;
+                PedalForceCurve060_Slider.Value = dap_config_st.payloadPedalConfig_.relativeForce_p060;
+                PedalForceCurve080_Slider.Value = dap_config_st.payloadPedalConfig_.relativeForce_p080;
+                PedalForceCurve100_Slider.Value = dap_config_st.payloadPedalConfig_.relativeForce_p100;
 
                 Update_BrakeForceCurve();
 
@@ -419,12 +435,55 @@ namespace User.PluginSdkDemo
         }
 
 
-        public void SendConfigToPedal_click(object sender, RoutedEventArgs e)
+        unsafe private UInt16 checksumCalc(byte* data, int length)
+        {
+
+            UInt16 curr_crc = 0x0000;
+            byte sum1 = (byte)curr_crc;
+            byte sum2 = (byte)(curr_crc >> 8);
+            int index;
+            for (index=0; index < length; index = index + 1)
+            {
+
+                
+
+                int v = (sum1 + (*data));
+                sum1 = (byte)v;
+                sum1 = (byte)(v % 255);
+
+                int w = (sum1 + sum2) % 255;
+                sum2 = (byte)w;
+
+                data++;// = data++;
+            }
+
+            int x = (sum2 << 8) | sum1;
+
+            return (UInt16)x;
+
+            //return (sum2, sum1);
+
+        }
+        unsafe public void SendConfigToPedal_click(object sender, RoutedEventArgs e)
         {
             if (Plugin.serialPortConnected)
             {
-                // https://stackoverflow.com/questions/17338571/writing-bytes-from-a-struct-into-a-file-with-c-sharp
-                int length = sizeof(byte) * 21;
+
+                // compute checksum
+                //getBytes(this.dap_config_st.payloadPedalConfig_)
+                payloadPedalConfig tmp = this.dap_config_st.payloadPedalConfig_;
+                payloadPedalConfig* v = &tmp;
+                byte* p = (byte*)v;
+                this.dap_config_st.payloadHeader_.checkSum = checksumCalc(p, sizeof(payloadPedalConfig));
+
+
+                TextBox1.Text = "CRC simhub calc: " + this.dap_config_st.payloadHeader_.checkSum + "    ";
+
+
+
+                int length = sizeof(DAP_config_st);
+                int val = this.dap_config_st.payloadHeader_.checkSum;
+                string msg = "CRC value: " + val.ToString();
                 byte[] newBuffer = new byte[length];
                 newBuffer = getBytes(this.dap_config_st);
                 Plugin._serialPort.Write(newBuffer, 0, newBuffer.Length);
@@ -436,6 +495,8 @@ namespace User.PluginSdkDemo
                     while (Plugin._serialPort.BytesToRead > 0)
                     {
                         string message = Plugin._serialPort.ReadLine();
+
+                        TextBox1.Text += "      -->   " + message;
                     }
                 }
                 catch (TimeoutException) { }

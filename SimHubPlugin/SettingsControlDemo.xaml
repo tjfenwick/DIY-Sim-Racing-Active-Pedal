@@ -104,7 +104,7 @@
             AutoToolTipPlacement="TopLeft" 
             AutoToolTipPrecision="0"
             Minimum="0"
-			Maximum="100"
+			Maximum="255"
             TickPlacement="BottomRight"
 			TickFrequency="10" RenderTransformOrigin="0.508,0.525"
             Value="73"
