@@ -293,7 +293,7 @@ void loop() {
       }
       {
         // if target cycle time is reached, update last time
-        last = now;
+        cycleTimeLastCall = now;
       }
 
       
