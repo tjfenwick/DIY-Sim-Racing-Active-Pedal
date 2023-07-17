@@ -39,6 +39,8 @@ static CycleTimer timerSC("SC cycle time");
 
 ForceCurve_Interpolated* forceCurve;
 
+//    define one of these to determine strategy for pedal movement update
+//#define USE_LINEAR_STRATEGY
 #define INTERP_SPRING_STIFFNESS
 
 
@@ -143,6 +145,8 @@ LoadCell_ADS1256* loadcell = NULL;
 #include "StepperWithLimits.h"
 StepperWithLimits* stepper = NULL;
 static const int32_t MIN_STEPS = 5;
+
+#include "StepperMovementStrategy.h"
 
 
 /**********************************************************************************************/
@@ -402,24 +406,13 @@ void loop() {
       
 
       // use interpolation to determine local linearized spring stiffness
-      #ifndef INTERP_SPRING_STIFFNESS
-        float spingStiffnessInv_lcl = dap_calculationVariables_st.springStiffnesssInv;
-        // caclulate pedal position
-        int32_t Position_Next = spingStiffnessInv_lcl * (filteredReading - dap_calculationVariables_st.Force_Min) + dap_calculationVariables_st.stepperPosMin ;        //Calculates new position using linear function
-
-      #else
-        double stepperPosFraction = stepper->getCurrentPositionFraction();
+      #if defined USE_LINEAR_STRATEGY
+        int32_t Position_Next = MoveByLinearStrategy(filteredReading, dap_calculationVariables_st);
         
-        float spingStiffnessInv_lcl = dap_calculationVariables_st.springStiffnesssInv;
-        float springStiffnessInterp = forceCurve->stiffnessAtPosition(stepperPosFraction);
-        if (springStiffnessInterp > 0) {
-          spingStiffnessInv_lcl = (1.0f / springStiffnessInterp);
-        }
+      #elif defined INTERP_SPRING_STIFFNESS
+        double stepperPosFraction = stepper->getCurrentPositionFraction();
+        int32_t Position_Next = MoveByInterpolatedStrategy(filteredReading, stepperPosFraction, forceCurve, dap_calculationVariables_st);
 
-        // caclulate pedal position
-        float pedalForceInterp = forceCurve->forceAtPosition(stepperPosFraction);
-        float stepperPosInterp = forceCurve->stepperPos(stepperPosFraction);
-        int32_t Position_Next = spingStiffnessInv_lcl * (filteredReading - pedalForceInterp) + stepperPosInterp;
 
       #endif
 
