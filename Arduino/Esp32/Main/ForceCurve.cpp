@@ -22,7 +22,7 @@ ForceCurve_Interpolated::ForceCurve_Interpolated(DAP_config_st& config_st, DAP_c
   yValues[4] = calc_st.Force_Min + ((float)config_st.payLoadPedalConfig_.relativeForce_p080) / 100.0f * calc_st.Force_Range;
   yValues[5] = calc_st.Force_Min + ((float)config_st.payLoadPedalConfig_.relativeForce_p100) / 100.0f * calc_st.Force_Range;
 
-#define DEBUG_FORCECURVE
+//#define DEBUG_FORCECURVE
 #ifdef DEBUG_FORCECURVE
   for (int i = 0; i < 6; i++) {
     Serial.print(xValues[i]);    Serial.print("  ");

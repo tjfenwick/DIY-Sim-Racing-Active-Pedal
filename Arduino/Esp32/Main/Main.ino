@@ -2,6 +2,16 @@
 //#define ESTIMATE_LOADCELL_VARIANCE
 
 
+#include <EEPROM.h>
+
+
+//#define PRINT_USED_STACK_SIZE
+// https://stackoverflow.com/questions/55998078/freertos-task-priority-and-stack-size
+#define STACK_SIZE_FOR_TASK_1 0.2 * (configTOTAL_HEAP_SIZE / 4)
+#define STACK_SIZE_FOR_TASK_2 0.2 * (configTOTAL_HEAP_SIZE / 4)
+
+
+
 #include "ABSOscillation.h"
 ABSOscillation absOscillation;
 #define ABS_OSCILLATION
@@ -164,9 +174,15 @@ void setup()
 
   semaphore_updateJoystick = xSemaphoreCreateMutex();
   semaphore_updateConfig = xSemaphoreCreateMutex();
+  delay(10);
 
 
   if(semaphore_updateJoystick==NULL)
+  {
+    Serial.println("Could not create semaphore");
+    ESP.restart();
+  }
+  if(semaphore_updateConfig==NULL)
   {
     Serial.println("Could not create semaphore");
     ESP.restart();
@@ -184,6 +200,11 @@ void setup()
     dap_config_st.initialiseDefaults_Accelerator();
   #endif
 
+  // Load config to EEPROM
+  EEPROM.begin(sizeof(DAP_config_st));
+  dap_config_st.loadConfigFromEprom(dap_config_st);
+
+  // interprete config values
   dap_calculationVariables_st.updateFromConfig(dap_config_st);
 
   // init controller
@@ -225,6 +246,7 @@ void setup()
                     pedalUpdateTask,   /* Task function. */
                     "pedalUpdateTask",     /* name of task. */
                     10000,       /* Stack size of task */
+                    //STACK_SIZE_FOR_TASK_1,
                     NULL,        /* parameter of the task */
                     1,           /* priority of the task */
                     &Task2,      /* Task handle to keep track of created task */
@@ -234,7 +256,8 @@ void setup()
   xTaskCreatePinnedToCore(
                     serialCommunicationTask,   
                     "serialCommunicationTask", 
-                    10000,     
+                    10000,  
+                    //STACK_SIZE_FOR_TASK_2,    
                     NULL,      
                     1,         
                     &Task2,    
@@ -274,48 +297,51 @@ void loop() {
 /**********************************************************************************************/
 
 
-  //long lastCallTime = micros();
-  unsigned long cycleTimeLastCall = micros();
-  unsigned long minCyclesForFirToInit = 1000;
-  unsigned long firCycleIncrementer = 0;
-
-  
-
-  //void loop()
-  void pedalUpdateTask( void * pvParameters )
-  {
-
-    for(;;){
+//long lastCallTime = micros();
+unsigned long cycleTimeLastCall = micros();
+unsigned long minCyclesForFirToInit = 1000;
+unsigned long firCycleIncrementer = 0;
 
 
-      // controll cycle time. Delay did not work with the multi tasking, thus this workaround was integrated
-      unsigned long now = micros();
-      if (now - cycleTimeLastCall < PUT_TARGET_CYCLE_TIME_IN_US) // 100us = 10kHz
-      {
-        // skip 
-        continue;
-      }
-      {
-        // if target cycle time is reached, update last time
-        cycleTimeLastCall = now;
-      }
 
-      
+//void loop()
+void pedalUpdateTask( void * pvParameters )
+{
 
-      // print the execution time averaged over multiple cycles 
-      #ifdef PRINT_CYCLETIME
-        timerPU.Bump();
-      #endif
+  for(;;){
 
 
-      // if a config update was received over serial, update the variables required for further computation
-      if (configUpdateAvailable == true)
+    // controll cycle time. Delay did not work with the multi tasking, thus this workaround was integrated
+    unsigned long now = micros();
+    if (now - cycleTimeLastCall < PUT_TARGET_CYCLE_TIME_IN_US) // 100us = 10kHz
+    {
+      // skip 
+      continue;
+    }
+    {
+      // if target cycle time is reached, update last time
+      cycleTimeLastCall = now;
+    }
+
+    
+
+    // print the execution time averaged over multiple cycles 
+    #ifdef PRINT_CYCLETIME
+      timerPU.Bump();
+    #endif
+
+
+    // if a config update was received over serial, update the variables required for further computation
+    if (configUpdateAvailable == true)
+    {
+      if(semaphore_updateConfig!=NULL)
       {
         if(xSemaphoreTake(semaphore_updateConfig, 1)==pdTRUE)
         {
           Serial.println("Update pedal config!");
           configUpdateAvailable = false;
           dap_config_st = dap_config_st_local;
+          dap_config_st.storeConfigToEprom(dap_config_st);
           dap_calculationVariables_st.updateFromConfig(dap_config_st);
           dap_calculationVariables_st.updateEndstops(stepper->getLimitMin(), stepper->getLimitMax());
           dap_calculationVariables_st.updateStiffness();
@@ -326,22 +352,27 @@ void loop() {
           xSemaphoreGive(semaphore_updateConfig);
         }
       }
-
-
-
-      // if reset pedal position was requested, reset pedal now
-      // This function is implemented, so that in case of lost steps, the user can request a reset of the pedal psotion
-      if (resetPedalPosition) {
-        stepper->refindMinLimit();
-        resetPedalPosition = false;
+      else
+      {
+        Serial.println("semaphore_updateConfig == 0");
       }
+    }
 
 
-      //#define RECALIBRATE_POSITION
-      #ifdef RECALIBRATE_POSITION
-        stepper->checkLimitsAndResetIfNecessary();
-      #endif
-  
+
+    // if reset pedal position was requested, reset pedal now
+    // This function is implemented, so that in case of lost steps, the user can request a reset of the pedal psotion
+    if (resetPedalPosition) {
+      stepper->refindMinLimit();
+      resetPedalPosition = false;
+    }
+
+
+    //#define RECALIBRATE_POSITION
+    #ifdef RECALIBRATE_POSITION
+      stepper->checkLimitsAndResetIfNecessary();
+    #endif
+
 
       // compute pedal oscillation, when ABS is active
     #ifdef ABS_OSCILLATION
@@ -445,12 +476,24 @@ void loop() {
       }
 
       // compute controller output
-      if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE) {
-        joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max);
-        xSemaphoreGive(semaphore_updateJoystick);
+      if(semaphore_updateJoystick!=NULL)
+      {
+        if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE) {
+          joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max);
+          xSemaphoreGive(semaphore_updateJoystick);
+        }
       }
-    }
+      else
+      {
+        Serial.println("semaphore_updateJoystick == 0");
+      }
+
+    #ifdef PRINT_USED_STACK_SIZE
+      unsigned int temp2 = uxTaskGetStackHighWaterMark(nullptr);
+      Serial.print("PU task stack size="); Serial.println(temp2);
+    #endif
   }
+}
 
   
 
@@ -481,10 +524,10 @@ uint16_t checksumCalculator(uint8_t * data, uint16_t length)
    return (sum2 << 8) | sum1;
 }
 
-  void serialCommunicationTask( void * pvParameters )
-  {
+void serialCommunicationTask( void * pvParameters )
+{
 
-    for(;;){
+  for(;;){
 
       
       
@@ -498,13 +541,15 @@ uint16_t checksumCalculator(uint8_t * data, uint16_t length)
 
 
 
-      // read serial input 
-      byte n = Serial.available();
+    // read serial input 
+    byte n = Serial.available();
 
-      // likely config structure 
-      if ( n == sizeof(DAP_config_st) )
+    // likely config structure 
+    if ( n == sizeof(DAP_config_st) )
+    {
+      
+      if(semaphore_updateConfig!=NULL)
       {
-        
         if(xSemaphoreTake(semaphore_updateConfig, 1)==pdTRUE)
         {
           DAP_config_st * dap_config_st_local_ptr;
@@ -515,63 +560,77 @@ uint16_t checksumCalculator(uint8_t * data, uint16_t length)
 
           // check if data is plausible
           bool structChecker = true;
-          if ( dap_config_st_local.payLoadHeader_.payloadType != dap_config_st.payLoadHeader_.payloadType ){ structChecker = false;}
-          if ( dap_config_st_local.payLoadHeader_.version != dap_config_st.payLoadHeader_.version ){ structChecker = false;}
+          if ( dap_config_st_local.payLoadHeader_.payloadType != DAP_PAYLOAD_TYPE_CONFIG ){ 
+            structChecker = false;
+            Serial.print("Payload type expected: ");
+            Serial.print(DAP_PAYLOAD_TYPE_CONFIG);
+            Serial.print(",   Payload type received: ");
+            Serial.println(dap_config_st_local.payLoadHeader_.payloadType);
+          }
+          if ( dap_config_st_local.payLoadHeader_.version != DAP_VERSION_CONFIG ){ 
+            structChecker = false;
+            Serial.print("Config version expected: ");
+            Serial.print(DAP_VERSION_CONFIG);
+            Serial.print(",   Config version received: ");
+            Serial.println(dap_config_st_local.payLoadHeader_.version);
+          }
 
           // checksum validation
           uint16_t crc = checksumCalculator((uint8_t*)(&(dap_config_st_local_ptr->payLoadPedalConfig_)), sizeof(dap_config_st_local.payLoadPedalConfig_) );
-          if (crc != dap_config_st_local.payLoadHeader_.checkSum){ structChecker = false;}
-        
-          /*Serial.println("Config received!");
-          Serial.print("Payload type: ");
-          Serial.print(dap_config_st.payLoadHeader_.payloadType);
-          Serial.print(",    CRC received: ");
-          Serial.print(dap_config_st_local.payLoadHeader_.checkSum);
-          Serial.print(",    CRC calcluated: ");
-          Serial.println(crc);*/
+          if (crc != dap_config_st_local.payLoadHeader_.checkSum){ 
+            structChecker = false;
+            Serial.print("CRC expected: ");
+            Serial.print(crc);
+            Serial.print(",   CRC received: ");
+            Serial.println(dap_config_st_local.payLoadHeader_.checkSum);
+          }
 
 
           // if checks are successfull, overwrite global configuration struct
           if (structChecker == true)
           {
-            //Serial.println("Update pedal config!");
+            Serial.println("Update pedal config!");
             configUpdateAvailable = true;          
           }
           xSemaphoreGive(semaphore_updateConfig);
         }
       }
-      else
+    }
+    else
+    {
+      if (n!=0)
       {
-        if (n!=0)
-        {
-          int menuChoice = Serial.parseInt();
-          switch (menuChoice) {
-            // resset minimum position
-            case 1:
-              Serial.println("Reset position!");
-              resetPedalPosition = true;
-              break;
+        int menuChoice = Serial.parseInt();
+        switch (menuChoice) {
+          // resset minimum position
+          case 1:
+            Serial.println("Reset position!");
+            resetPedalPosition = true;
+            break;
 
-            // toggle ABS
-            case 2:
-              //Serial.print("Second case:");
-              absOscillation.trigger();
-              break;
+          // toggle ABS
+          case 2:
+            //Serial.print("Second case:");
+            absOscillation.trigger();
+            break;
 
-            default:
-              Serial.println("Default case:");
-              break;
-          }
-
+          default:
+            Serial.println("Default case:");
+            break;
         }
+
       }
+    }
 
 
 
 
-      // transmit controller output
-      if (IsControllerReady()) {
-        //delay(1);
+    // transmit controller output
+    if (IsControllerReady()) {
+      //delay(1);
+
+      if(semaphore_updateJoystick!=NULL)
+      {
         if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE)
         {
           int32_t joystickNormalizedToInt32_local = joystickNormalizedToInt32;
@@ -579,7 +638,12 @@ uint16_t checksumCalculator(uint8_t * data, uint16_t length)
           
           SetControllerOutputValue(joystickNormalizedToInt32_local);
         }
+        else
+        {
+          Serial.println("semaphore_updateJoystick == 0");
+        }
       }
-
     }
+
   }
+}

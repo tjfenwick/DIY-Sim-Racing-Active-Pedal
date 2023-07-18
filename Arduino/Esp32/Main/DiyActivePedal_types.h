@@ -2,6 +2,10 @@
 
 #include <stdint.h>
 
+
+#define DAP_VERSION_CONFIG 100
+#define DAP_PAYLOAD_TYPE_CONFIG 100
+
 struct payloadHeader {
   
   // structure identification via payload
@@ -60,6 +64,8 @@ struct DAP_config_st {
   
   void initialiseDefaults();
   void initialiseDefaults_Accelerator();
+  void loadConfigFromEprom(DAP_config_st& config_st);
+  void storeConfigToEprom(DAP_config_st& config_st);
 };
 
 
