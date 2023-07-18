@@ -1,13 +1,19 @@
 ﻿using GameReaderCommon;
 using SimHub.Plugins;
+using SimHub.Plugins.OutputPlugins.Dash.GLCDTemplating;
 using System;
 using System.IO.Ports;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 
+
+
+
 // https://stackoverflow.com/questions/14344305/best-way-to-structure-class-struct-in-c-sharp
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 [Serializable]
+
+
 
 public struct payloadHeader
 {

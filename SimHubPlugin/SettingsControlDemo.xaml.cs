@@ -43,7 +43,7 @@ namespace User.PluginSdkDemo
             
 
             dap_config_st.payloadHeader_.payloadType = 100;
-            dap_config_st.payloadHeader_.version = 0;
+            dap_config_st.payloadHeader_.version = 100;
 
             dap_config_st.payloadPedalConfig_.pedalStartPosition = 35;
             dap_config_st.payloadPedalConfig_.pedalEndPosition = 80;
@@ -318,7 +318,8 @@ namespace User.PluginSdkDemo
             try
             {
                 // which config file is seleced
-                string dirName = "C:\\Program Files (x86)\\SimHub\\PluginsData\\Common";
+                string currentDirectory = Directory.GetCurrentDirectory();
+                string dirName = currentDirectory + "\\PluginsData\\Common";
                 string jsonFileName = ComboBox_JsonFileSelected.Text;
                 string fileName = dirName + "\\" + jsonFileName + ".json";
 
