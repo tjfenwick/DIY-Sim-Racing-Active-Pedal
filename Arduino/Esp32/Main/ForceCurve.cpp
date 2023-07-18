@@ -15,14 +15,14 @@ ForceCurve_Interpolated::ForceCurve_Interpolated(DAP_config_st& config_st, DAP_c
   xValues[4] = calc_st.stepperPosMin + 0.80 * calc_st.stepperPosRange;
   xValues[5] = calc_st.stepperPosMin + 1.00 * calc_st.stepperPosRange;
   
-  yValues[0] = calc_st.Force_Min + ((float)config_st.relativeForce_p000) / 100.0f * calc_st.Force_Range;
-  yValues[1] = calc_st.Force_Min + ((float)config_st.relativeForce_p020) / 100.0f * calc_st.Force_Range;
-  yValues[2] = calc_st.Force_Min + ((float)config_st.relativeForce_p040) / 100.0f * calc_st.Force_Range;
-  yValues[3] = calc_st.Force_Min + ((float)config_st.relativeForce_p060) / 100.0f * calc_st.Force_Range;
-  yValues[4] = calc_st.Force_Min + ((float)config_st.relativeForce_p080) / 100.0f * calc_st.Force_Range;
-  yValues[5] = calc_st.Force_Min + ((float)config_st.relativeForce_p100) / 100.0f * calc_st.Force_Range;
+  yValues[0] = calc_st.Force_Min + ((float)config_st.payLoadPedalConfig_.relativeForce_p000) / 100.0f * calc_st.Force_Range;
+  yValues[1] = calc_st.Force_Min + ((float)config_st.payLoadPedalConfig_.relativeForce_p020) / 100.0f * calc_st.Force_Range;
+  yValues[2] = calc_st.Force_Min + ((float)config_st.payLoadPedalConfig_.relativeForce_p040) / 100.0f * calc_st.Force_Range;
+  yValues[3] = calc_st.Force_Min + ((float)config_st.payLoadPedalConfig_.relativeForce_p060) / 100.0f * calc_st.Force_Range;
+  yValues[4] = calc_st.Force_Min + ((float)config_st.payLoadPedalConfig_.relativeForce_p080) / 100.0f * calc_st.Force_Range;
+  yValues[5] = calc_st.Force_Min + ((float)config_st.payLoadPedalConfig_.relativeForce_p100) / 100.0f * calc_st.Force_Range;
 
-#define DEBUG_FORCECURVE
+//#define DEBUG_FORCECURVE
 #ifdef DEBUG_FORCECURVE
   for (int i = 0; i < 6; i++) {
     Serial.print(xValues[i]);    Serial.print("  ");
@@ -38,10 +38,10 @@ ForceCurve_Interpolated::ForceCurve_Interpolated(DAP_config_st& config_st, DAP_c
     xValueSample = calc_st.stepperPosMin + xValueSample * calc_st.stepperPosRange;
     _stepperPos[interpStep] = xValueSample;
 
-    //interpTargetValues[interpStep] = Interpolation::Linear(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample, false);
-    //interpTargetValues[interpStep] = Interpolation::SmoothStep(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample);
-    _targetValues[interpStep] = Interpolation::CatmullSpline(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample);
-    //interpTargetValues[interpStep] = Interpolation::ConstrainedSpline(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample);
+    _targetValues[interpStep] = Interpolation::Linear(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample, false);
+    //_targetValues[interpStep] = Interpolation::SmoothStep(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample);
+    //_targetValues[interpStep] = Interpolation::CatmullSpline(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample);
+    //_targetValues[interpStep] = Interpolation::ConstrainedSpline(xValues, yValues, INTERPOLATION_NUMBER_OF_SOURCE_VALUES, xValueSample);
 
 #ifdef DEBUG_FORCECURVE
     Serial.print(xValueSample);    Serial.print("   ");    Serial.println(_targetValues[interpStep]);

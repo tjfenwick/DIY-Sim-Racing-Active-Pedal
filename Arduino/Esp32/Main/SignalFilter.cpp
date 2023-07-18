@@ -1,8 +1,19 @@
 #include "SignalFilter.h"
+#include "PedalConfig.h"
 
-// adjust model noise here s = 0.5 * a * delta_t^2 --> a = 2 * s / delta_t^2
-static const float KF_MODEL_NOISE_FORCE_ACCELERATION = ( 2.0f * 9.0f / 0.05f/ 0.05f );
 
+;
+
+
+#ifdef PEDAL_IS_BRAKE
+  // adjust model noise here s = 0.5 * a * delta_t^2 --> a = 2 * s / delta_t^2
+  static const float KF_MODEL_NOISE_FORCE_ACCELERATION = ( 2.0f * 30.0f / 0.05f/ 0.05f );
+#endif
+
+#ifdef PEDAL_IS_ACCELERATOR
+  // adjust model noise here s = 0.5 * a * delta_t^2 --> a = 2 * s / delta_t^2
+  static const float KF_MODEL_NOISE_FORCE_ACCELERATION = ( 2.0f * 10.0f / 0.05f/ 0.05f );
+#endif
 
 KalmanFilter::KalmanFilter(float varianceEstimate)
   : _timeLastObservation(micros())
@@ -10,6 +21,10 @@ KalmanFilter::KalmanFilter(float varianceEstimate)
   // evolution matrix. Size is <Nstate,Nstate>
   _K.F = {1.0, 0.0,
           0.0, 1.0};
+
+  // command matrix.  Size is <Nstate,Ncom>
+  _K.B = {1.0, 
+          0.0};
         
   // measurement matrix. Size is <Nobs,Nstate>
   _K.H = {1.0, 0.0};
@@ -22,7 +37,7 @@ KalmanFilter::KalmanFilter(float varianceEstimate)
   _K.R = { varianceEstimate };
 }
 
-float KalmanFilter::filteredValue(float observation) {
+float KalmanFilter::filteredValue(float observation, float command) {
   // obtain time
   unsigned long currentTime = micros();
   unsigned long elapsedTime = currentTime - _timeLastObservation;
@@ -38,13 +53,16 @@ float KalmanFilter::filteredValue(float observation) {
   _K.F = {1.0,  delta_t, 
           0.0,  1.0};
 
+  _K.B = {1.0, 
+          0.0};
+
   float K_Q_11 = KF_MODEL_NOISE_FORCE_ACCELERATION * 0.5f * delta_t_pow3;
   _K.Q = {KF_MODEL_NOISE_FORCE_ACCELERATION * 0.25f * delta_t_pow4,   K_Q_11,
         K_Q_11, KF_MODEL_NOISE_FORCE_ACCELERATION * delta_t_pow2};
         
 
   // APPLY KALMAN FILTER
-  _K.update({observation});
+  _K.update({observation}, {command});
   return _K.x(0,0);
 }
 

@@ -18,6 +18,24 @@ Current Build of Materials ~$250 **Some of these parts will be switched out as I
 
 
 
+
+# Hardware
+## ESP32
+The embedded code of the DIY active pedal runs on an ESP32 microcontroller. 
+
+## Mechanics
+There are multiple variations of the DIY active pedal build by users, which can be found at our [discord](https://discord.gg/j9K5vUuT) channel.   
+  
+
+
 # Software
-SimHub plugin:
+
+## ESP32 code
+To flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32. 
+
+## SimHub plugin:
+The SimHub plugin was designed to communicate with the esp32 to (a) modify the pedal configuration, e.g. the force vs. travel parameterization and (b) to trigger effects such as ABS oscillations.  
+
 ![image](SimHubPlugin/Images/SimHubPluginOverview.png)
+
+To install the plugin, copy the plugin [binaries](SimHubPlugin/bin/Release) content to your SimHub directory, e.g. C:/Program Files (x86)/SimHub

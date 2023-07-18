@@ -2,7 +2,12 @@
 
 #include <stdint.h>
 
-struct DAP_config_st {
+
+#define DAP_VERSION_CONFIG 100
+#define DAP_PAYLOAD_TYPE_CONFIG 100
+
+struct payloadHeader {
+  
   // structure identification via payload
   uint8_t payloadType;
 
@@ -10,8 +15,10 @@ struct DAP_config_st {
   uint8_t version;
 
   // To check if structure is valid
-  uint8_t checkSum;
+  uint16_t checkSum;
+};
 
+struct payloadPedalConfig {
   // configure pedal start and endpoint
   // In percent
   uint8_t pedalStartPosition;
@@ -44,8 +51,21 @@ struct DAP_config_st {
   uint8_t horPos_AB;
   uint8_t verPos_AB;
   uint8_t lengthPedal_CB;
+};
+
+
+
+struct DAP_config_st {
+
+  payloadHeader payLoadHeader_;
+  payloadPedalConfig payLoadPedalConfig_;
+
+  
   
   void initialiseDefaults();
+  void initialiseDefaults_Accelerator();
+  void loadConfigFromEprom(DAP_config_st& config_st);
+  void storeConfigToEprom(DAP_config_st& config_st);
 };
 
 
