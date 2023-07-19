@@ -366,7 +366,8 @@ namespace User.PluginSdkDemo
                 // https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/how-to?pivots=dotnet-8-0
                 // https://www.educative.io/answers/how-to-read-a-json-file-in-c-sharp
 
-                string dirName = "C:\\Program Files (x86)\\SimHub\\PluginsData\\Common";
+                string currentDirectory = Directory.GetCurrentDirectory();
+                string dirName = currentDirectory + "\\PluginsData\\Common";
                 string jsonFileName = ComboBox_JsonFileSelected.Text;
                 string fileName = dirName + "\\" + jsonFileName + ".json";
 
