@@ -26,15 +26,34 @@ namespace User.PluginSdkDemo
     {
 
 
-        
+
 
         public DataPluginDemo Plugin { get; }
 
         public DAP_config_st dap_config_st;
-        
 
 
 
+        private void UpdateSerialPortList_click()
+        {
+
+            var SerialPortSelectionArray = new List<SerialPortChoice>();
+            string[] comPorts = SerialPort.GetPortNames();
+            if (comPorts.Length > 0)
+            {
+
+                foreach (string portName in comPorts)
+                {
+                    SerialPortSelectionArray.Add(new SerialPortChoice(portName, portName));
+                }
+            }
+            else
+            {
+                SerialPortSelectionArray.Add(new SerialPortChoice("NA", "NA"));
+            }
+
+            SerialPortSelection.DataContext = SerialPortSelectionArray;
+        }
 
 
 
@@ -67,25 +86,7 @@ namespace User.PluginSdkDemo
 
 
 
-
-
-
-            var SerialPortSelectionArray = new List<SerialPortChoice>() {
-                new SerialPortChoice("COM1", "COM1"),
-                new SerialPortChoice("COM2", "COM2"),
-                new SerialPortChoice("COM3", "COM3"),
-                new SerialPortChoice("COM4", "COM4"),
-                new SerialPortChoice("COM5", "COM5"),
-                new SerialPortChoice("COM6", "COM6"),
-                new SerialPortChoice("COM7", "COM7"),
-                new SerialPortChoice("COM8", "COM8"),
-                new SerialPortChoice("COM9", "COM9"),
-                new SerialPortChoice("COM10", "COM10"),
-                new SerialPortChoice("COM11", "COM11"),
-                new SerialPortChoice("COM12", "COM12")
-            };
-
-            SerialPortSelection.DataContext = SerialPortSelectionArray;
+            UpdateSerialPortList_click();
 
         }
 
@@ -509,6 +510,13 @@ namespace User.PluginSdkDemo
         }
 
 
+
+        public void UpdateSerialPortList_click(object sender, RoutedEventArgs e)
+        {
+            UpdateSerialPortList_click();
+        }
+
+
         public void ConnectToPedal_click(object sender, RoutedEventArgs e)
         {
             Plugin.serialPortConnected = !Plugin.serialPortConnected;
@@ -536,13 +544,13 @@ namespace User.PluginSdkDemo
                 catch (Exception ex)
                 {
                     //DisplayData(MessageType.Error, ex.Message);
-                    
+
 
                     /*Plugin._serialPort.Dispose();
                     Plugin._serialPort.Open();
                     int tmp = 5;*/
 
-                    this.Plugin.PedalMinPosition = 50; 
+                    ConnectToPedal.IsChecked = false;
 
 
                 }

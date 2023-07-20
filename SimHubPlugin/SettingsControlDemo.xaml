@@ -30,13 +30,13 @@
         </Grid.ColumnDefinitions>
 
 
-        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" Text="Serial port selection:" Grid.Row="0" Grid.Column="0" Width="180" />
+        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="500,0,0,0" Text="Serial port selection:" Grid.Row="0" Grid.Column="0" Width="180" />
 
-        <ComboBox x:Name="SerialPortSelection" SelectionChanged="SerialPortSelectionChanged" Margin="130,0,0,0"  Grid.Row="0" Grid.Column="0"
+        <ComboBox x:Name="SerialPortSelection" SelectionChanged="SerialPortSelectionChanged" Margin="200,0,0,0"  Grid.Row="0" Grid.Column="0"
                   Width="120" HorizontalAlignment="Left"
                   ItemsSource="{Binding}" DisplayMemberPath="Display" SelectedValuePath="Value"/>
 
-        <TextBlock HorizontalAlignment="Right" VerticalAlignment="Top" Margin="50,0,0,0" Text="Connect to pedal" Grid.Row="0" Grid.Column="0" Width="100" />
+        <TextBlock HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,350,0" Text="Connect to pedal" Grid.Row="0" Grid.Column="0" Width="100" Grid.ColumnSpan="2" />
         <CheckBox x:Name="ConnectToPedal" Click="ConnectToPedal_click" Grid.Column="0" HorizontalAlignment="Right" Grid.Row="0"
                   Width="50"
                   Height="25" Margin="100,20,0,0" VerticalAlignment="Top"/>
@@ -45,6 +45,7 @@
 
 
 
+        <styles:SHButtonPrimary Click="UpdateSerialPortList_click" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0" Width="180" >Update serial port list</styles:SHButtonPrimary>
 
 
         <styles:SHButtonPrimary Click="ResetPedalPosition_click" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Width="180" >Reset pedal position</styles:SHButtonPrimary>
