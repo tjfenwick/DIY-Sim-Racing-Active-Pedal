@@ -1,38 +1,36 @@
 #pragma once
 
 #include "freertos/timers.h"
-
+#include "RTDebugOutput.h"
 
 static const int MAX_CYCLES = 1000;
 
 class CycleTimer {
 private:
-  String _timerName;
-  unsigned long _timeFirst;
+  RTDebugOutput<float, 1> _rtOutput;
+  int64_t _timeFirst;
   unsigned int _cycleCount;
 
 public:
   CycleTimer(String timerName)
-    : _timerName(timerName)
+    : _rtOutput({ timerName })
   {
     ResetTimer();
   }
 
   void ResetTimer() {
-    _timeFirst = esp_timer_get_time();//micros();
+    _timeFirst = esp_timer_get_time();
     _cycleCount = 0;
   }
 
   void Bump() {
     _cycleCount++;
     if (_cycleCount > MAX_CYCLES) {
-
-      ;
-      unsigned long timeEnd = esp_timer_get_time();//micros();
-      unsigned long timeElapsed = timeEnd - _timeFirst;
+      int64_t timeEnd = esp_timer_get_time();
+      int64_t timeElapsed = timeEnd - _timeFirst;
               
-      double averageCycleTime = ((double)timeElapsed) / ((double)MAX_CYCLES); 
-      Serial.print(_timerName); Serial.print(": "); Serial.println(averageCycleTime);
+      float averageCycleTime = float(timeElapsed) / MAX_CYCLES;
+      _rtOutput.offerData({ averageCycleTime });
 
       ResetTimer();
     }

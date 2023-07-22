@@ -40,9 +40,6 @@ DAP_calculationVariables_st dap_calculationVariables_st;
 #include "CycleTimer.h"
 //#define PRINT_CYCLETIME
 
-static CycleTimer timerPU("PU cycle time");
-static CycleTimer timerSC("SC cycle time");
-
 // target cycle time for pedal update task, to get constant cycle times, required for FIR filtering
 #define PUT_TARGET_CYCLE_TIME_IN_US 100
 
@@ -391,6 +388,7 @@ void pedalUpdateTask( void * pvParameters )
 
     // print the execution time averaged over multiple cycles 
     #ifdef PRINT_CYCLETIME
+      static CycleTimer timerPU("PU cycle time");
       timerPU.Bump();
     #endif
 
@@ -613,6 +611,7 @@ void serialCommunicationTask( void * pvParameters )
 
     // average cycle time averaged over multiple cycles 
     #ifdef PRINT_CYCLETIME
+      static CycleTimer timerSC("SC cycle time");
       timerSC.Bump();
     #endif
 

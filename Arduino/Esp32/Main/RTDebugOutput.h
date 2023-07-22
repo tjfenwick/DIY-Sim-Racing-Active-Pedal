@@ -67,13 +67,17 @@ public:
   }
 
   void printData() {
-    if(xSemaphoreTake(_semaphore_data, 0) == pdTRUE) {
+    if (xSemaphoreTake(_semaphore_data, 0) == pdTRUE) {
       if (_dataReady) {
-        for (int i=0; i<NVALS; i++) {
-          printValue(_outNames[i], _outValues[i]);
+        static SemaphoreHandle_t semaphore_print = xSemaphoreCreateMutex();
+        if (xSemaphoreTake(semaphore_print, 0) == pdTRUE) {
+          for (int i=0; i<NVALS; i++) {
+            printValue(_outNames[i], _outValues[i]);
+          }
+          Serial.println(" ");
+          xSemaphoreGive(semaphore_print);
+          _dataReady = false;
         }
-        Serial.println(" ");
-        _dataReady = false;
       }
       xSemaphoreGive(_semaphore_data);
     }
