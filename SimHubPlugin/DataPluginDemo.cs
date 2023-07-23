@@ -3,6 +3,7 @@ using SimHub.Plugins;
 using SimHub.Plugins.OutputPlugins.Dash.GLCDTemplating;
 using System;
 using System.IO.Ports;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 
@@ -80,20 +81,16 @@ namespace User.PluginSdkDemo
     {
 
 
-        public int TravelDistance = 100;
-        public int PedalMinPosition = 100;
-        public int PedalMaxPosition = 100;
-        public int PedalMaxForce = 100;
-
-
-        public bool toogleDebug = false;
         public bool sendAbsSignal = false;
+		public DAP_config_st dap_config_initial_st;
 
-        
+
 
 
         //https://www.c-sharpcorner.com/uploadfile/eclipsed4utoo/communicating-with-serial-port-in-C-Sharp/
-        public SerialPort _serialPort = new SerialPort("COM7", 921600, Parity.None, 8, StopBits.One);
+        public SerialPort[] _serialPort = new SerialPort[3] {new SerialPort("COM7", 921600, Parity.None, 8, StopBits.One),
+            new SerialPort("COM7", 921600, Parity.None, 8, StopBits.One),
+            new SerialPort("COM7", 921600, Parity.None, 8, StopBits.One)};
         
     
 
@@ -128,33 +125,43 @@ namespace User.PluginSdkDemo
         /// <param name="data">Current game data, including current and previous data frame.</param>
         public void DataUpdate(PluginManager pluginManager, ref GameData data)
         {
-            // Define the value of our property (declared in init)
+			
+			bool sendAbsSignal_local_b = false;
+			
+			
+            // Send ABS signal when triggered by the game
             if (data.GameRunning)
             {
                 if (data.OldData != null && data.NewData != null)
                 {
                     if (data.NewData.ABSActive > 0)
                     {
-                        if (_serialPort.IsOpen)
-                        {
-                            _serialPort.Write("2");
-                        }
+						sendAbsSignal_local_b = true;
                     }
-                    /*else
-                    {
-                        _serialPort.Write("3");
-                    }*/
                 }
             }
-
+			
+			// Send ABS test signal if requested
             if (sendAbsSignal)
             {
-                if (_serialPort.IsOpen)
-                {
-                    _serialPort.Write("2");
-                }
+				sendAbsSignal_local_b = true;
+                
             }
+			
+			
+			// Send ABS trigger signal via serial
+			if (sendAbsSignal_local_b)
+			{
+				if (_serialPort[1].IsOpen)
+                {
+                    _serialPort[1].Write("2");
+                }
+			}
+			
+			
         }
+		
+		
 
         /// <summary>
         /// Called at plugin manager stop, close/dispose anything needed here !
@@ -163,6 +170,16 @@ namespace User.PluginSdkDemo
         /// <param name="pluginManager"></param>
         public void End(PluginManager pluginManager)
         {
+            //for(uint pedalIndex = 0; pedalIndex<3; pedalIndex++)
+            //{
+            //    Settings.selectedComPortNames[pedalIndex] = _serialPort[pedalIndex].PortName;
+
+
+            //    SimHub.Logging.Current.Info("Diy active pedas plugin - Test 2: " + _serialPort[pedalIndex].PortName);
+
+
+            //}
+            
             // Save settings
             this.SaveCommonSettings("GeneralSettings", Settings);
         }
@@ -184,7 +201,7 @@ namespace User.PluginSdkDemo
         /// <param name="pluginManager"></param>
         public void Init(PluginManager pluginManager)
         {
-            SimHub.Logging.Current.Info("Starting plugin");
+            SimHub.Logging.Current.Info("Starting DIY active pedal plugin");
 
             // Load settings
             Settings = this.ReadCommonSettings<DataPluginDemoSettings>("GeneralSettings", () => new DataPluginDemoSettings());
@@ -209,31 +226,68 @@ namespace User.PluginSdkDemo
             });
 
 
+            //Settings.selectedJsonIndexLast[0]
+            SimHub.Logging.Current.Info("Diy active pedas plugin - Test 1");
+            SimHub.Logging.Current.Info("Diy active pedas plugin - COM port: " + Settings.selectedComPortNames[0]);
 
 
-            // https://learn.microsoft.com/de-de/dotnet/api/system.io.ports.serialport?view=dotnet-plat-ext-7.0
-            Console.WriteLine("Available Ports:");
-            foreach (string s in SerialPort.GetPortNames())
-            {
-                Console.WriteLine("   {0}", s);
+
+
+
+
+
+            // prepare serial port interfaces
+            for (uint pedalIdx = 0; pedalIdx<3; pedalIdx++)
+			{
+				if (_serialPort[pedalIdx].IsOpen)
+				{
+					_serialPort[pedalIdx].Close();
+				}
+				
+				//_serialPort.Handshake = Handshake.None;
+				_serialPort[pedalIdx].ReadTimeout = 2000;
+				_serialPort[pedalIdx].WriteTimeout = 500;
+
+                try
+                {
+                    _serialPort[pedalIdx].PortName = Settings.selectedComPortNames[pedalIdx];
+                }
+                catch (Exception caughtEx)
+                {
+                }
+
+
             }
-            int tmp = 5;
 
-            if (_serialPort.IsOpen)
-            {
-                _serialPort.Close();
-            }
-
-
-            //_serialPort.Handshake = Handshake.None;
-            _serialPort.ReadTimeout = 2000;
-            _serialPort.WriteTimeout = 500;
+            //// check if Json config files are present, otherwise create new ones
+            //for (uint jsonIndex = 0; jsonIndex < ComboBox_JsonFileSelected.Items.Count; jsonIndex++)
+            //{
+            //	// which config file is seleced
+            //	string currentDirectory = Directory.GetCurrentDirectory();
+            //	string dirName = currentDirectory + "\\PluginsData\\Common";
+            //	string jsonFileName = ComboBox_JsonFileSelected(ComboBox_JsonFileSelected.Items[jsonIndex]).Text;
+            //	string fileName = dirName + "\\" + jsonFileName + ".json";
 
 
-            /*_serialPort.Open();
-            _serialPort.Write("1");
-            _serialPort.Close();
-            */
+            //	// Check if file already exists, otherwise create    
+            //	if (!File.Exists(fileName))
+            //	{
+            //		// create default config
+            //		// https://stackoverflow.com/questions/3275863/does-net-4-have-a-built-in-json-serializer-deserializer
+            //		// https://learn.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-serialize-and-deserialize-json-data?redirectedfrom=MSDN
+            //		var stream1 = new MemoryStream();
+            //		var ser = new DataContractJsonSerializer(typeof(DAP_config_st));
+            //		ser.WriteObject(stream1, dap_config_initial_st);
+
+            //		stream1.Position = 0;
+            //		StreamReader sr = new StreamReader(stream1);
+            //		string jsonString = sr.ReadToEnd();
+
+            //		System.IO.File.WriteAllText(fileName, jsonString);
+            //	}
+            //}
+
+
 
 
 
