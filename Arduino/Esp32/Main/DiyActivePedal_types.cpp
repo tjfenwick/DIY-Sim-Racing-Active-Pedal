@@ -15,8 +15,8 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.pedalStartPosition = 35;
   payLoadPedalConfig_.pedalEndPosition = 80;
 
-  payLoadPedalConfig_.maxForce = 90;
-  payLoadPedalConfig_.preloadForce = 1;
+  payLoadPedalConfig_.maxForce = 90 * 300 / 40;
+  payLoadPedalConfig_.preloadForce = 1 * 300 / 40;
 
   payLoadPedalConfig_.relativeForce_p000 = 0;
   payLoadPedalConfig_.relativeForce_p020 = 20;
@@ -43,8 +43,8 @@ void DAP_config_st::initialiseDefaults_Accelerator() {
   payLoadHeader_.version = DAP_VERSION_CONFIG;
 
 
-  payLoadPedalConfig_.pedalStartPosition = 35;
-  payLoadPedalConfig_.pedalEndPosition = 80;
+  payLoadPedalConfig_.pedalStartPosition = 25;
+  payLoadPedalConfig_.pedalEndPosition = 90;
 
   payLoadPedalConfig_.maxForce = 20;
   payLoadPedalConfig_.preloadForce = 3;
@@ -111,8 +111,8 @@ void DAP_calculationVariables_st::updateFromConfig(DAP_config_st& config_st) {
   dampingPress = ((float)config_st.payLoadPedalConfig_.dampingPress) / 400.0f;
 
   // update force variables
-  Force_Min = ((float)config_st.payLoadPedalConfig_.preloadForce) / 10.0f;
-  Force_Max = ((float)config_st.payLoadPedalConfig_.maxForce) / 10.0f;
+  Force_Min = ((float)config_st.payLoadPedalConfig_.preloadForce);
+  Force_Max = ((float)config_st.payLoadPedalConfig_.maxForce); 
   Force_Range = Force_Max - Force_Min;
 }
 

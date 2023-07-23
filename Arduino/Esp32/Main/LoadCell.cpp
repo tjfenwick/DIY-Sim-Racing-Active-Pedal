@@ -21,7 +21,7 @@ static const int NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION = 1000;
 static const float LOADCELL_VARIANCE_MIN = 0.001f;
 
 static const float LOADCELL_EXCITATION_V = 5;
-static const float LOADCELL_WEIGHT_RATING_KG = 40;
+static const float LOADCELL_WEIGHT_RATING_KG = 300;
 static const float LOADCELL_SENSITIVITY_MV_V = 2;
 
 static const float CONVERSION_FACTOR = LOADCELL_WEIGHT_RATING_KG / (LOADCELL_EXCITATION_V * (LOADCELL_SENSITIVITY_MV_V/1000));
@@ -90,11 +90,15 @@ void LoadCell_ADS1256::estimateVariance() {
   float varEstimate = 0.0f;
   for (long i = 0; i < NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION; i++){
     float loadcellReading = getReadingKg();
-    Serial.println(loadcellReading);
+    //Serial.println(loadcellReading);
     varEstimate += sq(loadcellReading) * varNormalizer;
   }
 
+  Serial.println("Variance est.:");
   Serial.println(varEstimate);
+
+  Serial.println("Stddev est.:");
+  Serial.println(sqrt(varEstimate));
 
   // make sure estimate is nonzero
   if (varEstimate < LOADCELL_VARIANCE_MIN) { 

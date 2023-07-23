@@ -29,14 +29,14 @@ FirNotchFilter::FirNotchFilter(float notchFrequency)
   // Normalized notch frequency
   f_n = 2 * f_c / f_s;
 
-  //filter1 = simpleNotchFIR(f_n);     // fundamental
+  filter1 = simpleNotchFIR(f_n);     // fundamental
   //filter2 = simpleNotchFIR(2 * f_n); // second harmonic
 
 }
 
 float FirNotchFilter::filterValue(float value) {
   //return filter2(filter1(value));
-  //return filter1(value);
-  return filter(value);
+  return filter1(value);
+  //return filter(value);
 }
 
