@@ -6,13 +6,18 @@
 
 
 #ifdef PEDAL_IS_BRAKE
+
+  // v = s / t
+  // a = v/t
+  // a = s / t^2
+  // a = 300 / delta_t^2
   // adjust model noise here s = 0.5 * a * delta_t^2 --> a = 2 * s / delta_t^2
-  static const float KF_MODEL_NOISE_FORCE_ACCELERATION = ( 2.0f * 30.0f / 0.05f/ 0.05f );
+  static const float KF_MODEL_NOISE_FORCE_ACCELERATION = ( 2.0f * 1000.0f / 0.05f/ 0.05f );
 #endif
 
 #ifdef PEDAL_IS_ACCELERATOR
   // adjust model noise here s = 0.5 * a * delta_t^2 --> a = 2 * s / delta_t^2
-  static const float KF_MODEL_NOISE_FORCE_ACCELERATION = ( 2.0f * 10.0f / 0.05f/ 0.05f );
+  static const float KF_MODEL_NOISE_FORCE_ACCELERATION = ( 2.0f * 100.0f / 0.05f/ 0.05f );
 #endif
 
 KalmanFilter::KalmanFilter(float varianceEstimate)

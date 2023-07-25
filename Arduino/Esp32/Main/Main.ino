@@ -1,5 +1,7 @@
 #include "PedalConfig.h"
-//#define ESTIMATE_LOADCELL_VARIANCE
+#define ESTIMATE_LOADCELL_VARIANCE
+
+
 
 
 #include <EEPROM.h>
@@ -232,6 +234,8 @@ void setup()
     forceCurve = new ForceCurve_Interpolated(dap_config_st, dap_calculationVariables_st);
   #endif
 
+  Serial.print("Given loadcell variance: ");
+  Serial.println(loadcell->getVarianceEstimate());
   kalman = new KalmanFilter(loadcell->getVarianceEstimate());
 
 
@@ -302,6 +306,8 @@ unsigned long cycleTimeLastCall = micros();
 unsigned long minCyclesForFirToInit = 1000;
 unsigned long firCycleIncrementer = 0;
 
+
+unsigned long printCycleCounter = 0;
 
 
 //void loop()
@@ -405,8 +411,9 @@ void pedalUpdateTask( void * pvParameters )
 
 
     // Apply FIR notch filter to reduce force oscillation caused by ABS
+    //#define APPLY_FIR_FILTER
     #ifdef APPLY_FIR_FILTER
-      float filteredReading2 = firNotchFilter->filterValue(filteredReading);
+      float filteredReading2 = firNotchFilter->filterValue(loadcellReading);
       if (firCycleIncrementer > minCyclesForFirToInit)
       {
         filteredReading = filteredReading2;
@@ -417,22 +424,22 @@ void pedalUpdateTask( void * pvParameters )
       }
 
       firCycleIncrementer++;
-      if (firCycleIncrementer % 500 == 0)
+      /*if (firCycleIncrementer % 500 == 0)
       { 
         firCycleIncrementer = 0;
         Serial.print(filteredReading);
         Serial.print(",   ");
         Serial.print(filteredReading2);
         Serial.println("   ");
-      }
+      }*/
       
     #endif
     
 
-//    #define DEBUG_FILTER
+    //#define DEBUG_FILTER
     #ifdef DEBUG_FILTER
-      static RTDebugOutput<float, 2> rtDebugFilter({ "rawReading_g", "filtered_g" });
-      rtDebugFilter.offerData({ loadcellReading * 1000, filteredReading * 1000 });
+      static RTDebugOutput<float, 2> rtDebugFilter({ "rawReading_g", "filtered_g"});
+      rtDebugFilter.offerData({ loadcellReading * 1000, filteredReading * 1000});
     #endif
       
 
@@ -524,6 +531,9 @@ uint16_t checksumCalculator(uint8_t * data, uint16_t length)
    return (sum2 << 8) | sum1;
 }
 
+
+
+int32_t joystickNormalizedToInt32_local = 0;
 void serialCommunicationTask( void * pvParameters )
 {
 
@@ -623,6 +633,7 @@ void serialCommunicationTask( void * pvParameters )
     }
 
 
+    //SerialBT.println("Hello World");
 
 
     // transmit controller output
@@ -633,16 +644,17 @@ void serialCommunicationTask( void * pvParameters )
       {
         if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE)
         {
-          int32_t joystickNormalizedToInt32_local = joystickNormalizedToInt32;
+          joystickNormalizedToInt32_local = joystickNormalizedToInt32;
           xSemaphoreGive(semaphore_updateJoystick);
-          
-          SetControllerOutputValue(joystickNormalizedToInt32_local);
         }
         else
         {
           Serial.println("semaphore_updateJoystick == 0");
         }
       }
+
+      SetControllerOutputValue(joystickNormalizedToInt32_local);
+
     }
 
   }
