@@ -87,6 +87,7 @@ namespace User.PluginSdkDemo
 
 
 
+
         //https://www.c-sharpcorner.com/uploadfile/eclipsed4utoo/communicating-with-serial-port-in-C-Sharp/
         public SerialPort[] _serialPort = new SerialPort[3] {new SerialPort("COM7", 921600, Parity.None, 8, StopBits.One),
             new SerialPort("COM7", 921600, Parity.None, 8, StopBits.One),
@@ -287,6 +288,27 @@ namespace User.PluginSdkDemo
             //	}
             //}
 
+
+
+            dap_config_initial_st.payloadHeader_.payloadType = 100;
+            dap_config_initial_st.payloadHeader_.version = 100;
+            dap_config_initial_st.payloadPedalConfig_.pedalStartPosition = 35;
+            dap_config_initial_st.payloadPedalConfig_.pedalEndPosition = 80;
+            dap_config_initial_st.payloadPedalConfig_.maxForce = 90;
+            dap_config_initial_st.payloadPedalConfig_.relativeForce_p000 = 0;
+            dap_config_initial_st.payloadPedalConfig_.relativeForce_p020 = 20;
+            dap_config_initial_st.payloadPedalConfig_.relativeForce_p040 = 40;
+            dap_config_initial_st.payloadPedalConfig_.relativeForce_p060 = 60;
+            dap_config_initial_st.payloadPedalConfig_.relativeForce_p080 = 80;
+            dap_config_initial_st.payloadPedalConfig_.relativeForce_p100 = 100;
+            dap_config_initial_st.payloadPedalConfig_.dampingPress = 0;
+            dap_config_initial_st.payloadPedalConfig_.dampingPull = 0;
+            dap_config_initial_st.payloadPedalConfig_.absFrequency = 5;
+            dap_config_initial_st.payloadPedalConfig_.absAmplitude = 100;
+            dap_config_initial_st.payloadPedalConfig_.lengthPedal_AC = 150;
+            dap_config_initial_st.payloadPedalConfig_.horPos_AB = 215;
+            dap_config_initial_st.payloadPedalConfig_.verPos_AB = 80;
+            dap_config_initial_st.payloadPedalConfig_.lengthPedal_CB = 200;
 
 
 

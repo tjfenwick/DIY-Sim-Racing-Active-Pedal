@@ -7,7 +7,7 @@
     {
         public int SpeedWarningLevel = 100;
 		
-		public uint[] selectedJsonIndexLast = new uint[3] {0, 3, 6};
+		public int[] selectedJsonIndexLast = new int[3] {0, 3, 6};
 
         public string[] selectedComPortNames = {"COM1", "COM1", "COM1"};
 

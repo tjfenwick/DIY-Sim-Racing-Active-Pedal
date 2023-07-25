@@ -69,7 +69,7 @@
         
 		<!-- read/write config from/to JSON file buttons -->
 		<styles:SHButtonPrimary Click="SaveStructToJson_click" HorizontalAlignment="Left" Grid.Row="4"  Grid.Column="1" Width="180" >Save config to JSON</styles:SHButtonPrimary>
-        <styles:SHButtonPrimary Click="ReadStructFromJson_click" HorizontalAlignment="Right" Grid.Row="4"  Grid.Column="1" Width="180" >Read config from JSON</styles:SHButtonPrimary>
+        <!--<styles:SHButtonPrimary Click="ReadStructFromJson_click" HorizontalAlignment="Right" Grid.Row="4"  Grid.Column="1" Width="180" >Read config from JSON</styles:SHButtonPrimary>-->
 		
 		<!-- Serial communication debug textbox -->
         <TextBox x:Name="TextBox1" Grid.Column="2" HorizontalAlignment="Left" Margin="54,0,0,0" Grid.Row="3" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="336" AutomationProperties.Name="TextBox2" Height="138" Grid.RowSpan="3"/>
@@ -321,7 +321,8 @@
             </TextBlock>
 
 
-
+            
+            
             <Polyline x:Name="Polyline_BrakeForceCurve"
                       Height="400" Width="400"
                     Points="0,0 80,20 160,40 240,60 320,80 400,100"

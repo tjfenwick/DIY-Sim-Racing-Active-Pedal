@@ -33,7 +33,8 @@ namespace User.PluginSdkDemo
         public DAP_config_st[] dap_config_st = new DAP_config_st[3];
 
 
-        
+
+
 
 
 
@@ -54,7 +55,8 @@ namespace User.PluginSdkDemo
 
                 string currentDirectory = Directory.GetCurrentDirectory();
                 string dirName = currentDirectory + "\\PluginsData\\Common";
-                string jsonFileName = ComboBox_JsonFileSelected.Text;
+                //string jsonFileName = ComboBox_JsonFileSelected.Text;
+                string jsonFileName = ((ComboBoxItem)ComboBox_JsonFileSelected.SelectedItem).Content.ToString();
                 string fileName = dirName + "\\" + jsonFileName + ".json";
 
                 string text = System.IO.File.ReadAllText(fileName);
@@ -62,7 +64,10 @@ namespace User.PluginSdkDemo
                 DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(DAP_config_st));
                 var ms = new MemoryStream(Encoding.UTF8.GetBytes(text));
                 dap_config_st[indexOfSelectedPedal_u] = (DAP_config_st)deserializer.ReadObject(ms);
-                TextBox1.Text = "Config loaded!";
+                //TextBox1.Text = "Config loaded!";
+                //TextBox1.Text += ComboBox_JsonFileSelected.Text;
+                //TextBox1.Text += "    ";
+                //TextBox1.Text += ComboBox_JsonFileSelected.SelectedIndex;
 
                 updateTheGuiFromConfig();
 
@@ -189,6 +194,52 @@ namespace User.PluginSdkDemo
         public SettingsControlDemo(DataPluginDemo plugin) : this()
         {
             this.Plugin = plugin;
+
+
+
+            // check if Json config files are present, otherwise create new ones
+            for (int jsonIndex = 0; jsonIndex < ComboBox_JsonFileSelected.Items.Count; jsonIndex++)
+            {
+
+                ComboBox_JsonFileSelected.SelectedIndex = jsonIndex;
+
+                // which config file is seleced
+                string currentDirectory = Directory.GetCurrentDirectory();
+                string dirName = currentDirectory + "\\PluginsData\\Common";
+                //string jsonFileName = ComboBox_JsonFileSelected(ComboBox_JsonFileSelected.Items[jsonIndex]).Text;
+                string jsonFileName = ((ComboBoxItem)ComboBox_JsonFileSelected.SelectedItem).Content.ToString();
+                string fileName = dirName + "\\" + jsonFileName + ".json";
+
+
+                // Check if file already exists, otherwise create    
+                if (!File.Exists(fileName))
+                {
+                    // create default config
+                    // https://stackoverflow.com/questions/3275863/does-net-4-have-a-built-in-json-serializer-deserializer
+                    // https://learn.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-serialize-and-deserialize-json-data?redirectedfrom=MSDN
+                    var stream1 = new MemoryStream();
+                    var ser = new DataContractJsonSerializer(typeof(DAP_config_st));
+                    ser.WriteObject(stream1, Plugin.dap_config_initial_st);
+
+                    stream1.Position = 0;
+                    StreamReader sr = new StreamReader(stream1);
+                    string jsonString = sr.ReadToEnd();
+
+                    System.IO.File.WriteAllText(fileName, jsonString);
+                }
+            }
+
+
+
+            for (uint pedalIndex = 0; pedalIndex<3; pedalIndex++)
+            {
+                indexOfSelectedPedal_u = pedalIndex;
+                //ComboBox_JsonFileSelected.SelectedIndex = Plugin.Settings.selectedJsonFileNames[indexOfSelectedPedal_u];
+                ComboBox_JsonFileSelected.SelectedIndex = Plugin.Settings.selectedJsonIndexLast[indexOfSelectedPedal_u];
+                ReadStructFromJson();
+                updateTheGuiFromConfig();
+            }
+            
         }
 
         
@@ -243,7 +294,8 @@ namespace User.PluginSdkDemo
                 //ComboBox_JsonFileSelected.SelectedItem = Plugin.Settings.selectedJsonFileNames[indexOfSelectedPedal_u];
                 //ComboBox_JsonFileSelected.SelectedValue = (string)Plugin.Settings.selectedJsonFileNames[indexOfSelectedPedal_u];
 
-                ComboBox_JsonFileSelected.SelectedIndex = Plugin.Settings.selectedComPortNamesInt[indexOfSelectedPedal_u];
+                ComboBox_JsonFileSelected.SelectedIndex = Plugin.Settings.selectedJsonIndexLast[indexOfSelectedPedal_u];
+
                 //ReadStructFromJson();
 
 
@@ -275,58 +327,49 @@ namespace User.PluginSdkDemo
 		
         private void Update_BrakeForceCurve()
         {
-            for (int pointIdx = 0; pointIdx < 6; pointIdx++)
+
+            double[] x = new double[6];
+            double[] y = new double[6];
+            x[0] = 0;
+            x[1] = 20;
+            x[2] = 40;
+            x[3] = 60;
+            x[4] = 80;
+            x[5] = 100;
+
+            y[0] = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000;
+            y[1] = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020;
+            y[2] = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040;
+            y[3] = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060;
+            y[4] = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080;
+            y[5] = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100;
+
+            // Use cubic interpolation to smooth the original data
+            (double[] xs2, double[] ys2, double[] a, double[] b) = Cubic.Interpolate1D(x, y, 100);
+
+            TextBox1.Text = "";
+            for (uint i = 0; i < a.Length; i++)
             {
-				
-				// http://www.csharphelper.com/howtos/wpf_let_user_draw_polyline.html
-				// https://stackoverflow.com/questions/1267687/how-to-move-all-coordinate-from-a-wpf-polyline-object
-				//Point p = this.Polyline_BrakeForceCurve.Points[0];
-				//p.Y = e.NewValue;
-				//this.Polyline_BrakeForceCurve.Points[0] = p;// = e.NewValue;
-				
-				
-                // http://www.csharphelper.com/howtos/wpf_let_user_draw_polyline.html
-                // https://stackoverflow.com/questions/1267687/how-to-move-all-coordinate-from-a-wpf-polyline-object
-                Point p = this.Polyline_BrakeForceCurve.Points[pointIdx];
-                //p.Y = e.NewValue;
-
-                double pointPos = 0;
-                switch (pointIdx)
-                {
-                    case 0:
-                        pointPos = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000;
-                        break;
-                    case 1:
-                        pointPos = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020;
-                        break;
-                    case 2:
-                        pointPos = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040;
-                        break;
-                    case 3:
-                        pointPos = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060;
-                        break;
-                    case 4:
-                        pointPos = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080;
-                        break;
-                    case 5:
-                        pointPos = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100;
-                        break;
-                    default:
-                        pointPos = 0;
-                        break;
-                }
-
-                p.Y = pointPos;
-
-                this.Polyline_BrakeForceCurve.Points[pointIdx] = p;// = e.NewValue;}
-
+                TextBox1.Text += "\na[" + i + "]: " + a[i] + "      b[" + i + "]: " + b[i] ;
             }
 
+
+            System.Windows.Media.PointCollection myPointCollection2 = new System.Windows.Media.PointCollection();
+ 
+
+            for (int pointIdx = 0; pointIdx < 100; pointIdx++)
+            {
+                System.Windows.Point Pointlcl = new System.Windows.Point(4 * xs2[pointIdx], ys2[pointIdx]);
+                myPointCollection2.Add(Pointlcl);
+            }
+
+            this.Polyline_BrakeForceCurve.Points = myPointCollection2;
+
         }
-		
-		
-		
-		public class SerialPortChoice
+
+
+
+        public class SerialPortChoice
         {
             public SerialPortChoice(string display, string value)
             {
@@ -344,12 +387,10 @@ namespace User.PluginSdkDemo
 		// see https://stackoverflow.com/questions/772841/is-there-selected-tab-changed-event-in-the-standard-wpf-tab-control
 		private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-            if (tabPedalSelection_clutch.IsSelected) { indexOfSelectedPedal_u = 0; }
-			if (tabPedalSelection_brake.IsSelected) { indexOfSelectedPedal_u = 1; }
-			if (tabPedalSelection_accelerator.IsSelected) { indexOfSelectedPedal_u = 2; }			
-			
-			// update the sliders & serial port selection accordingly
-			updateTheGuiFromConfig();
+            indexOfSelectedPedal_u = (uint)MyTab.SelectedIndex;
+
+            // update the sliders & serial port selection accordingly
+            updateTheGuiFromConfig();
 		}
 
 
@@ -482,7 +523,11 @@ namespace User.PluginSdkDemo
                 //TextBox1.Text = stringValue;
                 Plugin.Settings.selectedJsonFileNames[indexOfSelectedPedal_u] = stringValue;
 
-                Plugin.Settings.selectedComPortNamesInt[indexOfSelectedPedal_u] = ComboBox_JsonFileSelected.SelectedIndex;
+                Plugin.Settings.selectedJsonIndexLast[indexOfSelectedPedal_u] = ComboBox_JsonFileSelected.SelectedIndex;
+
+                
+
+                ReadStructFromJson();
             }
             catch (Exception caughtEx)
             {
@@ -539,10 +584,10 @@ namespace User.PluginSdkDemo
 
 		
 
-        public void ReadStructFromJson_click(object sender, RoutedEventArgs e)
-        {
-            ReadStructFromJson();
-        }
+        //public void ReadStructFromJson_click(object sender, RoutedEventArgs e)
+        //{
+        //    ReadStructFromJson();
+        //}
 		
 		
 		/********************************************************************************************************************/
