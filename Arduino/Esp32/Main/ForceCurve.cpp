@@ -3,6 +3,65 @@
 #include "InterpolationLib.h"
 
 
+// see https://swharden.com/blog/2022-01-22-spline-interpolation/
+float ForceCurve_Interpolated::EvalForceCubicSpline(DAP_config_st& config_st, const DAP_calculationVariables_st& calc_st, float fractionalPos)
+{
+
+  float splineSegment_fl32 = fractionalPos * 5;
+  uint8_t splineSegment_u8 = (uint8_t)floor(splineSegment_fl32);
+  
+  if (splineSegment_u8 < 0){splineSegment_u8 = 0;}
+  if (splineSegment_u8 > 4){splineSegment_u8 = 4;}
+  float a = config_st.payLoadPedalConfig_.cubic_spline_param_a_array[splineSegment_u8];
+  float b = config_st.payLoadPedalConfig_.cubic_spline_param_b_array[splineSegment_u8];
+
+  float yOrig[6];
+  yOrig[0] = config_st.payLoadPedalConfig_.relativeForce_p000;
+  yOrig[1] = config_st.payLoadPedalConfig_.relativeForce_p020;
+  yOrig[2] = config_st.payLoadPedalConfig_.relativeForce_p040;
+  yOrig[3] = config_st.payLoadPedalConfig_.relativeForce_p060;
+  yOrig[4] = config_st.payLoadPedalConfig_.relativeForce_p080;
+  yOrig[5] = config_st.payLoadPedalConfig_.relativeForce_p100;
+
+  double dx = 1.0f;
+  double t = (splineSegment_fl32 - (float)splineSegment_u8) / dx;
+  double y = (1 - t) * yOrig[splineSegment_u8] + t * yOrig[splineSegment_u8 + 1] + t * (1 - t) * (a * (1 - t) + b * t);
+
+  y = calc_st.Force_Min + y / 100.0f * calc_st.Force_Range;
+
+  return y;
+}
+
+
+float ForceCurve_Interpolated::EvalForceGradientCubicSpline(DAP_config_st& config_st, const DAP_calculationVariables_st& calc_st, float fractionalPos)
+{
+
+  float splineSegment_fl32 = fractionalPos * 5;
+  uint8_t splineSegment_u8 = (uint8_t)floor(splineSegment_fl32);
+  
+  if (splineSegment_u8 < 0){splineSegment_u8 = 0;}
+  if (splineSegment_u8 > 4){splineSegment_u8 = 4;}
+  float a = config_st.payLoadPedalConfig_.cubic_spline_param_a_array[splineSegment_u8];
+  float b = config_st.payLoadPedalConfig_.cubic_spline_param_b_array[splineSegment_u8];
+
+  float yOrig[6];
+  yOrig[0] = config_st.payLoadPedalConfig_.relativeForce_p000;
+  yOrig[1] = config_st.payLoadPedalConfig_.relativeForce_p020;
+  yOrig[2] = config_st.payLoadPedalConfig_.relativeForce_p040;
+  yOrig[3] = config_st.payLoadPedalConfig_.relativeForce_p060;
+  yOrig[4] = config_st.payLoadPedalConfig_.relativeForce_p080;
+  yOrig[5] = config_st.payLoadPedalConfig_.relativeForce_p100;
+
+  double dx = 1.0f;
+  double t = (splineSegment_fl32 - (float)splineSegment_u8) / dx;
+  double dy = yOrig[splineSegment_u8 + 1] - yOrig[splineSegment_u8];
+  double y_prime = dy / dx + (1 - 2 * t) * (a * (1 - t) + b * t) / dx + t * (1 - t) * (b - a) / dx;
+
+  y_prime = y_prime / 100.0f * calc_st.Force_Range;
+
+  return y_prime;
+}
+
 ForceCurve_Interpolated::ForceCurve_Interpolated(DAP_config_st& config_st, DAP_calculationVariables_st& calc_st)
 {
   double xValues[INTERPOLATION_NUMBER_OF_SOURCE_VALUES] = { 0, 20, 40, 60, 80, 100 };

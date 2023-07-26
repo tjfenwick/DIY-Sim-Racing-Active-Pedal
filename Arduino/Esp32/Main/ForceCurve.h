@@ -4,7 +4,7 @@
 
 
 static const int INTERPOLATION_NUMBER_OF_SOURCE_VALUES = 6;
-static const int INTERPOLATION_NUMBER_OF_TARGET_VALUES = 30;
+static const int INTERPOLATION_NUMBER_OF_TARGET_VALUES = 1000;
 
 class ForceCurve_Interpolated {
 private:
@@ -14,6 +14,9 @@ private:
 
 public:
   ForceCurve_Interpolated(DAP_config_st& config_st, DAP_calculationVariables_st& calc_st);
+  float EvalForceCubicSpline(DAP_config_st& config_st, const DAP_calculationVariables_st& calc_st, float fractionalPos);
+  float EvalForceGradientCubicSpline(DAP_config_st& config_st, const DAP_calculationVariables_st& calc_st, float fractionalPos);
+  
 
 private:
   int fractionalPosToIndex(float fractionalPos) const;

@@ -35,6 +35,22 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.horPos_AB = 215;
   payLoadPedalConfig_.verPos_AB = 80;
   payLoadPedalConfig_.lengthPedal_CB = 200;
+
+  payLoadPedalConfig_.cubic_spline_param_a_array[0] = 0;
+  payLoadPedalConfig_.cubic_spline_param_a_array[1] = 0;
+  payLoadPedalConfig_.cubic_spline_param_a_array[2] = 0;
+  payLoadPedalConfig_.cubic_spline_param_a_array[3] = 0;
+  payLoadPedalConfig_.cubic_spline_param_a_array[4] = 0;
+
+  payLoadPedalConfig_.cubic_spline_param_b_array[0] = 0;
+  payLoadPedalConfig_.cubic_spline_param_b_array[1] = 0;
+  payLoadPedalConfig_.cubic_spline_param_b_array[2] = 0;
+  payLoadPedalConfig_.cubic_spline_param_b_array[3] = 0;
+  payLoadPedalConfig_.cubic_spline_param_b_array[4] = 0;
+
+  payLoadPedalConfig_.PID_p_gain = 0.3;
+  payLoadPedalConfig_.PID_i_gain = 50.0;
+  payLoadPedalConfig_.PID_d_gain = 0.0;
 }
 
 
@@ -66,6 +82,22 @@ void DAP_config_st::initialiseDefaults_Accelerator() {
   payLoadPedalConfig_.horPos_AB = 215;
   payLoadPedalConfig_.verPos_AB = 80;
   payLoadPedalConfig_.lengthPedal_CB = 200;
+
+  payLoadPedalConfig_.cubic_spline_param_a_array[0] = 0;
+  payLoadPedalConfig_.cubic_spline_param_a_array[1] = 0;
+  payLoadPedalConfig_.cubic_spline_param_a_array[2] = 0;
+  payLoadPedalConfig_.cubic_spline_param_a_array[3] = 0;
+  payLoadPedalConfig_.cubic_spline_param_a_array[4] = 0;
+
+  payLoadPedalConfig_.cubic_spline_param_b_array[0] = 0;
+  payLoadPedalConfig_.cubic_spline_param_b_array[1] = 0;
+  payLoadPedalConfig_.cubic_spline_param_b_array[2] = 0;
+  payLoadPedalConfig_.cubic_spline_param_b_array[3] = 0;
+  payLoadPedalConfig_.cubic_spline_param_b_array[4] = 0;
+
+  payLoadPedalConfig_.PID_p_gain = 0.3;
+  payLoadPedalConfig_.PID_i_gain = 50.0;
+  payLoadPedalConfig_.PID_d_gain = 0.0;
 }
 
 
@@ -91,8 +123,13 @@ void DAP_config_st::loadConfigFromEprom(DAP_config_st& config_st)
     Serial.println("Successfully loaded config from EPROM!");
   }
   else
-  {
+  { 
     Serial.println("Couldn't load config from EPROM due to version mismatch!");
+    Serial.print("Target version: ");
+    Serial.println(DAP_VERSION_CONFIG);
+    Serial.print("Source version: ");
+    Serial.println(local_config_st.payLoadHeader_.version);
+
   }
 
 }
@@ -130,3 +167,4 @@ void DAP_calculationVariables_st::updateStiffness() {
   springStiffnesss = Force_Range / stepperPosRange;
   springStiffnesssInv = 1.0 / springStiffnesss;
 }
+

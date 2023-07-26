@@ -1,6 +1,7 @@
 #include "PedalConfig.h"
 #define ESTIMATE_LOADCELL_VARIANCE
 
+bool splineDebug_b = false;
 
 
 
@@ -351,6 +352,10 @@ void pedalUpdateTask( void * pvParameters )
           dap_calculationVariables_st.updateFromConfig(dap_config_st);
           dap_calculationVariables_st.updateEndstops(stepper->getLimitMin(), stepper->getLimitMax());
           dap_calculationVariables_st.updateStiffness();
+
+          // tune the PID settings
+          tunePidValues(dap_config_st);
+
           #ifdef INTERP_SPRING_STIFFNESS
             delete forceCurve;
             forceCurve = new ForceCurve_Interpolated(dap_config_st, dap_calculationVariables_st);
@@ -449,7 +454,21 @@ void pedalUpdateTask( void * pvParameters )
         
       #elif defined INTERP_SPRING_STIFFNESS
         double stepperPosFraction = stepper->getCurrentPositionFraction();
-        int32_t Position_Next = MoveByInterpolatedStrategy(filteredReading, stepperPosFraction, forceCurve, dap_calculationVariables_st);
+
+        //int32_t Position_Next = MoveByInterpolatedStrategy(filteredReading, stepperPosFraction, forceCurve, dap_calculationVariables_st);
+        int32_t Position_Next = MoveByPidStrategy(filteredReading, stepperPosFraction, stepper, forceCurve, dap_calculationVariables_st, dap_config_st);
+        //int32_t Position_Next = MoveByForceTargetingStrategy(filteredReading, stepper, forceCurve);
+
+
+        /*float intForceCubicSpline = forceCurve->EvalForceCubicSpline(dap_config_st, dap_calculationVariables_st, stepperPosFraction);
+        float intForceCubicSpline_prime = forceCurve->EvalForceGradientCubicSpline(dap_config_st, dap_calculationVariables_st, stepperPosFraction);
+
+        if (splineDebug_b)
+        {
+          static RTDebugOutput<float, 2> rtDebugFilter({ "y", "y_p"});
+          rtDebugFilter.offerData({ intForceCubicSpline, intForceCubicSpline_prime});          
+        }*/
+        
 
 
       #endif
@@ -530,6 +549,7 @@ uint16_t checksumCalculator(uint8_t * data, uint16_t length)
    }
    return (sum2 << 8) | sum1;
 }
+
 
 
 
@@ -622,6 +642,10 @@ void serialCommunicationTask( void * pvParameters )
           case 2:
             //Serial.print("Second case:");
             absOscillation.trigger();
+            break;
+          // de-/activate spline debug 
+          case 3:
+            splineDebug_b != splineDebug_b;
             break;
 
           default:

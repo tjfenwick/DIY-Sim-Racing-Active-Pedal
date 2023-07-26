@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-#define DAP_VERSION_CONFIG 100
+#define DAP_VERSION_CONFIG 102
 #define DAP_PAYLOAD_TYPE_CONFIG 100
 
 struct payloadHeader {
@@ -51,6 +51,17 @@ struct payloadPedalConfig {
   uint8_t horPos_AB;
   uint8_t verPos_AB;
   uint8_t lengthPedal_CB;
+
+  // cubic spline parameters
+  float cubic_spline_param_a_array[5];
+  float cubic_spline_param_b_array[5];
+
+  // PID parameters
+  float PID_p_gain;
+  float PID_i_gain;
+  float PID_d_gain;
+
+
 };
 
 

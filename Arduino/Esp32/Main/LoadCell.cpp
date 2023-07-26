@@ -40,7 +40,12 @@ ADS1256& ADC() {
     //adc.sendCommand(ADS1256_CMD_SDATAC);
     
     // start the ADS1256 with data rate of 15kSPS SPS and gain x64
-    adc.begin(ADS1256_DRATE_15000SPS,ADS1256_GAIN_64,false);     
+    //adc.begin(ADS1256_DRATE_15000SPS,ADS1256_GAIN_64,false);    
+    adc.begin(ADS1256_DRATE_1000SPS,ADS1256_GAIN_64,false);    
+     
+    //adc.begin(ADS1256_DRATE_500SPS,ADS1256_GAIN_64,false);  
+    //adc.begin(ADS1256_DRATE_60SPS,ADS1256_GAIN_64,false);  
+    
     
     Serial.println("ADC Started");
     
