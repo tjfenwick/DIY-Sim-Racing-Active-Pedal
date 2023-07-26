@@ -111,7 +111,7 @@ namespace User.PluginSdkDemo
 			for (uint pedalIdx = 0; pedalIdx<3; pedalIdx++)
 			{
 				dap_config_st[pedalIdx].payloadHeader_.payloadType = 100;
-				dap_config_st[pedalIdx].payloadHeader_.version = 100;
+				dap_config_st[pedalIdx].payloadHeader_.version = 102;
 
 				dap_config_st[pedalIdx].payloadPedalConfig_.pedalStartPosition = 35;
 				dap_config_st[pedalIdx].payloadPedalConfig_.pedalEndPosition = 80;
@@ -131,7 +131,24 @@ namespace User.PluginSdkDemo
 				dap_config_st[pedalIdx].payloadPedalConfig_.verPos_AB = 80;
 				dap_config_st[pedalIdx].payloadPedalConfig_.lengthPedal_CB = 200;
 
-				InitializeComponent();
+
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_0 = 0;
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_1 = 0;
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_2 = 0;
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_3 = 0;
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_4 = 0;
+                                                                                                   
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_0 = 0;
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_1 = 0;
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_2 = 0;
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_3 = 0;
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_4 = 0;
+
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_p_gain = 0.3f;
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_i_gain = 50.0f;
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_d_gain = 0.0f;
+
+                InitializeComponent();
 				UpdateSerialPortList_click();
 			}
 
@@ -266,7 +283,12 @@ namespace User.PluginSdkDemo
 			PedalForceCurve080_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080;
 			PedalForceCurve100_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100;
 
-			Update_BrakeForceCurve();
+
+            PID_tuning_P_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_p_gain;
+            PID_tuning_I_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_i_gain;
+            PID_tuning_D_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_d_gain;
+
+            Update_BrakeForceCurve();
 
 
             //// Select serial port accordingly
@@ -346,6 +368,20 @@ namespace User.PluginSdkDemo
 
             // Use cubic interpolation to smooth the original data
             (double[] xs2, double[] ys2, double[] a, double[] b) = Cubic.Interpolate1D(x, y, 100);
+
+
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_0 = (float)a[0];
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_1 = (float)a[1];
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_2 = (float)a[2];
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_3 = (float)a[3];
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_4 = (float)a[4];
+
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_0 = (float)b[0];
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_1 = (float)b[1];
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_2 = (float)b[2];
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_3 = (float)b[3];
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_4 = (float)b[4];
+
 
             TextBox1.Text = "";
             for (uint i = 0; i < a.Length; i++)
@@ -506,6 +542,26 @@ namespace User.PluginSdkDemo
 
 
 
+        /********************************************************************************************************************/
+        /*							PID tuning                      														*/
+        /********************************************************************************************************************/
+        public void PID_tuning_P_gain_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_p_gain = (float)e.NewValue;
+        }
+
+        public void PID_tuning_I_gain_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_i_gain = (float)e.NewValue;
+        }
+
+        public void PID_tuning_D_gain_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_d_gain = (float)e.NewValue;
+        }
+
+
+
 
 
         /********************************************************************************************************************/
@@ -604,12 +660,24 @@ namespace User.PluginSdkDemo
                     Plugin._serialPort[indexOfSelectedPedal_u].DiscardInBuffer();
                 }
 
-                Plugin._serialPort[indexOfSelectedPedal_u].Write("1");
-                int myInt = 1;
-                byte[] b = BitConverter.GetBytes(myInt);
-                Plugin._serialPort[indexOfSelectedPedal_u].Write(b, 0, 4);
-                Plugin._serialPort[indexOfSelectedPedal_u].Write("\n");
-                System.Threading.Thread.Sleep(100);
+                try
+                {
+                    Plugin._serialPort[indexOfSelectedPedal_u].Write("1");
+                    int myInt = 1;
+                    byte[] b = BitConverter.GetBytes(myInt);
+                    Plugin._serialPort[indexOfSelectedPedal_u].Write(b, 0, 4);
+                    Plugin._serialPort[indexOfSelectedPedal_u].Write("\n");
+                    System.Threading.Thread.Sleep(100);
+                }
+                catch (Exception caughtEx)
+                {
+                    string errorMessage = caughtEx.Message;
+                    TextBox1.Text = errorMessage;
+                }
+
+
+
+
                 try
                 {
                     while (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0)
@@ -641,14 +709,22 @@ namespace User.PluginSdkDemo
                 TextBox1.Text = "CRC simhub calc: " + this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum + "    ";
 
 
-
-                int length = sizeof(DAP_config_st);
-                int val = this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum;
-                string msg = "CRC value: " + val.ToString();
-                byte[] newBuffer = new byte[length];
-                newBuffer = getBytes(this.dap_config_st[indexOfSelectedPedal_u]);
-                Plugin._serialPort[indexOfSelectedPedal_u].Write(newBuffer, 0, newBuffer.Length);
-                //Plugin._serialPort[indexOfSelectedPedal_u].Write("\n");
+                try
+                {
+                    this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.version = 102;
+                    int length = sizeof(DAP_config_st);
+                    int val = this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum;
+                    string msg = "CRC value: " + val.ToString();
+                    byte[] newBuffer = new byte[length];
+                    newBuffer = getBytes(this.dap_config_st[indexOfSelectedPedal_u]);
+                    Plugin._serialPort[indexOfSelectedPedal_u].Write(newBuffer, 0, newBuffer.Length);
+                    //Plugin._serialPort[indexOfSelectedPedal_u].Write("\n");
+                }
+                catch (Exception caughtEx)
+                {
+                    string errorMessage = caughtEx.Message;
+                    TextBox1.Text = errorMessage;
+                }
 
                 System.Threading.Thread.Sleep(100);
                 try

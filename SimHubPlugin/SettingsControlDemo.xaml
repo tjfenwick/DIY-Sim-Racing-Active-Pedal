@@ -29,6 +29,7 @@
             <RowDefinition Height="46"/>
             <RowDefinition Height="200"/>
             <RowDefinition Height="46"/>
+            <RowDefinition Height="200"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="400"/>
@@ -450,13 +451,99 @@
 			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
             Value="100"
             />
-			
-			
-			
-			
-			
-			
-		<!-- JSON config file selection -->
+
+
+
+
+
+
+
+        <!-- PID sliders -->
+        <TextBlock HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="5,10,0,0" 
+                   Text="P-gain:" 
+                   Grid.Row="11" 
+                   Grid.Column="0" 
+                   Width="120" 
+                   Foreground="White"/>
+        <Slider x:Name="PID_tuning_P_gain_slider" 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Top" 
+            Margin="50,10,0,0" 
+            Grid.Row="11" 
+            Grid.Column="0" 
+            Width="120" 
+            ValueChanged="PID_tuning_P_gain_changed" 
+            AutoToolTipPlacement="TopLeft" 
+            AutoToolTipPrecision="2"
+            Minimum="0"
+			Maximum="1"
+            TickPlacement="BottomRight"
+			TickFrequency="0.1" RenderTransformOrigin="0.508,0.525"
+            Value="0.3"
+            IsSnapToTickEnabled="False" 
+            SmallChange="0.05"
+            />
+
+        <TextBlock HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="5,50,0,0" 
+                   Text="I-gain:" 
+                   Grid.Row="11" 
+                   Grid.Column="0" 
+                   Width="120" 
+                   Foreground="White"/>
+        <Slider x:Name="PID_tuning_I_gain_slider" 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Top" 
+            Margin="50,50,0,0" 
+            Grid.Row="11" 
+            Grid.Column="0" 
+            Width="120" 
+            ValueChanged="PID_tuning_I_gain_changed" 
+            AutoToolTipPlacement="TopLeft" 
+            AutoToolTipPrecision="2"
+            Minimum="0"
+			Maximum="100"
+            TickPlacement="BottomRight"
+			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
+            Value="50"
+            IsSnapToTickEnabled="False"
+            />
+
+        <TextBlock HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="5,90,0,0" 
+                   Text="D-gain:" 
+                   Grid.Row="11" 
+                   Grid.Column="0" 
+                   Width="120" 
+                   Foreground="White"/>
+        <Slider x:Name="PID_tuning_D_gain_slider" 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Top" 
+            Margin="50,90,0,0" 
+            Grid.Row="11" 
+            Grid.Column="0" 
+            Width="120" 
+            ValueChanged="PID_tuning_D_gain_changed" 
+            AutoToolTipPlacement="TopLeft" 
+            AutoToolTipPrecision="2"
+            Minimum="0"
+			Maximum="10"
+            TickPlacement="BottomRight"
+			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
+            Value="0"
+            IsSnapToTickEnabled="False"
+            />
+
+
+
+
+
+
+        <!-- JSON config file selection -->
         <ComboBox x:Name="ComboBox_JsonFileSelected" SelectionChanged="ComboBox_SelectionChanged" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Center" Width="179" Margin="5,0,0,0" >
             <ComboBoxItem IsSelected="True">DiyPedalConfig_clutch_1</ComboBoxItem>
             <ComboBoxItem>DiyPedalConfig_clutch_2</ComboBoxItem>

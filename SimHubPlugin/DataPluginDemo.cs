@@ -62,6 +62,26 @@ public struct payloadPedalConfig
     public byte horPos_AB;
     public byte verPos_AB;
     public byte lengthPedal_CB;
+
+    // cubic spline params
+    public float cubic_spline_param_a_0;
+    public float cubic_spline_param_a_1;
+    public float cubic_spline_param_a_2;
+    public float cubic_spline_param_a_3;
+    public float cubic_spline_param_a_4;
+
+    public float cubic_spline_param_b_0;
+    public float cubic_spline_param_b_1;
+    public float cubic_spline_param_b_2;
+    public float cubic_spline_param_b_3;
+    public float cubic_spline_param_b_4;
+
+    // PID settings
+    public float PID_p_gain;
+    public float PID_i_gain;
+    public float PID_d_gain;
+
+
 }
 
 public struct DAP_config_st
@@ -291,7 +311,7 @@ namespace User.PluginSdkDemo
 
 
             dap_config_initial_st.payloadHeader_.payloadType = 100;
-            dap_config_initial_st.payloadHeader_.version = 100;
+            dap_config_initial_st.payloadHeader_.version = 102;
             dap_config_initial_st.payloadPedalConfig_.pedalStartPosition = 35;
             dap_config_initial_st.payloadPedalConfig_.pedalEndPosition = 80;
             dap_config_initial_st.payloadPedalConfig_.maxForce = 90;
