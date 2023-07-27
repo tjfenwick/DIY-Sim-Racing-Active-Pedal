@@ -13,8 +13,8 @@ void DAP_config_st::initialiseDefaults() {
   payLoadHeader_.version = DAP_VERSION_CONFIG;
   payLoadHeader_.storeToEeprom = false;
 
-  payLoadPedalConfig_.pedalStartPosition = 35;
-  payLoadPedalConfig_.pedalEndPosition = 80;
+  payLoadPedalConfig_.pedalStartPosition = 10;
+  payLoadPedalConfig_.pedalEndPosition = 85;
 
   payLoadPedalConfig_.maxForce = 60;
   payLoadPedalConfig_.preloadForce = 2;
@@ -30,7 +30,7 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.dampingPull = 0;
 
   payLoadPedalConfig_.absFrequency = 15;
-  payLoadPedalConfig_.absAmplitude = 30.0f;
+  payLoadPedalConfig_.absAmplitude = 0;
 
   payLoadPedalConfig_.lengthPedal_AC = 150;
   payLoadPedalConfig_.horPos_AB = 215;
@@ -61,7 +61,7 @@ void DAP_config_st::initialiseDefaults_Accelerator() {
   payLoadHeader_.storeToEeprom = false;
 
 
-  payLoadPedalConfig_.pedalStartPosition = 25;
+  payLoadPedalConfig_.pedalStartPosition = 10;
   payLoadPedalConfig_.pedalEndPosition = 90;
 
   payLoadPedalConfig_.maxForce = 20;
@@ -78,7 +78,7 @@ void DAP_config_st::initialiseDefaults_Accelerator() {
   payLoadPedalConfig_.dampingPull = 0;
 
   payLoadPedalConfig_.absFrequency = 60;
-  payLoadPedalConfig_.absAmplitude = 0.0f;
+  payLoadPedalConfig_.absAmplitude = 0;
 
   payLoadPedalConfig_.lengthPedal_AC = 150;
   payLoadPedalConfig_.horPos_AB = 215;
@@ -149,7 +149,7 @@ void DAP_calculationVariables_st::updateFromConfig(DAP_config_st& config_st) {
   endPosRel = ((float)config_st.payLoadPedalConfig_.pedalEndPosition) / 100.0f;
 
   absFrequency = 2 * PI * ((float)config_st.payLoadPedalConfig_.absFrequency);
-  absAmplitude = ((float)config_st.payLoadPedalConfig_.absAmplitude)/ TRAVEL_PER_ROTATION_IN_MM * STEPS_PER_MOTOR_REVOLUTION / ABS_SCALING; // in mm
+  absAmplitude = ((float)config_st.payLoadPedalConfig_.absAmplitude) / 20.0f; // in kg
 
   dampingPress = ((float)config_st.payLoadPedalConfig_.dampingPress) / 400.0f;
 

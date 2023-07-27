@@ -432,7 +432,7 @@ void pedalUpdateTask( void * pvParameters )
 
       // compute pedal oscillation, when ABS is active
     #ifdef ABS_OSCILLATION
-      int32_t stepperAbsOffset = absOscillation.stepperOffset(dap_calculationVariables_st);
+      int32_t forceAbsOffset = absOscillation.forceOffset(&dap_calculationVariables_st);
     #endif
 
 
@@ -496,6 +496,10 @@ void pedalUpdateTask( void * pvParameters )
     #endif
       
 
+    #ifdef ABS_OSCILLATION
+      filteredReading += forceAbsOffset;
+    #endif
+
     // use interpolation to determine local linearized spring stiffness
     double stepperPosFraction = stepper->getCurrentPositionFraction();
     //int32_t Position_Next = MoveByInterpolatedStrategy(filteredReading, stepperPosFraction, &forceCurve, &dap_calculationVariables_st, &dap_config_st);
@@ -513,9 +517,7 @@ void pedalUpdateTask( void * pvParameters )
       
 
 
-    #ifdef ABS_OSCILLATION
-      Position_Next += stepperAbsOffset;
-    #endif
+    
 
   
     // clip target position to configured target interval
