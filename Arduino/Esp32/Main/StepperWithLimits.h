@@ -20,10 +20,9 @@ public:
   bool hasValidStepper() const { return NULL != _stepper; }
 
 public:
-  void findMinMaxLimits(uint8_t pedalStartPosPct, uint8_t pedalEndPosPct);
+  void findMinMaxEndstops();
   void refindMinLimit();
   void checkLimitsAndResetIfNecessary();
-private:
   void updatePedalMinMaxPos(uint8_t pedalStartPosPct, uint8_t pedalEndPosPct);
 
 public:

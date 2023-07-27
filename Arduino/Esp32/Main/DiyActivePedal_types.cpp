@@ -11,12 +11,13 @@ static const float ABS_SCALING = 50;
 void DAP_config_st::initialiseDefaults() {
   payLoadHeader_.payloadType = DAP_PAYLOAD_TYPE_CONFIG;
   payLoadHeader_.version = DAP_VERSION_CONFIG;
+  payLoadHeader_.storeToEeprom = false;
 
   payLoadPedalConfig_.pedalStartPosition = 35;
   payLoadPedalConfig_.pedalEndPosition = 80;
 
-  payLoadPedalConfig_.maxForce = 90 * 300 / 40;
-  payLoadPedalConfig_.preloadForce = 1 * 300 / 40;
+  payLoadPedalConfig_.maxForce = 60;
+  payLoadPedalConfig_.preloadForce = 2;
 
   payLoadPedalConfig_.relativeForce_p000 = 0;
   payLoadPedalConfig_.relativeForce_p020 = 20;
@@ -57,6 +58,7 @@ void DAP_config_st::initialiseDefaults() {
 void DAP_config_st::initialiseDefaults_Accelerator() {
   payLoadHeader_.payloadType = DAP_PAYLOAD_TYPE_CONFIG;
   payLoadHeader_.version = DAP_VERSION_CONFIG;
+  payLoadHeader_.storeToEeprom = false;
 
 
   payLoadPedalConfig_.pedalStartPosition = 25;
@@ -104,9 +106,13 @@ void DAP_config_st::initialiseDefaults_Accelerator() {
 
 void DAP_config_st::storeConfigToEprom(DAP_config_st& config_st)
 {
-  EEPROM.put(0, config_st); 
-  EEPROM.commit();
-  Serial.println("Successfully stored config in EPROM!");
+  if (true == config_st.payLoadHeader_.storeToEeprom)
+  {
+    config_st.payLoadHeader_.storeToEeprom = false; // set to false, thus at restart existing EEPROM config isn't restored to EEPROM
+    EEPROM.put(0, config_st); 
+    EEPROM.commit();
+    Serial.println("Successfully stored config in EPROM!");
+  }
 }
 
 void DAP_config_st::loadConfigFromEprom(DAP_config_st& config_st)

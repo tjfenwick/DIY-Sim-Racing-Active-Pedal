@@ -1,17 +1,27 @@
 #include "PedalConfig.h"
 #define ESTIMATE_LOADCELL_VARIANCE
 
+
+
+/**********************************************************************************************/
+/*                                                                                            */
+/*                         function declarations                                              */
+/*                                                                                            */
+/**********************************************************************************************/
+void updatePedalCalcParameters();
+
+
+
+
+
+
+
+
 bool splineDebug_b = false;
 
 
 
 #include <EEPROM.h>
-
-
-//#define PRINT_USED_STACK_SIZE
-// https://stackoverflow.com/questions/55998078/freertos-task-priority-and-stack-size
-#define STACK_SIZE_FOR_TASK_1 0.2 * (configTOTAL_HEAP_SIZE / 4)
-#define STACK_SIZE_FOR_TASK_2 0.2 * (configTOTAL_HEAP_SIZE / 4)
 
 
 
@@ -49,12 +59,8 @@ static CycleTimer timerSC("SC cycle time");
 /**********************************************************************************************/
 
 #include "ForceCurve.h"
+ForceCurve_Interpolated forceCurve;
 
-ForceCurve_Interpolated* forceCurve;
-
-//    define one of these to determine strategy for pedal movement update
-//#define USE_LINEAR_STRATEGY
-#define INTERP_SPRING_STIFFNESS
 
 
 /**********************************************************************************************/
@@ -63,6 +69,11 @@ ForceCurve_Interpolated* forceCurve;
 /*                                                                                            */
 /**********************************************************************************************/
 #include "soc/rtc_wdt.h"
+
+//#define PRINT_USED_STACK_SIZE
+// https://stackoverflow.com/questions/55998078/freertos-task-priority-and-stack-size
+#define STACK_SIZE_FOR_TASK_1 0.2 * (configTOTAL_HEAP_SIZE / 4)
+#define STACK_SIZE_FOR_TASK_2 0.2 * (configTOTAL_HEAP_SIZE / 4)
 
 TaskHandle_t Task1;
 TaskHandle_t Task2;
@@ -162,6 +173,12 @@ static const int32_t MIN_STEPS = 5;
 #include "StepperMovementStrategy.h"
 
 
+
+
+
+
+
+
 /**********************************************************************************************/
 /*                                                                                            */
 /*                         setup function                                                     */
@@ -175,6 +192,67 @@ void setup()
 
   
 
+  
+
+  // init controller
+  SetupController();
+
+  delay(1000);
+
+  stepper = new StepperWithLimits(stepPinStepper, dirPinStepper, minPin, maxPin);
+  loadcell = new LoadCell_ADS1256();
+
+  loadcell->setZeroPoint();
+  #ifdef ESTIMATE_LOADCELL_VARIANCE
+    loadcell->estimateVariance();       // automatically identify sensor noise for KF parameterization
+  #endif
+
+  // find the min & max endstops
+  stepper->findMinMaxEndstops();
+  Serial.print("Min Position is "); Serial.println(stepper->getLimitMin());
+  Serial.print("Max Position is "); Serial.println(stepper->getLimitMax());
+
+
+  // setup Kalman filter
+  Serial.print("Given loadcell variance: ");
+  Serial.println(loadcell->getVarianceEstimate());
+  kalman = new KalmanFilter(loadcell->getVarianceEstimate());
+
+
+  // setup FIR filter
+  firNotchFilter = new FirNotchFilter(15);
+
+
+
+
+
+
+  // initialize configuration and update local variables
+  #ifdef PEDAL_IS_BRAKE
+    dap_config_st.initialiseDefaults();
+  #endif
+
+  #ifdef PEDAL_IS_ACCELERATOR
+    dap_config_st.initialiseDefaults_Accelerator();
+  #endif
+
+  // Load config from EEPROM, if valid, overwrite initial config
+  EEPROM.begin(sizeof(DAP_config_st));
+  dap_config_st.loadConfigFromEprom(dap_config_st);
+
+  // interprete config values
+  dap_calculationVariables_st.updateFromConfig(dap_config_st);
+
+  // activate parameter update in first cycle
+  configUpdateAvailable = true;
+  // equalize pedal config for both tasks
+  dap_config_st_local = dap_config_st;
+
+
+
+
+
+  // setup multi tasking
   semaphore_updateJoystick = xSemaphoreCreateMutex();
   semaphore_updateConfig = xSemaphoreCreateMutex();
   delay(10);
@@ -193,59 +271,6 @@ void setup()
 
   disableCore0WDT();
 
-
-  // initialize configuration and update local variables
-  #ifdef PEDAL_IS_BRAKE
-    dap_config_st.initialiseDefaults();
-  #endif
-
-  #ifdef PEDAL_IS_ACCELERATOR
-    dap_config_st.initialiseDefaults_Accelerator();
-  #endif
-
-  // Load config to EEPROM
-  EEPROM.begin(sizeof(DAP_config_st));
-  dap_config_st.loadConfigFromEprom(dap_config_st);
-
-  // interprete config values
-  dap_calculationVariables_st.updateFromConfig(dap_config_st);
-
-  // init controller
-  SetupController();
-
-
-  delay(1000);
-
-  stepper = new StepperWithLimits(stepPinStepper, dirPinStepper, minPin, maxPin);
-  loadcell = new LoadCell_ADS1256();
-
-  loadcell->setZeroPoint();
-  #ifdef ESTIMATE_LOADCELL_VARIANCE
-    loadcell->estimateVariance();       // automatically identify sensor noise for KF parameterization
-  #endif
-
-  stepper->findMinMaxLimits(dap_config_st.payLoadPedalConfig_.pedalStartPosition, dap_config_st.payLoadPedalConfig_.pedalEndPosition);
-
-  Serial.print("Min Position is "); Serial.println(stepper->getLimitMin());
-  Serial.print("Max Position is "); Serial.println(stepper->getLimitMax());
-
-  // compute pedal stiffness parameters
-  dap_calculationVariables_st.updateEndstops(stepper->getLimitMin(), stepper->getLimitMax());
-  #ifdef INTERP_SPRING_STIFFNESS
-    forceCurve = new ForceCurve_Interpolated(dap_config_st, dap_calculationVariables_st);
-  #endif
-
-  Serial.print("Given loadcell variance: ");
-  Serial.println(loadcell->getVarianceEstimate());
-  kalman = new KalmanFilter(loadcell->getVarianceEstimate());
-
-
-  firNotchFilter = new FirNotchFilter(15);
-
-
-
-
-
   //create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
   xTaskCreatePinnedToCore(
                     pedalUpdateTask,   /* Task function. */
@@ -256,7 +281,7 @@ void setup()
                     1,           /* priority of the task */
                     &Task2,      /* Task handle to keep track of created task */
                     0);          /* pin task to core 1 */
-    delay(500);
+  delay(500);
 
   xTaskCreatePinnedToCore(
                     serialCommunicationTask,   
@@ -267,22 +292,40 @@ void setup()
                     1,         
                     &Task2,    
                     1);     
-    delay(500);
+  delay(500);
 
 
 
-  // equalize pedal config for both tasks
-  dap_config_st_local = dap_config_st;
+  
 
   Serial.println("Setup end!");
-
-
   
 }
 
 
 
 
+/**********************************************************************************************/
+/*                                                                                            */
+/*                         Calc update function                                               */
+/*                                                                                            */
+/**********************************************************************************************/
+void updatePedalCalcParameters()
+{
+
+  dap_calculationVariables_st.updateFromConfig(dap_config_st);
+  dap_calculationVariables_st.updateEndstops(stepper->getLimitMin(), stepper->getLimitMax());
+  stepper->updatePedalMinMaxPos(dap_config_st.payLoadPedalConfig_.pedalStartPosition, dap_config_st.payLoadPedalConfig_.pedalEndPosition);
+  //stepper->findMinMaxLimits(dap_config_st.payLoadPedalConfig_.pedalStartPosition, dap_config_st.payLoadPedalConfig_.pedalEndPosition);
+  dap_calculationVariables_st.updateStiffness();
+
+  // tune the PID settings
+  tunePidValues(dap_config_st);
+
+  // equalize pedal config for both tasks
+  dap_config_st_local = dap_config_st;
+
+}
 
 
 
@@ -343,25 +386,27 @@ void pedalUpdateTask( void * pvParameters )
     {
       if(semaphore_updateConfig!=NULL)
       {
+
+        bool configWasUpdated_b = false;
+        // Take the semaphore and just update the config file, then release the semaphore
         if(xSemaphoreTake(semaphore_updateConfig, 1)==pdTRUE)
         {
           Serial.println("Update pedal config!");
           configUpdateAvailable = false;
           dap_config_st = dap_config_st_local;
-          dap_config_st.storeConfigToEprom(dap_config_st);
-          dap_calculationVariables_st.updateFromConfig(dap_config_st);
-          dap_calculationVariables_st.updateEndstops(stepper->getLimitMin(), stepper->getLimitMax());
-          dap_calculationVariables_st.updateStiffness();
-
-          // tune the PID settings
-          tunePidValues(dap_config_st);
-
-          #ifdef INTERP_SPRING_STIFFNESS
-            delete forceCurve;
-            forceCurve = new ForceCurve_Interpolated(dap_config_st, dap_calculationVariables_st);
-          #endif
+          configWasUpdated_b = true;
           xSemaphoreGive(semaphore_updateConfig);
         }
+
+        // update the calc params
+        if (true == configWasUpdated_b)
+        {
+          Serial.println("Updating the calc params!");
+          configWasUpdated_b = false;
+          dap_config_st.storeConfigToEprom(dap_config_st); // store config to EEPROM
+          updatePedalCalcParameters(); // update the calc parameters
+        }
+
       }
       else
       {
@@ -408,8 +453,11 @@ void pedalUpdateTask( void * pvParameters )
 
     #endif
 
+
+    // Get the loadcell reading
     float loadcellReading = loadcell->getReadingKg();
 
+    // Do the loadcell signal filtering
     float filteredReading = kalman->filteredValue(loadcellReading, 0);
     float changeVelocity = kalman->changeVelocity();
 
@@ -448,71 +496,53 @@ void pedalUpdateTask( void * pvParameters )
     #endif
       
 
-      // use interpolation to determine local linearized spring stiffness
-      #if defined USE_LINEAR_STRATEGY
-        int32_t Position_Next = MoveByLinearStrategy(filteredReading, dap_calculationVariables_st);
-        
-      #elif defined INTERP_SPRING_STIFFNESS
-        double stepperPosFraction = stepper->getCurrentPositionFraction();
+    // use interpolation to determine local linearized spring stiffness
+    double stepperPosFraction = stepper->getCurrentPositionFraction();
+    //int32_t Position_Next = MoveByInterpolatedStrategy(filteredReading, stepperPosFraction, &forceCurve, &dap_calculationVariables_st, &dap_config_st);
+    int32_t Position_Next = MoveByPidStrategy(filteredReading, stepperPosFraction, stepper, &forceCurve, &dap_calculationVariables_st, &dap_config_st);
 
-        //int32_t Position_Next = MoveByInterpolatedStrategy(filteredReading, stepperPosFraction, forceCurve, dap_calculationVariables_st);
-        int32_t Position_Next = MoveByPidStrategy(filteredReading, stepperPosFraction, stepper, forceCurve, dap_calculationVariables_st, dap_config_st);
-        //int32_t Position_Next = MoveByForceTargetingStrategy(filteredReading, stepper, forceCurve);
+    
+    
 
-
-        /*float intForceCubicSpline = forceCurve->EvalForceCubicSpline(dap_config_st, dap_calculationVariables_st, stepperPosFraction);
-        float intForceCubicSpline_prime = forceCurve->EvalForceGradientCubicSpline(dap_config_st, dap_calculationVariables_st, stepperPosFraction);
-
-        if (splineDebug_b)
-        {
-          static RTDebugOutput<float, 2> rtDebugFilter({ "y", "y_p"});
-          rtDebugFilter.offerData({ intForceCubicSpline, intForceCubicSpline_prime});          
-        }*/
-        
-
-
-      #endif
-
-      
-      
-
-      // add dampening
-      if (dap_calculationVariables_st.dampingPress  > 0.0001)
-      {
-        // dampening is proportional to velocity --> D-gain for stability
-        Position_Next -= dap_calculationVariables_st.dampingPress * changeVelocity * dap_calculationVariables_st.springStiffnesssInv;
-      }
+    // add dampening
+    if (dap_calculationVariables_st.dampingPress  > 0.0001)
+    {
+      // dampening is proportional to velocity --> D-gain for stability
+      Position_Next -= dap_calculationVariables_st.dampingPress * changeVelocity * dap_calculationVariables_st.springStiffnesssInv;
+    }
       
 
 
     #ifdef ABS_OSCILLATION
       Position_Next += stepperAbsOffset;
     #endif
-      // clip target position to configured target interval
-      Position_Next = (int32_t)constrain(Position_Next, dap_calculationVariables_st.stepperPosMin, dap_calculationVariables_st.stepperPosMax);
+
+  
+    // clip target position to configured target interval
+    Position_Next = (int32_t)constrain(Position_Next, dap_calculationVariables_st.stepperPosMin, dap_calculationVariables_st.stepperPosMax);
 
 
-      // get current stepper position right before sheduling a new move
-      //int32_t stepperPosCurrent = stepper->getCurrentPositionSteps();
-      int32_t stepperPosCurrent = stepper->getTargetPositionSteps();
-      int32_t movement = abs(stepperPosCurrent - Position_Next);
-      if (movement > MIN_STEPS)
-      {
-        stepper->moveTo(Position_Next, false);
-      }
+    // get current stepper position right before sheduling a new move
+    //int32_t stepperPosCurrent = stepper->getCurrentPositionSteps();
+    int32_t stepperPosCurrent = stepper->getTargetPositionSteps();
+    int32_t movement = abs(stepperPosCurrent - Position_Next);
+    if (movement > MIN_STEPS)
+    {
+      stepper->moveTo(Position_Next, false);
+    }
 
-      // compute controller output
-      if(semaphore_updateJoystick!=NULL)
-      {
-        if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE) {
-          joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max);
-          xSemaphoreGive(semaphore_updateJoystick);
-        }
+    // compute controller output
+    if(semaphore_updateJoystick!=NULL)
+    {
+      if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE) {
+        joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max);
+        xSemaphoreGive(semaphore_updateJoystick);
       }
-      else
-      {
-        Serial.println("semaphore_updateJoystick == 0");
-      }
+    }
+    else
+    {
+      Serial.println("semaphore_updateJoystick == 0");
+    }
 
     #ifdef PRINT_USED_STACK_SIZE
       unsigned int temp2 = uxTaskGetStackHighWaterMark(nullptr);
@@ -604,7 +634,6 @@ void serialCommunicationTask( void * pvParameters )
             Serial.print(",   Config version received: ");
             Serial.println(dap_config_st_local.payLoadHeader_.version);
           }
-
           // checksum validation
           uint16_t crc = checksumCalculator((uint8_t*)(&(dap_config_st_local_ptr->payLoadPedalConfig_)), sizeof(dap_config_st_local.payLoadPedalConfig_) );
           if (crc != dap_config_st_local.payLoadHeader_.checkSum){ 
@@ -657,13 +686,8 @@ void serialCommunicationTask( void * pvParameters )
     }
 
 
-    //SerialBT.println("Hello World");
-
-
     // transmit controller output
     if (IsControllerReady()) {
-      //delay(1);
-
       if(semaphore_updateJoystick!=NULL)
       {
         if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE)
@@ -676,9 +700,7 @@ void serialCommunicationTask( void * pvParameters )
           Serial.println("semaphore_updateJoystick == 0");
         }
       }
-
       SetControllerOutputValue(joystickNormalizedToInt32_local);
-
     }
 
   }

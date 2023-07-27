@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-#define DAP_VERSION_CONFIG 102
+#define DAP_VERSION_CONFIG 103
 #define DAP_PAYLOAD_TYPE_CONFIG 100
 
 struct payloadHeader {
@@ -16,6 +16,10 @@ struct payloadHeader {
 
   // To check if structure is valid
   uint16_t checkSum;
+
+  // store to EEPROM flag
+  bool storeToEeprom;
+
 };
 
 struct payloadPedalConfig {

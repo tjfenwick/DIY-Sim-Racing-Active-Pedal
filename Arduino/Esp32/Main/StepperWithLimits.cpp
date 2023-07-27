@@ -40,7 +40,7 @@ StepperWithLimits::StepperWithLimits(uint8_t pinStep, uint8_t pinDirection, uint
   }
 }
 
-void StepperWithLimits::findMinMaxLimits(uint8_t pedalStartPosPct, uint8_t pedalEndPosPct) {
+void StepperWithLimits::findMinMaxEndstops() {
   if (! hasValidStepper()) return;
 
   int32_t setPosition = _stepper->getCurrentPosition();
@@ -60,8 +60,6 @@ void StepperWithLimits::findMinMaxLimits(uint8_t pedalStartPosPct, uint8_t pedal
   }
 
   _limitMax = _stepper->getCurrentPosition();
-  
-  updatePedalMinMaxPos(pedalStartPosPct, pedalEndPosPct);
 
   _stepper->moveTo(_posMin, true);
 #if defined(SUPPORT_ESP32_PULSE_COUNTER)
