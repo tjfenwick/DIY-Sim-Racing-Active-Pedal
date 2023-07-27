@@ -16,6 +16,8 @@ using System.Windows.Media;
 
 
 
+
+
 public struct payloadHeader
 {
     // structure identification via payload
@@ -26,8 +28,9 @@ public struct payloadHeader
 
     // To check if structure is valid
     public UInt16 checkSum;
-}
 
+    public bool storeToEeprom;
+}
 public struct payloadPedalConfig
 {
     // configure pedal start and endpoint
@@ -54,7 +57,7 @@ public struct payloadPedalConfig
 
     // configure ABS effect 
     public byte absFrequency; // In Hz
-    public byte absAmplitude; // In steps
+    public byte absAmplitude; // In kg/20
 
     // geometric properties of the pedal
     // in mm
@@ -312,6 +315,7 @@ namespace User.PluginSdkDemo
 
             dap_config_initial_st.payloadHeader_.payloadType = 100;
             dap_config_initial_st.payloadHeader_.version = 102;
+            dap_config_initial_st.payloadHeader_.storeToEeprom = false;
             dap_config_initial_st.payloadPedalConfig_.pedalStartPosition = 35;
             dap_config_initial_st.payloadPedalConfig_.pedalEndPosition = 80;
             dap_config_initial_st.payloadPedalConfig_.maxForce = 90;

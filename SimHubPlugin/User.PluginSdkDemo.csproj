@@ -114,6 +114,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CubicSpline.cs" />
     <Compile Include="DataPluginDemo.cs" />
     <Compile Include="DataPluginDemoSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
