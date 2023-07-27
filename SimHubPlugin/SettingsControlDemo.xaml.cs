@@ -19,12 +19,16 @@ using System.CodeDom.Compiler;
 
 namespace User.PluginSdkDemo
 {
+
+
     /// <summary>
     /// Logique d'interaction pour SettingsControlDemo.xaml
     /// </summary>
     public partial class SettingsControlDemo : UserControl
     {
 
+
+        public uint pedalConfigPayload_version = 104;
 
 		public uint indexOfSelectedPedal_u = 1;
 
@@ -111,7 +115,7 @@ namespace User.PluginSdkDemo
 			for (uint pedalIdx = 0; pedalIdx<3; pedalIdx++)
 			{
 				dap_config_st[pedalIdx].payloadHeader_.payloadType = 100;
-				dap_config_st[pedalIdx].payloadHeader_.version = 102;
+				dap_config_st[pedalIdx].payloadHeader_.version = (byte)pedalConfigPayload_version;
 
 				dap_config_st[pedalIdx].payloadPedalConfig_.pedalStartPosition = 35;
 				dap_config_st[pedalIdx].payloadPedalConfig_.pedalEndPosition = 80;
@@ -125,7 +129,7 @@ namespace User.PluginSdkDemo
 				dap_config_st[pedalIdx].payloadPedalConfig_.dampingPress = 0;
 				dap_config_st[pedalIdx].payloadPedalConfig_.dampingPull = 0;
 				dap_config_st[pedalIdx].payloadPedalConfig_.absFrequency = 5;
-				dap_config_st[pedalIdx].payloadPedalConfig_.absAmplitude = 100;
+				dap_config_st[pedalIdx].payloadPedalConfig_.absAmplitude = 20;
 				dap_config_st[pedalIdx].payloadPedalConfig_.lengthPedal_AC = 150;
 				dap_config_st[pedalIdx].payloadPedalConfig_.horPos_AB = 215;
 				dap_config_st[pedalIdx].payloadPedalConfig_.verPos_AB = 80;
@@ -608,6 +612,8 @@ namespace User.PluginSdkDemo
                 string jsonFileName = ComboBox_JsonFileSelected.Text;
                 string fileName = dirName + "\\" + jsonFileName + ".json";
 
+                this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.version = (byte)pedalConfigPayload_version;
+
                 // https://stackoverflow.com/questions/3275863/does-net-4-have-a-built-in-json-serializer-deserializer
                 // https://learn.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-serialize-and-deserialize-json-data?redirectedfrom=MSDN
                 var stream1 = new MemoryStream();
@@ -711,7 +717,8 @@ namespace User.PluginSdkDemo
 
                 try
                 {
-                    this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.version = 102;
+                    this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.version = (byte)pedalConfigPayload_version;
+                    this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.storeToEeprom = true;
                     int length = sizeof(DAP_config_st);
                     int val = this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum;
                     string msg = "CRC value: " + val.ToString();
