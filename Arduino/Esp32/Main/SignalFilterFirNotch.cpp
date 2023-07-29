@@ -1,5 +1,4 @@
 #include "SignalFilterFirNotch.h"
-#include "PedalConfig.h"
 
 
 

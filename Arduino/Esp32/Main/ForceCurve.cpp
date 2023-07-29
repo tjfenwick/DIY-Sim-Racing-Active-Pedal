@@ -14,11 +14,13 @@
 float ForceCurve_Interpolated::EvalForceCubicSpline(const DAP_config_st* config_st, const DAP_calculationVariables_st* calc_st, float fractionalPos)
 {
 
-  float splineSegment_fl32 = fractionalPos * 5;
+  float fractionalPos_lcl = constrain(fractionalPos, 0, 1);
+
+  float splineSegment_fl32 = fractionalPos_lcl * 5;
   uint8_t splineSegment_u8 = (uint8_t)floor(splineSegment_fl32);
   
   if (splineSegment_u8 < 0){splineSegment_u8 = 0;}
-  if (splineSegment_u8 > 4){splineSegment_u8 = 4;}
+  if (splineSegment_u8 > (NUMBER_OF_SPLINE_SEGMENTS-1) ){splineSegment_u8 = NUMBER_OF_SPLINE_SEGMENTS-1;}
   float a = config_st->payLoadPedalConfig_.cubic_spline_param_a_array[splineSegment_u8];
   float b = config_st->payLoadPedalConfig_.cubic_spline_param_b_array[splineSegment_u8];
 

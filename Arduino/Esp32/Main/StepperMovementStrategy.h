@@ -68,6 +68,7 @@ int32_t MoveByPidStrategy(float loadCellReadingKg, float stepperPosFraction, Ste
     myPID.SetTunings(config_st->payLoadPedalConfig_.PID_p_gain, config_st->payLoadPedalConfig_.PID_i_gain, config_st->payLoadPedalConfig_.PID_d_gain, P_ON_E);
   }
 
+
   float loadCellTargetKg = forceCurve->EvalForceCubicSpline(config_st, calc_st, stepperPosFraction);
   loadCellTargetKg -=absForceOffset_fl32;
   
@@ -105,4 +106,102 @@ int32_t MoveByPidStrategy(float loadCellReadingKg, float stepperPosFraction, Ste
   return posStepperNew;
 }
 
+
+
+
+
+int32_t mpcBasedMove(float loadCellReadingKg, float stepperPosFraction, StepperWithLimits* stepper, ForceCurve_Interpolated* forceCurve, const DAP_calculationVariables_st* calc_st, DAP_config_st* config_st, float absForceOffset_fl32) 
+{
+
+
+
+  static const float MOVE_MM_FOR_1KG = 3.0;
+  static const float MOVE_STEPS_FOR_1KG = (MOVE_MM_FOR_1KG / TRAVEL_PER_ROTATION_IN_MM) * STEPS_PER_MOTOR_REVOLUTION;
+
+
+
+  // get target force at current location
+  float loadCellTargetKg = forceCurve->EvalForceCubicSpline(config_st, calc_st, stepperPosFraction);
+  loadCellTargetKg -=absForceOffset_fl32;
+
+  
+
+  // get loadcell reading
+  float loadCellReadingKg_clip = constrain(loadCellReadingKg, calc_st->Force_Min, calc_st->Force_Max);
+
+  
+  
+  // if target force at location is lower than loadcell reading --> move towards the foot k_f * n_steps
+
+  // Take into account system constraints like stepper rpm & acceleration
+
+  
+
+  // if target force at location is lower than loadcell reading --> move away from the foot -k_f * n_steps
+
+  
+
+  // predict target force at new location and compare to predicted force --> compute cost matrix
+
+  
+  
+
+  
+
+  
+
+  // e_k = r^2 = (F_lc - k * (delta_x_0) - F_t(x_0 + delta_x_0))^2
+
+  // r: force residue
+
+  // e: cost
+
+  // F_lc: current loadcell measurement
+
+  // k: sping stiffness of the foot
+
+  // x_0: current stepper position
+
+  // x_1: next stepper pos
+
+  // delta_x_0 = x_1 - x_0: step update at time step 0
+
+  // F_t(x): target force at location
+
+  
+
+  
+
+  // minimize e with x_1
+
+  // d[e(delta_x_0)] / d[delta_x_0] == 0
+
+  
+
+  // d[e] / d[delta_x_0] = d[e] / d[r] * d[r] / d[delta_x_0]
+
+  // d[e] / d[r] = 2 * r
+
+  
+
+  // d[r] / d[delta_x_0] = d[F_lc - k * (delta_x_0) - F_t(x_0 + delta_x_0)] = -k  - d[F_t]/d[delta_x_0]
+
+  
+
+  
+
+  // MPC: sum up over planing horizon and optimize costs
+
+  // take only the first control value & repeat in the next cycle
+
+  // constraint |delta_x_0| < max step rate
+
+  
+
+  // l = sum_k( e_k(delta_x_k, x_0) )
+
+  // where k = [0, 1, ..., N]
+
+  
+}
 

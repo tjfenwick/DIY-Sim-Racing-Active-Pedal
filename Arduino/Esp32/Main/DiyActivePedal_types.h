@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-#define DAP_VERSION_CONFIG 104
+#define DAP_VERSION_CONFIG 105
 #define DAP_PAYLOAD_TYPE_CONFIG 100
 
 struct payloadHeader {
@@ -64,6 +64,9 @@ struct payloadPedalConfig {
   float PID_p_gain;
   float PID_i_gain;
   float PID_d_gain;
+
+  // controller settings
+  uint8_t maxGameOutput;
 
 
 };

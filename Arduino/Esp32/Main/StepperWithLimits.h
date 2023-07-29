@@ -5,7 +5,7 @@
 static const uint32_t MAXIMUM_STEPPER_RPM = 7000;     
 static const uint32_t STEPS_PER_MOTOR_REVOLUTION = 1600;
 static const uint32_t MAXIMUM_STEPPER_SPEED = (MAXIMUM_STEPPER_RPM * STEPS_PER_MOTOR_REVOLUTION) / 60;   // steps/s
-static const int32_t MAXIMUM_STEPPER_ACCELERATION = 1e9;                                                 // steps/s²
+static const int32_t MAXIMUM_STEPPER_ACCELERATION = 1e10;                                                 // steps/s²
 
 
 class StepperWithLimits {
@@ -27,6 +27,7 @@ public:
 
 public:
   int8_t moveTo(int32_t position, bool blocking = false);
+  void printStates();
 
 public:
   int32_t getCurrentPositionSteps() const;

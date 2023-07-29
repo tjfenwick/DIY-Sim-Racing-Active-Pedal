@@ -1,4 +1,3 @@
-#include "PedalConfig.h"
 #define ESTIMATE_LOADCELL_VARIANCE
 
 
@@ -325,6 +324,11 @@ void updatePedalCalcParameters()
   // equalize pedal config for both tasks
   dap_config_st_local = dap_config_st;
 
+
+
+
+
+
 }
 
 
@@ -506,7 +510,9 @@ void pedalUpdateTask( void * pvParameters )
     //int32_t Position_Next = MoveByInterpolatedStrategy(filteredReading, stepperPosFraction, &forceCurve, &dap_calculationVariables_st, &dap_config_st);
     int32_t Position_Next = MoveByPidStrategy(filteredReading, stepperPosFraction, stepper, &forceCurve, &dap_calculationVariables_st, &dap_config_st, absForceOffset_fl32);
 
+
     
+    //stepper->printStates();
     
 
     // add dampening
@@ -538,7 +544,7 @@ void pedalUpdateTask( void * pvParameters )
     if(semaphore_updateJoystick!=NULL)
     {
       if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE) {
-        joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max);
+        joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
         xSemaphoreGive(semaphore_updateJoystick);
       }
     }

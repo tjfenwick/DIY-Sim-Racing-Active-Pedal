@@ -1,5 +1,7 @@
 #include "StepperWithLimits.h"
 
+#include "RTDebugOutput.h"
+
 static const uint8_t LIMIT_TRIGGER_VALUE = LOW;                                   // does endstop trigger high or low
 static const int32_t ENDSTOP_MOVEMENT = STEPS_PER_MOTOR_REVOLUTION / 100;         // how much to move between trigger checks
 
@@ -108,3 +110,21 @@ double StepperWithLimits::getCurrentPositionFraction() const {
 int32_t StepperWithLimits::getTargetPositionSteps() const {
   return _stepper->getPositionAfterCommandsCompleted();
 }
+
+
+void StepperWithLimits::printStates()
+{
+  int32_t currentStepperPos = _stepper->getCurrentPosition();
+  int32_t currentStepperVel = _stepper->getCurrentSpeedInUs();
+  int32_t currentStepperVel2 = _stepper->getCurrentSpeedInMilliHz();
+
+
+  //Serial.println(currentStepperVel);
+  
+  int32_t currentStepperAccel = _stepper->getCurrentAcceleration();
+
+  static RTDebugOutput<int32_t, 4> rtDebugFilter({ "Pos", "Vel", "Vel2", "Accel"});
+  rtDebugFilter.offerData({ currentStepperPos, currentStepperVel, currentStepperVel2, currentStepperAccel});
+}
+
+
