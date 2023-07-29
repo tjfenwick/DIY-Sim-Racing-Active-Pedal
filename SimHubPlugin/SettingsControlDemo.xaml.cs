@@ -702,9 +702,89 @@ namespace User.PluginSdkDemo
         }
 
 
+
         /********************************************************************************************************************/
-		/*							Send config to pedal																	*/																		
-		/********************************************************************************************************************/
+        /*							Refind min endstop																		*/
+        /********************************************************************************************************************/
+        public void StartSystemIdentification_click(object sender, RoutedEventArgs e)
+        {
+
+            TextBox1.Text = "Start system identification";
+
+
+            try
+            {
+
+                string currentDirectory = Directory.GetCurrentDirectory();
+                string dirName = currentDirectory + "\\PluginsData\\Common";
+                string logFileName = "DiyActivePedalSystemIdentification";
+                string fileName = dirName + "\\" + logFileName + ".txt";
+
+                if (File.Exists(fileName))
+                {
+                    File.Delete(fileName);
+                }
+                    
+
+                // This text is added only once to the file.
+                if (!File.Exists(fileName))
+                {
+                    using (StreamWriter sw = File.CreateText(fileName))
+                    {
+
+                        // trigger system identification
+                        Plugin._serialPort[indexOfSelectedPedal_u].Write("3");
+
+                        System.Threading.Thread.Sleep(100);
+
+
+                        // read system return log
+                        while (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0)
+                        {
+                            string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
+                            sw.Write(message);
+
+                            System.Threading.Thread.Sleep(20);
+
+                        }
+                    }
+
+                }
+
+                TextBox1.Text = "Finished system identification";
+
+
+                ////// trigger system identification
+                ////Plugin._serialPort[indexOfSelectedPedal_u].Write("3");
+
+                ////System.Threading.Thread.Sleep(100);
+
+
+                ////// read system return log
+                ////while (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0)
+                ////{
+                ////    string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
+                ////    using (StreamWriter sw = File.AppendText(fileName))
+                ////    {
+                ////        sw.WriteLine(message);
+                ////    }
+                ////    System.Threading.Thread.Sleep(100);
+                ////}
+
+
+            }
+            catch (Exception caughtEx)
+            {
+                string errorMessage = caughtEx.Message;
+                TextBox1.Text = errorMessage;
+            }
+
+        }
+
+
+        /********************************************************************************************************************/
+        /*							Send config to pedal																	*/
+        /********************************************************************************************************************/
         unsafe public void SendConfigToPedal_click(object sender, RoutedEventArgs e)
         {
 			if (Plugin._serialPort[indexOfSelectedPedal_u].IsOpen)
