@@ -1,5 +1,6 @@
+#include <string>
+//#include <string>
 #include "Controller.h"
-#include "PedalConfig.h"
 
 static const int16_t JOYSTICK_MIN_VALUE = 0;
 static const int16_t JOYSTICK_MAX_VALUE = 10000;
@@ -32,14 +33,14 @@ static const int16_t JOYSTICK_RANGE = JOYSTICK_MAX_VALUE - JOYSTICK_MIN_VALUE;
   #include <BleGamepad.h>
 
 
-  #ifdef PEDAL_IS_BRAKE
-    BleGamepad bleGamepad("DiyActiveBrake", "DiyActiveBrake", 100);
-  #endif
-
-  #ifdef PEDAL_IS_ACCELERATOR
-    BleGamepad bleGamepad("DiyActiveAccelerator", "DiyActiveAccelerator", 100);
-  #endif
-
+  
+  // get the max address 
+  // see https://arduino.stackexchange.com/questions/58677/get-esp32-chip-id-into-a-string-variable-arduino-c-newbie-here
+  char ssid[23];
+  uint64_t chipid = ESP.getEfuseMac(); // The chip ID is essentially its MAC address(length: 6 bytes).
+  unsigned int chip = (unsigned int)(chipid >> 32);
+  std::string bluetoothName_lcl = "DiyActivePedal_" + std::to_string( chip );
+  BleGamepad bleGamepad(bluetoothName_lcl, bluetoothName_lcl, 100);
   
   
   void SetupController() {
@@ -68,13 +69,13 @@ static const int16_t JOYSTICK_RANGE = JOYSTICK_MAX_VALUE - JOYSTICK_MIN_VALUE;
 #endif
 
 
-int32_t NormalizeControllerOutputValue(float value, float minVal, float maxVal) {
+int32_t NormalizeControllerOutputValue(float value, float minVal, float maxVal, float maxGameOutput) {
   float valRange = (maxVal - minVal);
   if (abs(valRange) < 0.01) {
     return JOYSTICK_MIN_VALUE;   // avoid div-by-zero
   }
-  
+
   float fractional = (value - minVal) / valRange;
   int32_t controller = JOYSTICK_MIN_VALUE + (fractional * JOYSTICK_RANGE);
-  return constrain(controller, JOYSTICK_MIN_VALUE, JOYSTICK_MAX_VALUE);
+  return constrain(controller, JOYSTICK_MIN_VALUE, (maxGameOutput/100.) * JOYSTICK_MAX_VALUE);
 }

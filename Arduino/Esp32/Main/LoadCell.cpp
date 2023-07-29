@@ -1,5 +1,4 @@
 #include "LoadCell.h"
-#include "PedalConfig.h"
 
 #include <SPI.h>
 #include <ADS1256.h>
@@ -9,14 +8,9 @@ static const float ADC_VREF = 2.5;        // voltage reference
 
 static const int NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION = 1000;
 
- #ifdef PEDAL_IS_BRAKE
-    static const float DEFAULT_VARIANCE_ESTIMATE = 0.2f * 0.2f;
-  #endif
-
-  #ifdef PEDAL_IS_ACCELERATOR
-    static const float DEFAULT_VARIANCE_ESTIMATE = 0.2f * 0.2f;
-  #endif
-
+ 
+static const float DEFAULT_VARIANCE_ESTIMATE = 0.2f * 0.2f;
+ 
 
 static const float LOADCELL_VARIANCE_MIN = 0.001f;
 
@@ -41,10 +35,8 @@ ADS1256& ADC() {
     
     // start the ADS1256 with data rate of 15kSPS SPS and gain x64
     //adc.begin(ADS1256_DRATE_15000SPS,ADS1256_GAIN_64,false);    
-    adc.begin(ADS1256_DRATE_1000SPS,ADS1256_GAIN_64,false);    
-     
-    //adc.begin(ADS1256_DRATE_500SPS,ADS1256_GAIN_64,false);  
-    //adc.begin(ADS1256_DRATE_60SPS,ADS1256_GAIN_64,false);  
+    //adc.begin(ADS1256_DRATE_1000SPS,ADS1256_GAIN_64,false);         
+    adc.begin(ADS1256_DRATE_3750SPS,ADS1256_GAIN_64,false);  
     
     
     Serial.println("ADC Started");

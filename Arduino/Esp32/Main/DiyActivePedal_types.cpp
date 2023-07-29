@@ -52,55 +52,10 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.PID_p_gain = 0.3;
   payLoadPedalConfig_.PID_i_gain = 50.0;
   payLoadPedalConfig_.PID_d_gain = 0.0;
+
+  payLoadPedalConfig_.maxGameOutput = 100;
 }
 
-
-void DAP_config_st::initialiseDefaults_Accelerator() {
-  payLoadHeader_.payloadType = DAP_PAYLOAD_TYPE_CONFIG;
-  payLoadHeader_.version = DAP_VERSION_CONFIG;
-  payLoadHeader_.storeToEeprom = false;
-
-
-  payLoadPedalConfig_.pedalStartPosition = 10;
-  payLoadPedalConfig_.pedalEndPosition = 90;
-
-  payLoadPedalConfig_.maxForce = 20;
-  payLoadPedalConfig_.preloadForce = 3;
-
-  payLoadPedalConfig_.relativeForce_p000 = 0;
-  payLoadPedalConfig_.relativeForce_p020 = 20;
-  payLoadPedalConfig_.relativeForce_p040 = 40;
-  payLoadPedalConfig_.relativeForce_p060 = 60;
-  payLoadPedalConfig_.relativeForce_p080 = 80;
-  payLoadPedalConfig_.relativeForce_p100 = 100;
-
-  payLoadPedalConfig_.dampingPress = 0;
-  payLoadPedalConfig_.dampingPull = 0;
-
-  payLoadPedalConfig_.absFrequency = 60;
-  payLoadPedalConfig_.absAmplitude = 0;
-
-  payLoadPedalConfig_.lengthPedal_AC = 150;
-  payLoadPedalConfig_.horPos_AB = 215;
-  payLoadPedalConfig_.verPos_AB = 80;
-  payLoadPedalConfig_.lengthPedal_CB = 200;
-
-  payLoadPedalConfig_.cubic_spline_param_a_array[0] = 0;
-  payLoadPedalConfig_.cubic_spline_param_a_array[1] = 0;
-  payLoadPedalConfig_.cubic_spline_param_a_array[2] = 0;
-  payLoadPedalConfig_.cubic_spline_param_a_array[3] = 0;
-  payLoadPedalConfig_.cubic_spline_param_a_array[4] = 0;
-
-  payLoadPedalConfig_.cubic_spline_param_b_array[0] = 0;
-  payLoadPedalConfig_.cubic_spline_param_b_array[1] = 0;
-  payLoadPedalConfig_.cubic_spline_param_b_array[2] = 0;
-  payLoadPedalConfig_.cubic_spline_param_b_array[3] = 0;
-  payLoadPedalConfig_.cubic_spline_param_b_array[4] = 0;
-
-  payLoadPedalConfig_.PID_p_gain = 0.3;
-  payLoadPedalConfig_.PID_i_gain = 50.0;
-  payLoadPedalConfig_.PID_d_gain = 0.0;
-}
 
 
 
