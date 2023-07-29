@@ -1,6 +1,6 @@
 #define ESTIMATE_LOADCELL_VARIANCE
 
-
+//#define ALLOW_SYSTEM_IDENTIFICATION
 
 /**********************************************************************************************/
 /*                                                                                            */
@@ -10,7 +10,7 @@
 void updatePedalCalcParameters();
 
 
-
+bool systemIdentificationMode_b = false;
 
 
 
@@ -365,6 +365,16 @@ void pedalUpdateTask( void * pvParameters )
   for(;;){
 
 
+    // system identification mode
+    #ifdef ALLOW_SYSTEM_IDENTIFICATION
+      if (systemIdentificationMode_b == true)
+      {
+        measureStepResponse(stepper, &dap_calculationVariables_st, &dap_config_st, loadcell);
+        systemIdentificationMode_b = false;
+      }
+    #endif
+    
+
     // controll cycle time. Delay did not work with the multi tasking, thus this workaround was integrated
     unsigned long now = micros();
     if (now - cycleTimeLastCall < PUT_TARGET_CYCLE_TIME_IN_US) // 100us = 10kHz
@@ -683,7 +693,8 @@ void serialCommunicationTask( void * pvParameters )
             break;
           // de-/activate spline debug 
           case 3:
-            splineDebug_b != splineDebug_b;
+            Serial.println("Start system identification");
+            systemIdentificationMode_b = true;
             break;
 
           default:

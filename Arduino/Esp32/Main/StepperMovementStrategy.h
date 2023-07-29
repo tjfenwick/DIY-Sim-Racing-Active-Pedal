@@ -205,3 +205,68 @@ int32_t mpcBasedMove(float loadCellReadingKg, float stepperPosFraction, StepperW
   
 }
 
+
+
+// see https://pidtuner.com
+void measureStepResponse(StepperWithLimits* stepper, const DAP_calculationVariables_st* calc_st, const DAP_config_st* config_st, const LoadCell_ADS1256* loadcell)
+{
+
+  int32_t currentPos = stepper->getCurrentPositionSteps();
+  int32_t minPos = currentPos - dap_calculationVariables_st.stepperPosRange * 0.05;
+  int32_t maxPos = currentPos + dap_calculationVariables_st.stepperPosRange * 0.05;
+
+  stepper->moveTo(minPos, true);
+
+  Serial.println("======================================");
+  Serial.println("Start system identification data:");
+
+  unsigned long initialTime = micros();
+  unsigned long t = micros();
+  bool targetPosHasBeenSet_b = false;
+  float loadcellReading;
+
+  int32_t targetPos;
+
+  for (uint32_t cycleIdx = 0; cycleIdx < 5; cycleIdx++)
+  {
+    // toogle target position
+    if (cycleIdx % 2 == 0)
+    {
+      targetPos = maxPos;
+    }
+    else
+    {
+      targetPos = minPos;
+    }
+
+    targetPos = (int32_t)constrain(targetPos, dap_calculationVariables_st.stepperPosMin, dap_calculationVariables_st.stepperPosMax);
+
+    // execute move to target position and meaure system response
+    float currentPos;
+    for (uint32_t sampleIdx_u32 = 0; sampleIdx_u32 < 2000; sampleIdx_u32++)
+    {
+      // get loadcell reading
+      loadcellReading = loadcell->getReadingKg();
+
+      // update time
+      t = micros() - initialTime;
+
+      // after some time, set target position
+      if (sampleIdx_u32 == 50)
+      {
+        stepper->moveTo(targetPos, false);
+      }
+
+      // get current position
+      currentPos = stepper->getCurrentPositionFraction();
+      loadcellReading = (loadcellReading - calc_st->Force_Min) / calc_st->Force_Range; 
+
+      static RTDebugOutput<float, 3> rtDebugFilter({ "t", "y", "F"});
+      rtDebugFilter.offerDataWithoutText({ ((float)t) *1e-6 , currentPos,  loadcellReading});   
+    }
+  }
+
+  Serial.println("======================================");
+  Serial.println("End system identification data");
+}
+
