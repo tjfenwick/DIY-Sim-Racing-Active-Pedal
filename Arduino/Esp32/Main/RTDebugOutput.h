@@ -10,6 +10,7 @@ private:
   std::array<String,NVALS> _outNames;
   std::array<TVALUE,NVALS> _outValues;
   bool _dataReady;
+  bool _withoutText = false;
   
 public:
   RTDebugOutput(std::array<String,NVALS> outNames)
@@ -24,16 +25,45 @@ public:
     if(xSemaphoreTake(_semaphore_data, 0) == pdTRUE) {
       _outValues = values;
       _dataReady = true;
+      _withoutText = false;
       xSemaphoreGive(_semaphore_data);
     }
   }
 
+
+  void offerDataWithoutText(std::array<TVALUE,NVALS> values) {
+    if(xSemaphoreTake(_semaphore_data, 0) == pdTRUE) {
+      _outValues = values;
+      _dataReady = true;
+      _withoutText = true;
+      xSemaphoreGive(_semaphore_data);
+    }
+  }
+
+  
+
   template <typename T>
   void printValue(String name, T value) {
-    Serial.print(name); Serial.print(":"); Serial.print(value); Serial.print(",");
+
+    if (_withoutText == false)
+    {
+      Serial.print(name); Serial.print(":"); Serial.print(value); Serial.print(",");
+    }
+    else
+    {
+      Serial.print(value, 9); Serial.print(",");
+    }
+    
   }
   void printValue(String name, float value) {
-    Serial.print(name); Serial.print(":"); Serial.print(value,6); Serial.print(",");
+    if (_withoutText == false)
+    {
+      Serial.print(name); Serial.print(":"); Serial.print(value,6); Serial.print(",");
+    }
+    else
+    {
+      Serial.print(value, 9); Serial.print(",");
+    }
   }
 
   void printData() {

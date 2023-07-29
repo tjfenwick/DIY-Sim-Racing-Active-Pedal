@@ -38,4 +38,5 @@ public:
   int32_t getLimitMin() const { return _limitMin; }
   int32_t getLimitMax() const { return _limitMax; }
   int32_t getTravelSteps() const { return _posMax - _posMin; }
+  void setSpeed(uint32_t speedInStepsPerSecond);
 };

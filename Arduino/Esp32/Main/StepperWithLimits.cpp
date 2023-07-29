@@ -128,3 +128,9 @@ void StepperWithLimits::printStates()
 }
 
 
+void StepperWithLimits::setSpeed(uint32_t speedInStepsPerSecond) 
+{
+  _stepper->setSpeedInHz(speedInStepsPerSecond);            // steps/s 
+}
+
+
