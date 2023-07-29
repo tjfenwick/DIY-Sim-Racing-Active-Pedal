@@ -28,7 +28,7 @@ namespace User.PluginSdkDemo
     {
 
 
-        public uint pedalConfigPayload_version = 104;
+        public uint pedalConfigPayload_version = 105;
 
 		public uint indexOfSelectedPedal_u = 1;
 
@@ -291,6 +291,9 @@ namespace User.PluginSdkDemo
             PID_tuning_P_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_p_gain;
             PID_tuning_I_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_i_gain;
             PID_tuning_D_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_d_gain;
+
+
+            maxGameOutput_slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput;
 
             Update_BrakeForceCurve();
 
@@ -565,7 +568,10 @@ namespace User.PluginSdkDemo
         }
 
 
-
+        public void maxGameOutput_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput = (byte)e.NewValue;
+        }
 
 
         /********************************************************************************************************************/

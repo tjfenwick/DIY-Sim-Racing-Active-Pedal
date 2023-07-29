@@ -44,4 +44,4 @@ The SimHub plugin was designed to communicate with the esp32 to (a) modify the p
 
 ![image](SimHubPlugin/Images/SimHubPluginOverview.png)
 
-To install the plugin, copy the plugin [binaries](SimHubPlugin/obj/Release) content to your SimHub directory, e.g. C:/Program Files (x86)/SimHub
+To install the plugin, copy the plugin [binaries](SimHubPlugin/bin) content to your SimHub directory, e.g. C:/Program Files (x86)/SimHub

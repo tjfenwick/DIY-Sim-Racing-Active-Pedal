@@ -84,6 +84,8 @@ public struct payloadPedalConfig
     public float PID_i_gain;
     public float PID_d_gain;
 
+    public byte maxGameOutput;
+
 
 }
 
@@ -334,6 +336,8 @@ namespace User.PluginSdkDemo
             dap_config_initial_st.payloadPedalConfig_.verPos_AB = 80;
             dap_config_initial_st.payloadPedalConfig_.lengthPedal_CB = 200;
 
+            dap_config_initial_st.payloadPedalConfig_.maxGameOutput = 100;
+            
 
 
 

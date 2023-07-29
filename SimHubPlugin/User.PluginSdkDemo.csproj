@@ -152,6 +152,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /y $(ProjectDir)obj\Release\DiyActivePedal.dll  $(ProjectDir)bin
+xcopy /y $(ProjectDir)obj\Release\DiyActivePedal.g.resources  $(ProjectDir)bin
+xcopy /y $(ProjectDir)obj\Release\DiyActivePedal.pdb $(ProjectDir)bin</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
