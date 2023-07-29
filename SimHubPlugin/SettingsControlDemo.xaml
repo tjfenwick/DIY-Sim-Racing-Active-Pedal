@@ -57,7 +57,7 @@
         <styles:SHButtonPrimary Click="UpdateSerialPortList_click" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Width="180" >Update serial port list</styles:SHButtonPrimary>
 
         <!-- serial connection -->
-        <TextBlock Text="Connect to pedal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,350,0"  Grid.Row="1" Grid.Column="0" Width="100" Grid.ColumnSpan="2" />
+        <TextBlock Text="Connect to pedal" HorizontalAlignment="left" VerticalAlignment="Top" Margin="-60,2,500,0"  Grid.Row="1" Grid.Column="1" Width="200" Grid.ColumnSpan="2" />
         <CheckBox x:Name="ConnectToPedal" Click="ConnectToPedal_click" Grid.Column="0" HorizontalAlignment="Right" Grid.Row="1"
                   Width="50"
                   Height="25" Margin="100,20,0,0" VerticalAlignment="Top"/>
@@ -559,6 +559,36 @@
             TickPlacement="BottomRight"
 			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
             Value="0"
+            IsSnapToTickEnabled="False"
+            />
+
+
+
+
+
+        <TextBlock HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="5,0,0,0" 
+                   Text="Max game output:" 
+                   Grid.Row="9" 
+                   Grid.Column="0" 
+                   Width="120" 
+                   Foreground="White"/>
+        <Slider x:Name="maxGameOutput_slider" 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Top" 
+            Margin="120,0,0,0" 
+            Grid.Row="9" 
+            Grid.Column="0" 
+            Width="120" 
+            ValueChanged="maxGameOutput_changed" 
+            AutoToolTipPlacement="TopLeft" 
+            AutoToolTipPrecision="0"
+            Minimum="0"
+			Maximum="100"
+            TickPlacement="BottomRight"
+			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
+            Value="100"
             IsSnapToTickEnabled="False"
             />
 
