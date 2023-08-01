@@ -78,8 +78,7 @@ static SemaphoreHandle_t semaphore_updateConfig=NULL;
   bool configUpdateAvailable = false;                              // semaphore protected data
   DAP_config_st dap_config_st_local;
 
-static SemaphoreHandle_t semaphore_updateJoystick=NULL;
-  int32_t joystickNormalizedToInt32 = 0;                           // semaphore protected data
+static QueueHandle_t queue_updateJoystick=NULL;
 
 bool resetPedalPosition = false;
 
@@ -249,14 +248,14 @@ void setup()
 
 
   // setup multi tasking
-  semaphore_updateJoystick = xSemaphoreCreateMutex();
+  queue_updateJoystick = xQueueCreate(1, sizeof(int32_t));
   semaphore_updateConfig = xSemaphoreCreateMutex();
   delay(10);
 
 
-  if(semaphore_updateJoystick==NULL)
+  if(queue_updateJoystick==NULL)
   {
-    Serial.println("Could not create semaphore");
+    Serial.println("Could not create queue");
     ESP.restart();
   }
   if(semaphore_updateConfig==NULL)
@@ -336,6 +335,7 @@ void updatePedalCalcParameters()
 /*                                                                                            */
 /**********************************************************************************************/
 void loop() {
+  taskYIELD();
 }
 
 
@@ -549,17 +549,8 @@ void pedalUpdateTask( void * pvParameters )
     }
 
     // compute controller output
-    if(semaphore_updateJoystick!=NULL)
-    {
-      if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE) {
-        joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
-        xSemaphoreGive(semaphore_updateJoystick);
-      }
-    }
-    else
-    {
-      Serial.println("semaphore_updateJoystick == 0");
-    }
+    int32_t joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
+    xQueueSend(queue_updateJoystick, &joystickNormalizedToInt32, /*xTicksToWait=*/10);
 
     #ifdef PRINT_USED_STACK_SIZE
       unsigned int temp2 = uxTaskGetStackHighWaterMark(nullptr);
@@ -707,19 +698,10 @@ void serialCommunicationTask( void * pvParameters )
 
     // transmit controller output
     if (IsControllerReady()) {
-      if(semaphore_updateJoystick!=NULL)
-      {
-        if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE)
-        {
-          joystickNormalizedToInt32_local = joystickNormalizedToInt32;
-          xSemaphoreGive(semaphore_updateJoystick);
-        }
-        else
-        {
-          Serial.println("semaphore_updateJoystick == 0");
-        }
+      int32_t joystickNormalizedToInt32 = 0;
+      if (pdTRUE == xQueueReceive(queue_updateJoystick, &joystickNormalizedToInt32, /*xTicksToWait=*/10)) {
+        SetControllerOutputValue(joystickNormalizedToInt32);
       }
-      SetControllerOutputValue(joystickNormalizedToInt32_local);
     }
 
   }
