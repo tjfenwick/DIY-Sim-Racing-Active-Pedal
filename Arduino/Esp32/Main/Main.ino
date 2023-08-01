@@ -74,11 +74,8 @@ ForceCurve_Interpolated forceCurve;
 TaskHandle_t Task1;
 TaskHandle_t Task2;
 
-static SemaphoreHandle_t semaphore_updateConfig=NULL;
-  bool configUpdateAvailable = false;                              // semaphore protected data
-  DAP_config_st dap_config_st_local;
-
 static QueueHandle_t queue_updateJoystick=NULL;
+static QueueHandle_t queue_updateConfig=NULL;
 
 bool resetPedalPosition = false;
 
@@ -238,31 +235,23 @@ void setup()
   // interprete config values
   dap_calculationVariables_st.updateFromConfig(dap_config_st);
 
-  // activate parameter update in first cycle
-  configUpdateAvailable = true;
-  // equalize pedal config for both tasks
-  dap_config_st_local = dap_config_st;
-
-
 
 
 
   // setup multi tasking
   queue_updateJoystick = xQueueCreate(1, sizeof(int32_t));
-  semaphore_updateConfig = xSemaphoreCreateMutex();
+  queue_updateConfig   = xQueueCreate(1, sizeof(DAP_config_st));
   delay(10);
 
 
-  if(queue_updateJoystick==NULL)
+  if(queue_updateJoystick==NULL || queue_updateConfig==NULL)
   {
     Serial.println("Could not create queue");
     ESP.restart();
   }
-  if(semaphore_updateConfig==NULL)
-  {
-    Serial.println("Could not create semaphore");
-    ESP.restart();
-  }
+
+  // activate parameter update in first cycle
+  xQueueSend(queue_updateConfig, &dap_config_st, /*xTicksToWait=*/10);
 
   disableCore0WDT();
 
@@ -316,15 +305,6 @@ void updatePedalCalcParameters()
 
   // tune the PID settings
   tunePidValues(dap_config_st);
-
-  // equalize pedal config for both tasks
-  dap_config_st_local = dap_config_st;
-
-
-
-
-
-
 }
 
 
@@ -394,36 +374,15 @@ void pedalUpdateTask( void * pvParameters )
 
 
     // if a config update was received over serial, update the variables required for further computation
-    if (configUpdateAvailable == true)
     {
-      if(semaphore_updateConfig!=NULL)
-      {
-
-        bool configWasUpdated_b = false;
-        // Take the semaphore and just update the config file, then release the semaphore
-        if(xSemaphoreTake(semaphore_updateConfig, 1)==pdTRUE)
+        DAP_config_st dap_config_st_local;
+        if (pdTRUE == xQueueReceive(queue_updateConfig, &dap_config_st_local, /*xTicksToWait=*/0))
         {
           Serial.println("Update pedal config!");
-          configUpdateAvailable = false;
           dap_config_st = dap_config_st_local;
-          configWasUpdated_b = true;
-          xSemaphoreGive(semaphore_updateConfig);
-        }
-
-        // update the calc params
-        if (true == configWasUpdated_b)
-        {
-          Serial.println("Updating the calc params!");
-          configWasUpdated_b = false;
           dap_config_st.storeConfigToEprom(dap_config_st); // store config to EEPROM
           updatePedalCalcParameters(); // update the calc parameters
         }
-
-      }
-      else
-      {
-        Serial.println("semaphore_updateConfig == 0");
-      }
     }
 
 
@@ -616,16 +575,8 @@ void serialCommunicationTask( void * pvParameters )
     // likely config structure 
     if ( n == sizeof(DAP_config_st) )
     {
-      
-      if(semaphore_updateConfig!=NULL)
-      {
-        if(xSemaphoreTake(semaphore_updateConfig, 1)==pdTRUE)
-        {
-          DAP_config_st * dap_config_st_local_ptr;
-          dap_config_st_local_ptr = &dap_config_st_local;
-          Serial.readBytes((char*)dap_config_st_local_ptr, sizeof(DAP_config_st));
-
-          
+          DAP_config_st dap_config_st_local;
+          Serial.readBytes((char*)&dap_config_st_local, sizeof(DAP_config_st));
 
           // check if data is plausible
           bool structChecker = true;
@@ -644,7 +595,7 @@ void serialCommunicationTask( void * pvParameters )
             Serial.println(dap_config_st_local.payLoadHeader_.version);
           }
           // checksum validation
-          uint16_t crc = checksumCalculator((uint8_t*)(&(dap_config_st_local_ptr->payLoadPedalConfig_)), sizeof(dap_config_st_local.payLoadPedalConfig_) );
+          uint16_t crc = checksumCalculator((uint8_t*)(&(dap_config_st_local.payLoadPedalConfig_)), sizeof(dap_config_st_local.payLoadPedalConfig_));
           if (crc != dap_config_st_local.payLoadHeader_.checkSum){ 
             structChecker = false;
             Serial.print("CRC expected: ");
@@ -658,11 +609,8 @@ void serialCommunicationTask( void * pvParameters )
           if (structChecker == true)
           {
             Serial.println("Update pedal config!");
-            configUpdateAvailable = true;          
+            xQueueSend(queue_updateConfig, &dap_config_st_local, /*xTicksToWait=*/10);
           }
-          xSemaphoreGive(semaphore_updateConfig);
-        }
-      }
     }
     else
     {
