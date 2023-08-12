@@ -24,6 +24,10 @@ This product is essentialy a robot. If not interacted with care, it may cause ha
 I'm not responsible for any harm caused by this design suggestion. Use responsible and at your own risk.  
 
 
+# Discord
+For better communication, a [Discord](https://discord.gg/j8QhD5hCv7) server has been created. 
+Feel free to join, research before you build and ask questions.
+
 
 # Hardware
 ## ESP32
