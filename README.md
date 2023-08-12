@@ -34,7 +34,7 @@ There are multiple variations of the DIY active pedal build by users, which can 
 
 ## BOM
 The BOM refers to the pedal design which I have choosen. There are multiple ways to build the pedal. I suggest that you only use this BOM as a reference and build your DIY active pedals however you like them.
-[BOM](BOM.MD)
+[BOM](BOM.md)
 
   
 
