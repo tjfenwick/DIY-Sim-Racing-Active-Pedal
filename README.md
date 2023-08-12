@@ -31,8 +31,12 @@ The embedded code of the DIY active pedal runs on an ESP32 microcontroller.
 
 ## Mechanics
 There are multiple variations of the DIY active pedal build by users, which can be found at our [discord](https://discord.gg/j9K5vUuT) channel.   
-  
 
+## BOM
+The BOM refers to the pedal design which I have choosen. There are multiple ways to build the pedal. I suggest that you only use this BOM as a reference and build your DIY active pedals however you like them.
+[BOM](BOM.MD)
+
+  
 
 # Software
 
