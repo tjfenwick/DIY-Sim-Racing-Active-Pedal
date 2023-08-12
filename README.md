@@ -37,7 +37,10 @@ The embedded code of the DIY active pedal runs on an ESP32 microcontroller.
 There are multiple variations of the DIY active pedal build by users, which can be found at our [discord](https://discord.gg/j9K5vUuT) channel.   
 
 ## BOM
-The [BOM](BOM.md) refers to the pedal design which I have choosen. There are multiple ways to build the pedal. I suggest that you only use this BOM as a reference and build your DIY active pedals however you like them. Go to our discord server and search for images to get inspirations.
+The [BOM](BOM.md) refers to the pedal design which I have choosen, see below:
+![image](Images/Build_1.jpg).
+
+There are multiple ways to build the pedal. I suggest that you only use this BOM as a reference and build your DIY active pedals however you like them. Go to our discord server and search for images to get inspirations.
 
 The first pedal costs me about 300€. Another add-on pedal costed me about 240€, since I bough some of the parts in packs for the first pedal and thus already had them. 
 
