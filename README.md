@@ -21,7 +21,7 @@ The regular ESP32 is currently recommended over the ESP32 S2, as it has a FPU an
 
 ESP32             |  ESP32 S2 mini
 :-------------------------:|:-------------------------:
-![](Wiring/Esp32/Esp32_PCB_0.png)  |  ![](Wiring/Esp32_s2_mini/Esp32_S2_mini_PCB_0.png.png)
+![](Wiring/Esp32/Esp32_PCB_0.png)  |  ![](Wiring/Esp32_s2_mini/Esp32_S2_mini_PCB_0.png)
 
 A more sophisticated custom PCB is currently under development and is beeing tested. Please refer to the Discord for up-to-date designs.
 
