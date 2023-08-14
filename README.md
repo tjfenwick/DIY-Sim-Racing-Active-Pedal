@@ -41,7 +41,13 @@ Currently a nicer PCB deisgn is under development, which has the ESP & ADS integ
 # Software
 
 ## ESP32 code
+
+# Built from source
 To flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32. 
+
+# flash prebuilt via webflasher
+HASN'T BEEN TESTED YET:
+The prebuilt binaries for the regular ESP32 can be found [here](Arduino/Esp32/bin). They can be flashed via the ESP [webflasher](https://esp.huhn.me/). 
 
 ## SimHub plugin:
 The SimHub plugin was designed to communicate with the esp32 to (a) modify the pedal configuration, e.g. the force vs. travel parameterization and (b) to trigger effects such as ABS oscillations.  
@@ -62,3 +68,4 @@ To install the plugin, copy the plugin [binaries](SimHubPlugin/bin) content to y
 - [ ] GUI design improvements for the SimHub plugin
 - [ ] SimHub plugin: Bugfix for COM port selection wrong, when switching between pedals
 - [ ] Send SimHub data via wifi to ESP
+- [ ] Automatically generate the bin files and refer to the ESP32 [webflasher](https://esp.huhn.me/)
