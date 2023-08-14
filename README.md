@@ -16,7 +16,10 @@ Feel free to join, research before you build and ask questions.
 
 # Hardware
 ## ESP32
-The embedded code of the DIY active pedal runs on an ESP32 microcontroller. 
+The embedded code of the DIY active pedal runs on an ESP32 microcontroller. Some beakoutboards are uploaded to the [Wiring](Wiring) directory. 
+The regular ESP32 is currently recommended over the ESP32 S2, as it has a FPU and it performs better with the stepper library. ESP32 S2 currently is losing steps. 
+
+A more sophisticated custom PCB is currently under development and is beeing tested. Please refer to the Discord for up-to-date designs.
 
 ## Mechanics
 There are multiple variations of the DIY active pedal build by users, which can be found at our [discord](https://discord.gg/j9K5vUuT) channel.   
