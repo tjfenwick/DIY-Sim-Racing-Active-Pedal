@@ -1,0 +1,9 @@
+<map id="StepperWithLimits" name="StepperWithLimits">
+<area shape="rect" id="Node000001" title=" " alt="" coords="130,144,258,171"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,140,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,44,107,81,136,118,169,141,166,146,133,122,103,84,82,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="164,5,224,32"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="197,47,197,143,191,143,191,47"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="248,5,308,32"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="278,47,269,84,251,122,237,135,222,146,219,141,234,131,246,118,264,82,272,46"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="Arduino/Esp32/Main/PedalGeometry.cpp" name="Arduino/Esp32/Main/PedalGeometry.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="221,5,361,48"/>
+<area shape="rect" id="Node000002" href="$_pedal_geometry_8h.html" title=" " alt="" coords="153,96,275,123"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="273,50,238,87,234,83,269,47"/>
+<area shape="rect" id="Node000006" href="$_stepper_with_limits_8h.html" title=" " alt="" coords="299,96,438,123"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="313,47,348,83,344,87,309,50"/>
+<area shape="rect" id="Node000003" href="$_diy_active_pedal__types_8h.html" title=" " alt="" coords="5,171,164,197"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="193,126,121,165,118,161,190,121"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="188,171,264,197"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="219,123,224,156,219,157,213,124"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="52,245,117,272"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,198,87,230,82,230,82,198"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="300,171,437,197"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="371,123,371,156,366,156,366,123"/>
+</map>

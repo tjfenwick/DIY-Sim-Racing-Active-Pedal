@@ -1,0 +1,11 @@
+<map id="Arduino/Esp32/Main/LoadCell.cpp" name="Arduino/Esp32/Main/LoadCell.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="69,5,208,48"/>
+<area shape="rect" id="Node000002" href="$_load_cell_8h.html" title=" " alt="" coords="5,96,88,123"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,51,74,88,70,84,113,47"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="112,96,165,123"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="141,49,141,81,136,81,136,49"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="190,96,277,123"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="165,47,209,84,205,88,161,51"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="14,171,79,197"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="49,123,49,156,44,156,44,123"/>
+</map>

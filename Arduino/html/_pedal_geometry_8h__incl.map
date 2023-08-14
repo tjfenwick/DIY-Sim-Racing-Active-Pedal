@@ -1,0 +1,9 @@
+<map id="Arduino/Esp32/Main/PedalGeometry.h" name="Arduino/Esp32/Main/PedalGeometry.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="86,5,224,48"/>
+<area shape="rect" id="Node000002" href="$_diy_active_pedal__types_8h.html" title=" " alt="" coords="5,96,164,123"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,50,107,86,103,83,135,47"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="188,96,264,123"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="175,47,207,83,203,86,171,50"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="52,171,117,197"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,123,87,156,82,156,82,123"/>
+</map>

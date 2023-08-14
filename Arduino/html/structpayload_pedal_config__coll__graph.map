@@ -1,0 +1,7 @@
+<map id="payloadPedalConfig" name="payloadPedalConfig">
+<area shape="rect" id="Node000001" title=" " alt="" coords="33,256,169,283"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,66,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="30,47,23,86,18,133,22,184,29,208,39,231,51,243,65,253,62,258,47,247,35,233,24,210,17,185,13,133,17,85,25,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="145,5,190,32"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="172,47,172,85,169,133,159,184,140,233,120,257,116,254,136,231,154,183,163,132,167,85,167,47"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="CycleTimer" name="CycleTimer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="95,96,182,123"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,61,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="44,44,61,70,78,83,98,93,96,98,75,88,57,74,40,47"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="116,5,161,32"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="141,47,141,95,136,95,136,47"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="186,5,277,32"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="223,47,204,74,170,98,166,93,200,70,219,44"/>
+</map>
