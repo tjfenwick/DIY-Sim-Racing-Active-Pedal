@@ -42,6 +42,9 @@ Currently a nicer PCB deisgn is under development, which has the ESP & ADS integ
 
 ## ESP32 code
 
+### Architecture
+A Doxygen report of the sources can be found [here](Arduino/html/index.html).
+
 ### Built from source
 To flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32. 
 
