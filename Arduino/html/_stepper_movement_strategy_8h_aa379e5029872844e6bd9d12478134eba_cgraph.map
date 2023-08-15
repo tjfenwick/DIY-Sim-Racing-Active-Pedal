@@ -1,0 +1,7 @@
+<map id="MoveByInterpolatedStrategy" name="MoveByInterpolatedStrategy">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,189,73"/>
+<area shape="rect" id="Node000002" href="$class_force_curve___interpolated.html#a765eedafeea4e8688e418b35cda4f840" title=" " alt="" coords="259,5,419,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,45,244,37,244,42,189,50"/>
+<area shape="rect" id="Node000003" href="$class_force_curve___interpolated.html#ad4a56e9775e1e390700d33ee2a2bd088" title=" " alt="" coords="237,72,441,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="189,70,222,75,221,80,189,75"/>
+</map>

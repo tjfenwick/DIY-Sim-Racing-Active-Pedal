@@ -1,0 +1,9 @@
+<map id="LoadCell_ADS1256::getReadingKg" name="LoadCell_ADS1256::getReadingKg">
+<area shape="rect" id="Node000001" title=" " alt="" coords="245,72,467,99"/>
+<area shape="rect" id="Node000002" href="$class_load_cell___a_d_s1256.html#a1b5950ca345eda08d54c11b3b28a5f05" title=" " alt="" coords="5,5,197,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="280,71,196,51,197,46,281,66"/>
+<area shape="rect" id="Node000003" href="$_stepper_movement_strategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3" title=" " alt="" coords="23,72,179,99"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="230,88,180,88,180,83,230,83"/>
+<area shape="rect" id="Node000004" href="$class_load_cell___a_d_s1256.html#aa3ffc937e2e8e3699edc459c1259b3ee" title=" " alt="" coords="9,123,193,165"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="281,105,194,125,193,120,280,100"/>
+</map>

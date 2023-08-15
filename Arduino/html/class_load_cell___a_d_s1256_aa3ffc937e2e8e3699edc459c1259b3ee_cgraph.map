@@ -1,0 +1,7 @@
+<map id="LoadCell_ADS1256::setZeroPoint" name="LoadCell_ADS1256::setZeroPoint">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,190,48"/>
+<area shape="rect" id="Node000002" href="$class_load_cell___a_d_s1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c" title=" " alt="" coords="238,13,460,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,24,223,24,223,29,190,29"/>
+<area shape="rect" id="Node000003" href="$_load_cell_8cpp.html#a69012c93d090a7bd675a327d08fad6a9" title=" " alt="" coords="508,13,556,40"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="460,24,493,24,493,29,460,29"/>
+</map>
