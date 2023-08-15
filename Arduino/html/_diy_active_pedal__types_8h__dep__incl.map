@@ -1,0 +1,18 @@
+<map id="Arduino/Esp32/Main/DiyActivePedal_types.h" name="Arduino/Esp32/Main/DiyActivePedal_types.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="263,5,425,48"/>
+<area shape="rect" id="Node000002" href="$_a_b_s_oscillation_8h.html" title=" " alt="" coords="5,96,144,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="268,56,139,98,137,93,266,51"/>
+<area shape="rect" id="Node000003" href="$_diy_active_pedal__types_8cpp.html" title=" " alt="" coords="293,187,469,229"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="354,62,380,186,374,187,348,63"/>
+<area shape="rect" id="Node000004" href="$_force_curve_8h.html" title=" " alt="" coords="168,96,306,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="310,60,264,97,260,93,306,55"/>
+<area shape="rect" id="Node000006" href="$_pedal_geometry_8h.html" title=" " alt="" coords="381,96,520,139"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="381,55,427,93,424,97,378,60"/>
+<area shape="rect" id="Node000008" href="$_stepper_movement_strategy_8h.html" title=" " alt="" coords="544,96,733,139"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="427,50,570,93,569,98,426,55"/>
+<area shape="rect" id="Node000005" href="$_force_curve_8cpp.html" title=" " alt="" coords="131,187,269,229"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="225,153,211,187,206,185,220,151"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="428,152,399,188,395,185,423,149"/>
+<area shape="rect" id="Node000007" href="$_pedal_geometry_8cpp.html" title=" " alt="" coords="494,187,634,229"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="490,146,539,184,536,188,486,150"/>
+</map>

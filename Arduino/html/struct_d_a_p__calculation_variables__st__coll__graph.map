@@ -1,0 +1,7 @@
+<map id="DAP_calculationVariables_st" name="DAP_calculationVariables_st">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,256,195,283"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="9,5,55,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="27,47,19,85,14,133,18,184,25,208,35,231,47,244,62,253,59,258,43,248,31,233,20,210,13,185,9,133,13,85,22,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="147,5,192,32"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,47,174,85,171,133,161,184,142,233,121,257,117,254,138,231,156,183,166,132,169,85,169,47"/>
+</map>
