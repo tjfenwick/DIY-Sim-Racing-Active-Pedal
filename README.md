@@ -26,7 +26,7 @@ ESP32 PCB            |  ESP32 S2 mini PCB
 A more sophisticated custom PCB is currently under development and tested. Please refer to the Discord for up-to-date designs.
 
 ## Mechanics
-There are multiple variations of the DIY active pedal build by users, which can be found at our [discord](https://discord.gg/j9K5vUuT) channel or [here](#Other-designs).
+There are multiple variations of the DIY active pedal build by users, which can be found at our [discord](https://discord.gg/j9K5vUuT) channel or [here](#other-designs).
 
 ## BOM
 The [BOM](BOM.md) refers to the pedal design which I have choosen, see below:
