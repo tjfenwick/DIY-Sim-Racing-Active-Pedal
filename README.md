@@ -26,7 +26,7 @@ ESP32 PCB            |  ESP32 S2 mini PCB
 A more sophisticated custom PCB is currently under development and tested. Please refer to the Discord for up-to-date designs.
 
 ## Mechanics
-There are multiple variations of the DIY active pedal build by users, which can be found at our [discord](https://discord.gg/j9K5vUuT) channel.   
+There are multiple variations of the DIY active pedal build by users, which can be found at our [discord](https://discord.gg/j9K5vUuT) channel or [here](#Other-designs).
 
 ## BOM
 The [BOM](BOM.md) refers to the pedal design which I have choosen, see below:
@@ -36,6 +36,10 @@ I've designed it mostly from of the shelf norm metal parts, thus it is easy and 
 The first pedal costs me about 300€. Another add-on pedal costed me about 240€, since I bough some of the parts in packs for the first pedal and thus already had them. 
 
 Currently a nicer PCB deisgn is under development, which has the ESP & ADS integrated. It needs to be testet though. I highly recommend to wait for it, as it will be much more user friendly, e.g. the build process will take less than an hour for an experienced craftsman. 
+
+##Other designs
+[Bjoes design](https://github.com/Bjoes/DIY-Active-pedal-mechanical-design)
+
 
   
 # Software
