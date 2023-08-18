@@ -1,0 +1,7 @@
+<map id="StepperWithLimits::getCurrentPositionFraction" name="StepperWithLimits::getCurrentPositionFraction">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,39,181,81"/>
+<area shape="rect" id="Node000002" href="$class_stepper_with_limits.html#a9b99ba97ab1e2c39165bdbbc4a1cf87c" title=" " alt="" coords="229,5,391,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,44,214,39,214,44,181,49"/>
+<area shape="rect" id="Node000003" href="$class_stepper_with_limits.html#ac61366d2883f5cde889a75e1f9a32157" title=" " alt="" coords="242,72,378,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,71,228,78,227,83,180,76"/>
+</map>
