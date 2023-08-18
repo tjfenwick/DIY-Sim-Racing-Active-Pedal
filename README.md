@@ -38,7 +38,9 @@ The first pedal costs me about 300â‚¬. Another add-on pedal costed me about 240â
 Currently a nicer PCB deisgn is under development, which has the ESP & ADS integrated. It needs to be testet though. I highly recommend to wait for it, as it will be much more user friendly, e.g. the build process will take less than an hour for an experienced craftsman. 
 
 ## Other designs
-[Bjoes design](https://github.com/Bjoes/DIY-Active-pedal-mechanical-design)
+Design           |  Link
+:-------------------------:|:-------------------------:
+![](https://user-images.githubusercontent.com/79850208/261399337-b313371c-9262-416d-a131-44fa269f9557.png | width=100)  |  [Bjoes design](https://github.com/Bjoes/DIY-Active-pedal-mechanical-design)
 
 
   
