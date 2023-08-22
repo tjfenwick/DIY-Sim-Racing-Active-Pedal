@@ -40,9 +40,10 @@ Currently a nicer PCB deisgn is under development, which has the ESP & ADS integ
 ## Other designs
 Here is a list of mechanical designs other incredible DIYers have done. 
 
-Design           |  Link
+| Design           |  Link |
 :-------------------------:|:-------------------------:
-<img src="https://user-images.githubusercontent.com/79850208/261399337-b313371c-9262-416d-a131-44fa269f9557.png" width="300">  |  [Bjoes design](https://github.com/Bjoes/DIY-Active-pedal-mechanical-design)
+|<img src="https://user-images.githubusercontent.com/17485523/231913569-695fcab1-f0bb-4af6-8d90-b1bfaece13bc.png" height="300">  |  [Tjfenwick design design](https://github.com/tjfenwick/DIY-Sim-Racing-Active-Pedal)|
+|<img src="https://user-images.githubusercontent.com/79850208/261399337-b313371c-9262-416d-a131-44fa269f9557.png" height="300">  |  [Bjoes design](https://github.com/Bjoes/DIY-Active-pedal-mechanical-design)|
 
 
   
@@ -66,6 +67,15 @@ The SimHub plugin was designed to communicate with the esp32 to (a) modify the p
 ![image](SimHubPlugin/Images/SimHubPluginOverview.png)
 
 To install the plugin, copy the plugin [binaries](SimHubPlugin/bin) content to your SimHub directory, e.g. C:/Program Files (x86)/SimHub
+
+
+
+# Misc
+## Pedal kinematics calculation
+To get a better understanding of the motion, a [python](Validation/PedalKinematics/main.py) script for simulation of the pedal angle and the pedal angular velocity has been written. Feel free to tune the pedal geometry as needed. The simulation result for my pedal geometry looks as follows:
+
+<img src="Validation/PedalKinematics/pedalKinematics.png" width="300">
+
 
 
 # Todo
