@@ -1,0 +1,14 @@
+<map id="ADC" name="ADC">
+<area shape="rect" id="Node000001" title=" " alt="" coords="515,68,563,95"/>
+<area shape="rect" id="Node000002" href="$class_load_cell___a_d_s1256.html#a1b5950ca345eda08d54c11b3b28a5f05" title=" " alt="" coords="5,5,197,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="500,69,466,59,397,46,326,38,197,30,197,25,326,33,398,41,468,53,502,64"/>
+<area shape="rect" id="Node000003" href="$class_load_cell___a_d_s1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c" title=" " alt="" coords="245,68,467,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="500,84,467,84,467,79,500,79"/>
+<area shape="rect" id="Node000006" href="$class_load_cell___a_d_s1256.html#a80402d547cc2f44af37b401a412d29bd" title=" " alt="" coords="260,119,452,161"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="502,97,468,109,432,121,430,116,466,104,500,92"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="276,67,196,50,198,45,277,62"/>
+<area shape="rect" id="Node000004" href="$_stepper_movement_strategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3" title=" " alt="" coords="23,72,179,99"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="230,86,180,87,180,81,230,81"/>
+<area shape="rect" id="Node000005" href="$class_load_cell___a_d_s1256.html#aa3ffc937e2e8e3699edc459c1259b3ee" title=" " alt="" coords="9,123,193,165"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="279,101,245,109,185,125,184,119,244,104,278,96"/>
+</map>

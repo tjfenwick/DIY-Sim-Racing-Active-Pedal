@@ -1,0 +1,8 @@
+<map id="LoadCell_ADS1256::estimateVariance" name="LoadCell_ADS1256::estimateVariance">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,197,48"/>
+<area shape="rect" id="Node000002" href="$_load_cell_8cpp.html#a69012c93d090a7bd675a327d08fad6a9" title=" " alt="" coords="515,13,563,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,24,500,24,500,29,197,29"/>
+<area shape="rect" id="Node000003" href="$class_load_cell___a_d_s1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c" title=" " alt="" coords="245,39,467,65"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="198,34,230,37,230,42,197,39"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="456,35,500,29,501,35,457,41"/>
+</map>

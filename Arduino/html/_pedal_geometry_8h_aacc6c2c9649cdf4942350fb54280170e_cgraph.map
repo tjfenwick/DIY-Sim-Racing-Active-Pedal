@@ -1,0 +1,5 @@
+<map id="sledPositionInMM" name="sledPositionInMM">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,13,130,40"/>
+<area shape="rect" id="Node000002" href="$class_stepper_with_limits.html#a9b99ba97ab1e2c39165bdbbc4a1cf87c" title=" " alt="" coords="178,5,340,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,24,163,24,163,29,130,29"/>
+</map>
