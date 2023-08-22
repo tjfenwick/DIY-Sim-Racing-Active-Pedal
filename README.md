@@ -39,8 +39,7 @@ Here is a list of mechanical designs DIYers have done:
 
 
 ## BOM
-The [BOM](Design/BOM.md) refers to the pedal design which I have choosen, see below:
-![image](Images/Build_1.jpg).
+The [BOM](Design/BOM.md) refers to the pedal design which I have choosen, see [here](Design/MechanicalDesign.md).
 
 
 
