@@ -41,9 +41,9 @@ Currently a nicer PCB deisgn is under development, which has the ESP & ADS integ
 Here is a list of mechanical designs other incredible DIYers have done. 
 
 | Design           |  Link |
-:-------------------------:|:-------------------------:
-|<img src="https://user-images.githubusercontent.com/17485523/231913569-695fcab1-f0bb-4af6-8d90-b1bfaece13bc.png" height="300">  |  [Tjfenwick design design](https://github.com/tjfenwick/DIY-Sim-Racing-Active-Pedal)|
-|<img src="https://user-images.githubusercontent.com/79850208/261399337-b313371c-9262-416d-a131-44fa269f9557.png" height="300">  |  [Bjoes design](https://github.com/Bjoes/DIY-Active-pedal-mechanical-design)|
+:------------------------- | :-------------------------
+|<img src="https://user-images.githubusercontent.com/17485523/231913569-695fcab1-f0bb-4af6-8d90-b1bfaece13bc.png" height="200">  |  [Tjfenwick design](https://github.com/tjfenwick/DIY-Sim-Racing-Active-Pedal)|
+|<img src="https://user-images.githubusercontent.com/79850208/261399337-b313371c-9262-416d-a131-44fa269f9557.png" height="200">  |  [Bjoes design](https://github.com/Bjoes/DIY-Active-pedal-mechanical-design)|
 
 
   
