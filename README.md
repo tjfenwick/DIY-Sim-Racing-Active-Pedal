@@ -25,26 +25,23 @@ ESP32 PCB            |  ESP32 S2 mini PCB
 
 A more sophisticated custom PCB is currently under development and tested. Please refer to the Discord for up-to-date designs.
 
-## Mechanics
-There are multiple variations of the DIY active pedal build by users, which can be found at our [discord](https://discord.gg/j9K5vUuT) channel or [here](#other-designs).
-
-## BOM
-The [BOM](BOM.md) refers to the pedal design which I have choosen, see below:
-![image](Images/Build_1.jpg).
-I've designed it mostly from of the shelf norm metal parts, thus it is easy and cheap to reproduce. However, there are multiple ways to build the pedal. I suggest that you only use this BOM as a reference and build your DIY active pedals however you like them. Go to our discord server and search for images to get inspirations.
-
-The first pedal costs me about 300€. Another add-on pedal costed me about 240€, since I bough some of the parts in packs for the first pedal and thus already had them. 
-
-Currently a nicer PCB deisgn is under development, which has the ESP & ADS integrated. It needs to be testet though. I highly recommend to wait for it, as it will be much more user friendly, e.g. the build process will take less than an hour for an experienced craftsman. 
-
-## Other designs
-Here is a list of mechanical designs other incredible DIYers have done. 
+## Mechanical design
+Here is a list of mechanical designs DIYers have done: 
 
 | Design           |  Link |
 :------------------------- | :-------------------------
 |<img src="https://user-images.githubusercontent.com/17485523/231913569-695fcab1-f0bb-4af6-8d90-b1bfaece13bc.png" height="200">  |  [Tjfenwick design](https://github.com/tjfenwick/DIY-Sim-Racing-Active-Pedal)|
 |<img src="https://user-images.githubusercontent.com/79850208/261399337-b313371c-9262-416d-a131-44fa269f9557.png" height="200">  |  [Bjoes design](https://github.com/Bjoes/DIY-Active-pedal-mechanical-design)|
 |<img src="https://media.printables.com/media/prints/557527/images/4471984_0fbfebf6-7b91-47dd-9602-44a6c7e8b851/thumbs/inside/1600x1200/png/screenshot-2023-08-19-150158.webp" height="200">  |  [GWiz design](https://www.printables.com/de/model/557527-simucube-style-active-pedal/files)|
+|<img src="Images/Build_1.jpg" height="200">  |  [ChrGri design](Design/MechanicalDesign.md)|
+
+
+
+
+## BOM
+The [BOM](Design/BOM.md) refers to the pedal design which I have choosen, see below:
+![image](Images/Build_1.jpg).
+
 
 
 
