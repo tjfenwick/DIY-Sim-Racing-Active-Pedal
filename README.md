@@ -72,7 +72,7 @@ To install the plugin, copy the plugin [binaries](SimHubPlugin/bin) content to y
 
 # Misc
 ## Pedal kinematics calculation
-To get a better understanding of the motion, a [python](Validation/PedalKinematics/main.py) script for simulation of the pedal angle and the pedal angular velocity has been written. Feel free to tune the pedal geometry as needed. The simulation result for my pedal geometry looks as follows:
+To get a better understanding of the motion and forces, a [python](Validation/PedalKinematics/main.py) script for simulation of the pedal angle, the pedal angular velocity and maximum pedal force has been written. Feel free to tune the pedal geometry as needed. The simulation result for my pedal geometry looks as follows:
 
 <img src="Validation/PedalKinematics/pedalKinematics.png" width="300">
 
