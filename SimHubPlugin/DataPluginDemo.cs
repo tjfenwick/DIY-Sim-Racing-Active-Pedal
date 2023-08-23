@@ -153,8 +153,9 @@ namespace User.PluginSdkDemo
         {
 			
 			bool sendAbsSignal_local_b = false;
-			
-			
+            bool sendTcSignal_local_b = false;
+
+
             // Send ABS signal when triggered by the game
             if (data.GameRunning)
             {
@@ -164,6 +165,12 @@ namespace User.PluginSdkDemo
                     {
 						sendAbsSignal_local_b = true;
                     }
+
+                    if (data.NewData.TCActive > 0)
+                    {
+                        sendTcSignal_local_b = true;
+                    }
+
                 }
             }
 			
@@ -171,7 +178,7 @@ namespace User.PluginSdkDemo
             if (sendAbsSignal)
             {
 				sendAbsSignal_local_b = true;
-                
+                sendTcSignal_local_b = true;
             }
 			
 			
@@ -183,8 +190,17 @@ namespace User.PluginSdkDemo
                     _serialPort[1].Write("2");
                 }
 			}
-			
-			
+
+            // Send TC trigger signal via serial
+            if (sendTcSignal_local_b)
+            {
+                if (_serialPort[2].IsOpen)
+                {
+                    _serialPort[2].Write("2");
+                }
+            }
+
+
         }
 		
 		

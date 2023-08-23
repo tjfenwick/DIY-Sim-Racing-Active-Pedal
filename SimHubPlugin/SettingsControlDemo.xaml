@@ -24,7 +24,7 @@
             <RowDefinition Height="46"/>
             <RowDefinition Height="46"/>
             <RowDefinition Height="46"/>
-            <RowDefinition Height="46"/>
+            <RowDefinition Height="120"/>
             <RowDefinition Height="46"/>
             <RowDefinition Height="46"/>
             <RowDefinition Height="300"/>
@@ -196,15 +196,15 @@
         <TextBlock HorizontalAlignment="Left" 
                    VerticalAlignment="Top" 
                    Margin="5,0,0,0" 
-                   Text="ABS amplitude:" 
+                   Text="ABS/TC amplitude:" 
                    Grid.Row="6" 
                    Grid.Column="0" 
                    Width="180" 
                    Foreground="White"/>
         <Slider x:Name="PedalAbsAmplitude_Slider" 
             HorizontalAlignment="Left" 
-            VerticalAlignment="Center" 
-            Margin="5,0,0,0" 
+            VerticalAlignment="Top" 
+            Margin="0,20,0,0" 
             Grid.Row="6" 
             Grid.Column="0" 
             Width="120" 
@@ -223,15 +223,15 @@
         <TextBlock HorizontalAlignment="Center" 
                    VerticalAlignment="Top" 
                    Margin="5,0,0,0" 
-                   Text="ABS frequency:" 
+                   Text="ABS/TC frequency:" 
                    Grid.Row="6" 
                    Grid.Column="0" 
                    Width="120" 
                    Foreground="White"/>
         <Slider x:Name="PedalAbsFrequency_Slider" 
             HorizontalAlignment="Center" 
-            VerticalAlignment="Center" 
-            Margin="5,0,0,0" 
+            VerticalAlignment="Top" 
+            Margin="5,20,0,0" 
             Grid.Row="6" 
             Grid.Column="0" 
             Width="120" 
@@ -248,8 +248,8 @@
         <!-- Pedal ABS test signal checkbox -->
         <!--<TextBlock HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5,0,0,0" Text="ABS test signal" Grid.Row="6" Grid.Column="0" Width="120" />-->
         <CheckBox x:Name="TestAbs" Grid.Column="0" HorizontalAlignment="Left" Grid.Row="6"
-                  Width="113"
-                  Height="34" Margin="334,0,0,0" VerticalAlignment="Center" Grid.ColumnSpan="2" IsEnabled="False" Content="ABS-Signal aktiv" Foreground="White"/>
+                  Width="112"
+                  Height="34" Margin="108,50,0,0" VerticalAlignment="Top" IsEnabled="False" Content="ABS/TC-Signal aktiv" Foreground="White"/>
 
 
         <!-- Pedal dampening slider -->
@@ -494,8 +494,8 @@
                    Grid.Column="0" 
                    Width="120" 
                    Foreground="White"/>
-        
-        
+
+
         <TextBlock HorizontalAlignment="Left" 
                    VerticalAlignment="Top" 
                    Margin="5,10,0,0" 
@@ -578,7 +578,7 @@
 
 
         <styles:SHButtonPrimary Click="StartSystemIdentification_click" HorizontalAlignment="Left" Grid.Row="11"  Grid.Column="1" Width="180" Margin="20,11,0,152" >System identification</styles:SHButtonPrimary>
-        
+
 
 
 
@@ -629,7 +629,7 @@
         </ComboBox>-->
         <styles:SHButtonPrimary Click="SaveButton_Click" HorizontalAlignment="Left" Grid.Row="2"  Grid.Column="1" Width="180" Margin="200,44,0,10" Content="Save config to JSON new" Grid.RowSpan="2" />
         <TextBox x:Name="TextBox2" Grid.Column="1" HorizontalAlignment="Left" Margin="7,36,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="373" AutomationProperties.Name="TextBox2" Height="46" Grid.RowSpan="2"/>
-        <Button Content="Test-ABS" Margin="276,0,0,0" Grid.Row="6" VerticalAlignment="Center" Click="TestAbs_click" Height="20" Background="#FF050550" HorizontalAlignment="Left" FontWeight="Bold" FontSize="9"/>
+        <Button Content="Test-ABS/TC" Margin="27,54,0,0" Grid.Row="6" VerticalAlignment="Top" Click="TestAbs_click" Height="20" Background="#FF050550" HorizontalAlignment="Left" FontWeight="Bold" FontSize="9"/>
         <styles:SHButtonSecondary Click="DisconnectToPedal_click" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0" Width="120" Margin="200,35,0,29" FontSize="10" Background="Red" Content="Disconnect from Pedal" Grid.RowSpan="2" />
 
 
