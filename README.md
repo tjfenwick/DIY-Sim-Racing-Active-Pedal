@@ -53,7 +53,9 @@ The [BOM](Design/BOM.md) refers to the pedal design which I have choosen, see [h
 ## ESP32 code
 
 ### Architecture
-A Doxygen report of the sources can be found [here](Arduino/html/index.html).
+A Doxygen report of the sources can be found [here](https://chrgri.github.io/DIY-Sim-Racing-Active-Pedal/Arduino/html/index.html).
+
+
 
 ### Built from source
 To flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32. 
