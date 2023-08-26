@@ -26,7 +26,7 @@ ESP32 PCB            |  ESP32 S2 mini PCB
 A more sophisticated custom PCB is currently under development and tested. Please refer to the Discord for up-to-date designs.
 
 ## Mechanical design
-Here is a list of mechanical designs DIYers have done: 
+Here are some examples of mechanical designs awesome DIYers have done: 
 
 | Design           |  Link |
 :------------------------- | :-------------------------
