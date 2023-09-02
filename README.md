@@ -61,8 +61,16 @@ A Doxygen report of the sources can be found [here](https://chrgri.github.io/DIY
 To flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32. 
 
 ### flash prebuilt binaries via webflasher
-HASN'T BEEN TESTED YET:
 The prebuilt binaries for the regular ESP32 can be found [here](Arduino/Esp32/bin). They can be flashed via the ESP [webflasher](https://esp.huhn.me/). 
+
+Memory adress            |  File
+:-------------------------:|:-------------------------:
+| 0x1000 | Main.ino.bootloader.bin |
+| 0x8000 | Main.ino.partitions.bin | 
+| 0xe000 | boot_app0.bin |
+| 0x10000 | Main.ino.bin |
+
+
 
 ## SimHub plugin:
 The SimHub plugin was designed to communicate with the esp32 to (a) modify the pedal configuration, e.g. the force vs. travel parameterization and (b) to trigger effects such as ABS oscillations.  
