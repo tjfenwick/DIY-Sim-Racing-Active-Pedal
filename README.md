@@ -55,12 +55,18 @@ The [BOM](Design/BOM.md) refers to the pedal design which I have choosen, see [h
 ### Architecture
 A Doxygen report of the sources can be found [here](https://chrgri.github.io/DIY-Sim-Racing-Active-Pedal/Arduino/html/index.html).
 
+### Install ESP32 driver
+The drivers can be found here [here](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers).
 
+### Flashing the ESP32
+There are two recommended ways to install the code on the ESP32. (a) built the sources by your own via Arduino IDE or (b) flash the compiled binaries via webflasher.
 
-### Built from source
-To flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32. 
+#### Built from source
+1. Install the ESP32 dependencies in Ardiono IDE, see e.g. [here](https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/)
+2. Install the [libraries](https://github.com/ChrGri/DIY-Sim-Racing-Active-Pedal/tree/main/Arduino/libs)
+3. Flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32.
 
-### flash prebuilt binaries via webflasher
+#### Flash prebuilt binaries via webflasher
 The prebuilt binaries for the regular ESP32 can be found [here](Arduino/Esp32/bin). They can be flashed via the ESP [webflasher](https://esp.huhn.me/). 
 
 Memory adress            |  File
