@@ -77,6 +77,17 @@ Memory adress            |  File
 | 0x10000 | Main.ino.bin |
 
 
+## iSV57T-130 servo config tuning
+The iSV57T allows parameter tuning via its RS232 interface. To tune the servo towards this application, parametrs have been identiefied for better. To flash this parameterset, follow the following steps:
+
+1. Order the RS232 to USB adapter cable mentioned in the BOM, if your PC does not have a native RS232 interface.
+2. Download the tuning [software](https://www.omc-stepperonline.com/download/iSV-T_software.zip).
+3. Connect the servo to your PC.
+4. Open the tuning software and connect to the pedal.
+5. Flash the [optimized](https://github.com/ChrGri/DIY-Sim-Racing-Active-Pedal/blob/main/StepperParameterization/Tuned_130.lsr) parameters. 
+ 
+
+
 
 ## SimHub plugin:
 The SimHub plugin was designed to communicate with the esp32 to (a) modify the pedal configuration, e.g. the force vs. travel parameterization and (b) to trigger effects such as ABS oscillations.  
