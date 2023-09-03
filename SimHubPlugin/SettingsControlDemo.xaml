@@ -14,7 +14,8 @@
 
 
     <!-- Define the GUI interface, common for all pedals -->
-    <Grid>
+    <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto">
+        <Grid>
 
         <!-- Define the GUI grid -->
         <Grid.RowDefinitions>
@@ -75,7 +76,7 @@
         <!--<styles:SHButtonPrimary Click="ReadStructFromJson_click" HorizontalAlignment="Right" Grid.Row="4"  Grid.Column="1" Width="180" >Read config from JSON</styles:SHButtonPrimary>-->
 
         <!-- Serial communication debug textbox -->
-        <TextBox x:Name="TextBox1" Grid.Column="2" HorizontalAlignment="Left" Margin="54,0,0,0" Grid.Row="3" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="336" AutomationProperties.Name="TextBox2" Height="138" Grid.RowSpan="3"/>
+        <TextBox x:Name="TextBox1" Grid.Column="0" HorizontalAlignment="Left" Margin="0,100,0,0" Grid.Row="9" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="336" AutomationProperties.Name="TextBox2" Height="138" Grid.RowSpan="3"/>
 
 
 
@@ -635,4 +636,5 @@
 
 
     </Grid>
+        </ScrollViewer>
 </UserControl>
