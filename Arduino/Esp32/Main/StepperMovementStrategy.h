@@ -261,12 +261,11 @@ void measureStepResponse(StepperWithLimits* stepper, const DAP_calculationVariab
       currentPos = stepper->getCurrentPositionFraction();
       loadcellReading = (loadcellReading - calc_st->Force_Min) / calc_st->Force_Range; 
 
-      static RTDebugOutput<float, 3> rtDebugFilter({ "t", "y", "F"});
-      rtDebugFilter.offerDataWithoutText({ ((float)t) *1e-6 , currentPos,  loadcellReading});   
+      static RTDebugOutput<float, 3, 9> rtDebugFilter;
+      rtDebugFilter.offerData({ ((float)t) *1e-6 , currentPos,  loadcellReading});   
     }
   }
 
   Serial.println("======================================");
   Serial.println("End system identification data");
 }
-

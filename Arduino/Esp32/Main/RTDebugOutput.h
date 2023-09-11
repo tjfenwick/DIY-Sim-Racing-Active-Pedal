@@ -3,79 +3,50 @@
 #include <array>
 
 
-template <typename TVALUE, int NVALS>
+template <typename TVALUE, int NVALS, int FLOAT_PRECISION=6>
 class RTDebugOutput {
 private:
-  SemaphoreHandle_t _semaphore_data;
+  QueueHandle_t _queue_data;
   std::array<String,NVALS> _outNames;
-  std::array<TVALUE,NVALS> _outValues;
-  bool _dataReady;
-  bool _withoutText = false;
   
 public:
-  RTDebugOutput(std::array<String,NVALS> outNames)
+  RTDebugOutput(std::array<String,NVALS> outNames = {})
     : _outNames(outNames)
-    , _dataReady(false)
   {
-    _semaphore_data = xSemaphoreCreateMutex();
+    _queue_data = xQueueCreate(1, sizeof(std::array<TVALUE,NVALS>));
     xTaskCreatePinnedToCore(this->debugOutputTask, "debugOutputTask", 5000, this, 1, NULL, 1);
   }
 
   void offerData(std::array<TVALUE,NVALS> values) {
-    if(xSemaphoreTake(_semaphore_data, 0) == pdTRUE) {
-      _outValues = values;
-      _dataReady = true;
-      _withoutText = false;
-      xSemaphoreGive(_semaphore_data);
-    }
+    xQueueSend(_queue_data, &values, /*xTicksToWait=*/0);
   }
-
-
-  void offerDataWithoutText(std::array<TVALUE,NVALS> values) {
-    if(xSemaphoreTake(_semaphore_data, 0) == pdTRUE) {
-      _outValues = values;
-      _dataReady = true;
-      _withoutText = true;
-      xSemaphoreGive(_semaphore_data);
-    }
-  }
-
   
 
   template <typename T>
   void printValue(String name, T value) {
-
-    if (_withoutText == false)
-    {
-      Serial.print(name); Serial.print(":"); Serial.print(value); Serial.print(",");
+    if (name.length() > 0) {
+      Serial.print(name); Serial.print(":"); 
     }
-    else
-    {
-      Serial.print(value, 9); Serial.print(",");
-    }
-    
+    Serial.print(value); Serial.print(",");
   }
   void printValue(String name, float value) {
-    if (_withoutText == false)
-    {
-      Serial.print(name); Serial.print(":"); Serial.print(value,6); Serial.print(",");
+    if (name.length() > 0) {
+      Serial.print(name); Serial.print(":"); 
     }
-    else
-    {
-      Serial.print(value, 9); Serial.print(",");
-    }
+    Serial.print(value, FLOAT_PRECISION); Serial.print(",");
   }
 
   void printData() {
-    if(xSemaphoreTake(_semaphore_data, 0) == pdTRUE) {
-      if (_dataReady) {
-        for (int i=0; i<NVALS; i++) {
-          printValue(_outNames[i], _outValues[i]);
+    std::array<TVALUE,NVALS> values;
+    if (pdTRUE == xQueueReceive(_queue_data, &values, /*xTicksToWait=*/0)) {
+        static SemaphoreHandle_t semaphore_print = xSemaphoreCreateMutex();
+        if (xSemaphoreTake(semaphore_print, /*xTicksToWait=*/10) == pdTRUE) {
+          for (int i=0; i<NVALS; i++) {
+            printValue(_outNames[i], values[i]);
+          }
+          Serial.println(" ");
+          xSemaphoreGive(semaphore_print);
         }
-        Serial.println(" ");
-        _dataReady = false;
-      }
-      xSemaphoreGive(_semaphore_data);
     }
   }
 
