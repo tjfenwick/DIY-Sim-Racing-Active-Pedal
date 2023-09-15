@@ -28,3 +28,6 @@
 [submodule "Arduino/libs/Arduino-PID-Library"]
 	path = Arduino/libs/Arduino-PID-Library
 	url = https://github.com/br3ttb/Arduino-PID-Library.git
+[submodule "Arduino/libs/QuickPID"]
+	path = Arduino/libs/QuickPID
+	url = https://github.com/Dlloydev/QuickPID.git
