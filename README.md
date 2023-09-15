@@ -61,7 +61,12 @@ The drivers can be found here [here](https://www.silabs.com/developers/usb-to-ua
 ### Flashing the ESP32
 There are two recommended ways to install the code on the ESP32. (a) built the sources by your own via Arduino IDE or (b) flash the compiled binaries via webflasher.
 
-#### Built from source
+#### Built from source (via Arduino CLI)
+1. Install the [Arduino CLI](https://github.com/arduino/arduino-cli/releases)
+2. Execute the [build script](Arduino\Esp32\arduinoCliBuildScript.bat) from your local report.
+3. Flash the binaries via e.g. webinstaller, see [below](#flash-prebuilt-binaries-via-webflasher).
+
+#### Built from source (via Arduino IDE)
 1. Install the ESP32 dependencies in Ardiono IDE, see e.g. [here](https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/)
 2. Install the [libraries](https://github.com/ChrGri/DIY-Sim-Racing-Active-Pedal/tree/main/Arduino/libs)
 3. Flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32.
@@ -101,11 +106,11 @@ To get a better understanding of the motion and forces, a [python](Validation/Pe
 - [ ] Add Doxygen + Graphviz to the project to automatically generate documentation, architecureal design overview, etc.
 - [ ] Add automatic system identification of pedal response
 - [ ] Add model-predictive-controll to the ESP code for improved pedal response
-- [ ] Add build manual
+- [x] Add build manual
 - [ ] Create video describing the build progress and the features
 - [ ] https://github.com/gin66/FastAccelStepper/issues/194
-- [ ] https://github.com/br3ttb/Arduino-PID-Library/issues/138
+- [x] https://github.com/br3ttb/Arduino-PID-Library/issues/138
 - [ ] GUI design improvements for the SimHub plugin
-- [ ] SimHub plugin: Bugfix for COM port selection wrong, when switching between pedals
+- [x] SimHub plugin: Bugfix for COM port selection wrong, when switching between pedals
 - [ ] Send SimHub data via wifi to ESP
 - [ ] Automatically generate the bin files and refer to the ESP32 [webflasher](https://esp.huhn.me/)
