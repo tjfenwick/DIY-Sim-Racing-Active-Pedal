@@ -25,3 +25,6 @@
 [submodule "Arduino/libs/QuickPID"]
 	path = Arduino/libs/QuickPID
 	url = https://github.com/Dlloydev/QuickPID.git
+[submodule "Arduino/libs/ADS1255-ADS1256"]
+	path = Arduino/libs/ADS1255-ADS1256
+	url = https://github.com/ChrGri/ADS1255-ADS1256.git
