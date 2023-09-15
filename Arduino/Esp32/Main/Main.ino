@@ -1,5 +1,7 @@
 #define ESTIMATE_LOADCELL_VARIANCE
 
+#include "Main.h"
+
 //#define ALLOW_SYSTEM_IDENTIFICATION
 
 /**********************************************************************************************/
@@ -40,8 +42,7 @@ DAP_calculationVariables_st dap_calculationVariables_st;
 #include "CycleTimer.h"
 //#define PRINT_CYCLETIME
 
-// target cycle time for pedal update task, to get constant cycle times, required for FIR filtering
-#define PUT_TARGET_CYCLE_TIME_IN_US 100
+
 
 
 

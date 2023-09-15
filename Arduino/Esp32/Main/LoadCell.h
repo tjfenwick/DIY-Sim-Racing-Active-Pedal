@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "Main.h"
 
 class LoadCell_ADS1256 {
 private:

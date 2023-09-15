@@ -1,21 +1,25 @@
 #pragma once
 
 #include "DiyActivePedal_types.h"
+#include "Main.h"
 
 
 
-// see https://github.com/br3ttb/Arduino-PID-Library/blob/master/examples/PID_Basic/PID_Basic.ino
-#include <PID_v1.h>
+
+
+// see https://github.com/Dlloydev/QuickPID/blob/master/examples/PID_Basic/PID_Basic.ino
+#include <QuickPID.h>
 
 //Define Variables we'll be connecting to
-double Setpoint, Input, Output;
+float Setpoint, Input, Output;
 
 //Specify the links and initial tuning parameters
 double Kp=0.3, Ki=50.0, Kd=0.000;
-
-// P_ON_E: proportional on error
-// P_ON_M: proportional on measurement
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, P_ON_E, DIRECT);
+QuickPID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd,  /* OPTIONS */
+               myPID.pMode::pOnError,                   /* pOnError, pOnMeas, pOnErrorMeas */
+               myPID.dMode::dOnMeas,                    /* dOnError, dOnMeas */
+               myPID.iAwMode::iAwCondition,             /* iAwCondition, iAwClamp, iAwOff */
+               myPID.Action::direct);                   /* direct, reverse */
 bool pidWasInitialized = false;
 
 
@@ -52,7 +56,7 @@ int32_t MoveByInterpolatedStrategy(float filteredLoadReadingKg, float stepperPos
 
 void tunePidValues(DAP_config_st& config_st)
 {
-  myPID.SetTunings(config_st.payLoadPedalConfig_.PID_p_gain, config_st.payLoadPedalConfig_.PID_i_gain, config_st.payLoadPedalConfig_.PID_d_gain, P_ON_E);
+  myPID.SetTunings(config_st.payLoadPedalConfig_.PID_p_gain, config_st.payLoadPedalConfig_.PID_i_gain, config_st.payLoadPedalConfig_.PID_d_gain);
 }
 
 int32_t MoveByPidStrategy(float loadCellReadingKg, float stepperPosFraction, StepperWithLimits* stepper, ForceCurve_Interpolated* forceCurve, const DAP_calculationVariables_st* calc_st, DAP_config_st* config_st, float absForceOffset_fl32) {
@@ -60,12 +64,13 @@ int32_t MoveByPidStrategy(float loadCellReadingKg, float stepperPosFraction, Ste
   if (pidWasInitialized == false)
   {
     //turn the PID on
-    myPID.SetMode(AUTOMATIC);
+    myPID.SetTunings(Kp, Ki, Kd);
+    myPID.SetMode(myPID.Control::automatic);
     pidWasInitialized = true;
-    myPID.SetSampleTime(1);
+    myPID.SetSampleTimeUs(PUT_TARGET_CYCLE_TIME_IN_US);
     myPID.SetOutputLimits(-1.0,0.0);
 
-    myPID.SetTunings(config_st->payLoadPedalConfig_.PID_p_gain, config_st->payLoadPedalConfig_.PID_i_gain, config_st->payLoadPedalConfig_.PID_d_gain, P_ON_E);
+    myPID.SetTunings(config_st->payLoadPedalConfig_.PID_p_gain, config_st->payLoadPedalConfig_.PID_i_gain, config_st->payLoadPedalConfig_.PID_d_gain);
   }
 
 
