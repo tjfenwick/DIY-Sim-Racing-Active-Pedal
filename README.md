@@ -63,7 +63,7 @@ There are two recommended ways to install the code on the ESP32. (a) built the s
 
 #### Built from source (via Arduino CLI)
 1. Install the [Arduino CLI](https://github.com/arduino/arduino-cli/releases)
-2. Execute the [build script](Arduino\Esp32\arduinoCliBuildScript.bat) from your local report.
+2. Execute the [build script](Arduino/Esp32/arduinoCliBuildScript.bat) from your local repor.
 3. Flash the binaries via e.g. webinstaller, see [below](#flash-prebuilt-binaries-via-webflasher).
 
 #### Built from source (via Arduino IDE)
