@@ -10,9 +10,6 @@
 [submodule "Arduino/libs/Joystick_ESP32S2"]
 	path = Arduino/libs/Joystick_ESP32S2
 	url = https://github.com/schnoog/Joystick_ESP32S2.git
-[submodule "Arduino/libs/ADS1255-ADS1256"]
-	path = Arduino/libs/ADS1255-ADS1256
-	url = https://github.com/ADS1xxx-Series-ADC-Libraries/ADS1255-ADS1256.git
 [submodule "Arduino/libs/Arduino-Interpolation"]
 	path = Arduino/libs/Arduino-Interpolation
 	url = https://github.com/luisllamasbinaburo/Arduino-Interpolation.git
@@ -25,9 +22,6 @@
 [submodule "Arduino/libs/Arduino-Filters"]
 	path = Arduino/libs/Arduino-Filters
 	url = https://github.com/tttapa/Arduino-Filters.git
-[submodule "Arduino/libs/Arduino-PID-Library"]
-	path = Arduino/libs/Arduino-PID-Library
-	url = https://github.com/br3ttb/Arduino-PID-Library.git
 [submodule "Arduino/libs/QuickPID"]
 	path = Arduino/libs/QuickPID
 	url = https://github.com/Dlloydev/QuickPID.git
