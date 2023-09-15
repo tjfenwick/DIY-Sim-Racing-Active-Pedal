@@ -18,7 +18,7 @@ double Kp=0.3, Ki=50.0, Kd=0.000;
 QuickPID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd,  /* OPTIONS */
                myPID.pMode::pOnError,                   /* pOnError, pOnMeas, pOnErrorMeas */
                myPID.dMode::dOnMeas,                    /* dOnError, dOnMeas */
-               myPID.iAwMode::iAwCondition,             /* iAwCondition, iAwClamp, iAwOff */
+               myPID.iAwMode::iAwOff,             /* iAwCondition, iAwClamp, iAwOff */
                myPID.Action::direct);                   /* direct, reverse */
 bool pidWasInitialized = false;
 
