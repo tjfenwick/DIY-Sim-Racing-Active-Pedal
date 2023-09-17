@@ -403,7 +403,7 @@ void pedalUpdateTask( void * pvParameters )
 
         bool configWasUpdated_b = false;
         // Take the semaphore and just update the config file, then release the semaphore
-        if(xSemaphoreTake(semaphore_updateConfig, 1)==pdTRUE)
+        if(xSemaphoreTake(semaphore_updateConfig, (TickType_t)1)==pdTRUE)
         {
           Serial.println("Update pedal config!");
           configUpdateAvailable = false;
@@ -424,6 +424,7 @@ void pedalUpdateTask( void * pvParameters )
       }
       else
       {
+        semaphore_updateConfig = xSemaphoreCreateMutex();
         Serial.println("semaphore_updateConfig == 0");
       }
     }
@@ -553,13 +554,14 @@ void pedalUpdateTask( void * pvParameters )
     // compute controller output
     if(semaphore_updateJoystick!=NULL)
     {
-      if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE) {
+      if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE) {
         joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
         xSemaphoreGive(semaphore_updateJoystick);
       }
     }
     else
     {
+      semaphore_updateJoystick = xSemaphoreCreateMutex();
       Serial.println("semaphore_updateJoystick == 0");
     }
 
@@ -630,7 +632,7 @@ void serialCommunicationTask( void * pvParameters )
       
       if(semaphore_updateConfig!=NULL)
       {
-        if(xSemaphoreTake(semaphore_updateConfig, 1)==pdTRUE)
+        if(xSemaphoreTake(semaphore_updateConfig, (TickType_t)1)==pdTRUE)
         {
           DAP_config_st * dap_config_st_local_ptr;
           dap_config_st_local_ptr = &dap_config_st_local;
@@ -711,7 +713,7 @@ void serialCommunicationTask( void * pvParameters )
     if (IsControllerReady()) {
       if(semaphore_updateJoystick!=NULL)
       {
-        if(xSemaphoreTake(semaphore_updateJoystick, 1)==pdTRUE)
+        if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE)
         {
           joystickNormalizedToInt32_local = joystickNormalizedToInt32;
           xSemaphoreGive(semaphore_updateJoystick);

@@ -72,7 +72,7 @@ There are two recommended ways to install the code on the ESP32. (a) built the s
 3. Flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32.
 
 #### Flash prebuilt binaries via webflasher
-The prebuilt binaries for the regular ESP32 can be found [here](Arduino/Esp32/bin). They can be flashed via the ESP [webflasher](https://esp.huhn.me/). 
+The prebuilt binaries for the [regular ESP32](Arduino/Esp32/bin) the and [ESP32 S2 mini](Arduino/Esp32/bin_s2_mini) are available. They can be flashed via the ESP [webflasher](https://esp.huhn.me/). 
 
 Memory adress            |  File
 :-------------------------:|:-------------------------:
