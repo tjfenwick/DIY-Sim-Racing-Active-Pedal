@@ -165,7 +165,7 @@ LoadCell_ADS1256* loadcell = NULL;
 
 #include "StepperWithLimits.h"
 StepperWithLimits* stepper = NULL;
-static const int32_t MIN_STEPS = 5;
+//static const int32_t MIN_STEPS = 5;
 
 #include "StepperMovementStrategy.h"
 
@@ -544,9 +544,9 @@ void pedalUpdateTask( void * pvParameters )
 
     // get current stepper position right before sheduling a new move
     //int32_t stepperPosCurrent = stepper->getCurrentPositionSteps();
-    int32_t stepperPosCurrent = stepper->getTargetPositionSteps();
-    int32_t movement = abs(stepperPosCurrent - Position_Next);
-    if (movement > MIN_STEPS)
+    //int32_t stepperPosCurrent = stepper->getTargetPositionSteps();
+    //int32_t movement = abs(stepperPosCurrent - Position_Next);
+    //if (movement > MIN_STEPS)
     {
       stepper->moveTo(Position_Next, false);
     }

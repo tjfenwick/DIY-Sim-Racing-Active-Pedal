@@ -66,6 +66,11 @@ int32_t MoveByPidStrategy(float loadCellReadingKg, float stepperPosFraction, Ste
     //turn the PID on
     myPID.SetTunings(Kp, Ki, Kd);
     myPID.SetMode(myPID.Control::automatic);
+    //myPID.SetAntiWindupMode(myPID.iAwMode::iAwCondition);
+    myPID.SetAntiWindupMode(myPID.iAwMode::iAwClamp);
+    //myPID.SetAntiWindupMode(myPID.iAwMode::iAwOff);
+
+
     pidWasInitialized = true;
     myPID.SetSampleTimeUs(PUT_TARGET_CYCLE_TIME_IN_US);
     myPID.SetOutputLimits(-1.0,0.0);
@@ -86,20 +91,26 @@ int32_t MoveByPidStrategy(float loadCellReadingKg, float stepperPosFraction, Ste
   
   // clip to min & max force to prevent Ki to overflow
   float loadCellReadingKg_clip = constrain(loadCellReadingKg, calc_st->Force_Min, calc_st->Force_Max);
-  
+  float loadCellTargetKg_clip = constrain(loadCellTargetKg, calc_st->Force_Min, calc_st->Force_Max);
+
+
   // normalize input & setpoint
   //Setpoint = (loadCellReadingKg_clip - calc_st.Force_Min) / calc_st.Force_Range;
   //Input = (loadCellTargetKg - calc_st.Force_Min) / calc_st.Force_Range; 
 
-  Setpoint = (loadCellTargetKg - calc_st->Force_Min) / calc_st->Force_Range;
+  Setpoint = (loadCellTargetKg_clip - calc_st->Force_Min) / calc_st->Force_Range;
   Input = (loadCellReadingKg_clip - calc_st->Force_Min) / calc_st->Force_Range; 
 
   // compute PID output
   myPID.Compute();
   
   // unnormalize output
-  int32_t posStepperNew = -1.0 * Output * (calc_st->stepperPosMax - calc_st->stepperPosMin);//stepper->getTravelSteps();
-  posStepperNew += calc_st->stepperPosMin;
+  //int32_t posStepperNew = -1.0 * Output * (float)(calc_st->stepperPosMax - calc_st->stepperPosMin);//stepper->getTravelSteps();
+  //posStepperNew += calc_st->stepperPosMin;
+
+  float posStepperNew_fl32 = -1.0 * Output * (float)(calc_st->stepperPosMax - calc_st->stepperPosMin);//stepper->getTravelSteps();
+  posStepperNew_fl32 += calc_st->stepperPosMin;
+  int32_t posStepperNew = floor(posStepperNew_fl32);
 
   //#define PLOT_PID_VALUES
   #ifdef PLOT_PID_VALUES
