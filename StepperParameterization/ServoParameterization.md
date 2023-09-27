@@ -1,3 +1,4 @@
+
 # Stepperonline iSV2-TR Servo manual:
 ## Purpose:  
 Useful to identify which parameters might be used with one ot the other, see chapter 4.1. E.g. position gain (Pr1.00) has no influence in position control mode.
@@ -21,9 +22,6 @@ https://www.leadshine.com/upfiles/downloads/4ce2f9e638bcd3a6d002fa895310d0a6_169
 
 
 
-
-
-
 # Leadshine iSV2 manual:
 ## Purpose:  
 Since the iSV57 manual is poorly written and contains no useful information about the parameterization, vibbration suppression, this document might be used to understand the effect of the different parameters. 
@@ -31,7 +29,7 @@ Since the iSV57 manual is poorly written and contains no useful information abou
 ## Link:     
 https://www.leadshine.com/productn/iSV2-CAN6020V24G%20Integrated%20Servo%20Motor-0-37-84.html
 
-
+=================================
 
 # Control loop model
 The model of the closed-loop system looks like follows:
@@ -68,15 +66,15 @@ Pr0.14 = max (set position deviation to maximum thus alarm will not be triggered
 
 ## PR1.00 (1st position loop gain)
 ### Recommendation
-See tuning manual (to come).
+See [tuning manual](StepperTuning.md).
 
 ## PR1.01 (1st velocity loop gain)
 ### Recommendation
-See tuning manual (to come).
+See [tuning manual](StepperTuning.md).
 
 ## PR1.02 (1st Integral Time Constant of Velocity Loop)
 ### Recommendation
-See tuning manual (to come).
+See [tuning manual](StepperTuning.md).
 
 ## PR1.03 (1st velocity detection filter)
 ### Recommendation
