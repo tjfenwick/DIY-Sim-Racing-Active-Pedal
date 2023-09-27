@@ -33,7 +33,12 @@ https://www.leadshine.com/productn/iSV2-CAN6020V24G%20Integrated%20Servo%20Motor
 
 
 
+# Control loop model
+The model of the closed-loop system looks like follows:
+![Control loop model](isv57_loops.PNG)
 
+The ESP32 (+ADC) and the loadcell are parts of the force control loop. Once the force at the pedal is measured, the ESP calculates the target position to control the pedal force and sends position commands to the iSV57. The iSV57 has three intergrated control loops (position, velocity and torque/current), which control the inner states of the servo.
+For good closed-loop performance, each of the control loop parameters must be tuned appropriately. 
 
 
 # Register settings
