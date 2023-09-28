@@ -33,7 +33,7 @@ namespace User.PluginSdkDemo
     {
 
 
-        public uint pedalConfigPayload_version = 105;
+        public uint pedalConfigPayload_version = 106;
 
         public uint indexOfSelectedPedal_u = 1;
 
@@ -410,6 +410,8 @@ namespace User.PluginSdkDemo
 
             maxGameOutput_slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput;
 
+            kfModelNoiseScaling_slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.kf_modelNoise;
+
             Update_BrakeForceCurve();
 
 
@@ -697,6 +699,13 @@ namespace User.PluginSdkDemo
         public void maxGameOutput_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput = (byte)e.NewValue;
+        }
+
+
+
+        public void kfModelNoiseScaling_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.kf_modelNoise = (byte)e.NewValue;
         }
 
 

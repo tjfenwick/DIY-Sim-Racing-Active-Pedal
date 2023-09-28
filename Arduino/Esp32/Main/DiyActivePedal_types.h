@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-#define DAP_VERSION_CONFIG 105
+#define DAP_VERSION_CONFIG 106
 #define DAP_PAYLOAD_TYPE_CONFIG 100
 
 struct payloadHeader {
@@ -68,6 +68,8 @@ struct payloadPedalConfig {
   // controller settings
   uint8_t maxGameOutput;
 
+  // Kalman filter model noise
+  uint8_t kf_modelNoise;
 
 };
 

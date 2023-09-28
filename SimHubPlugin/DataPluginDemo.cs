@@ -86,6 +86,9 @@ public struct payloadPedalConfig
 
     public byte maxGameOutput;
 
+    // Kalman filter model noise
+    public byte kf_modelNoise;
+
 
 }
 
@@ -108,6 +111,10 @@ namespace User.PluginSdkDemo
 
         public bool sendAbsSignal = false;
 		public DAP_config_st dap_config_initial_st;
+
+        // ABS trigger timer
+        DateTime absTrigger_currentTime = DateTime.Now;
+        DateTime absTrigger_lastTime = DateTime.Now;
 
 
 
@@ -177,13 +184,27 @@ namespace User.PluginSdkDemo
 			// Send ABS test signal if requested
             if (sendAbsSignal)
             {
-				sendAbsSignal_local_b = true;
+                sendAbsSignal_local_b = true;
                 sendTcSignal_local_b = true;
             }
-			
-			
-			// Send ABS trigger signal via serial
-			if (sendAbsSignal_local_b)
+
+
+            absTrigger_currentTime = DateTime.Now;
+            TimeSpan diff = absTrigger_currentTime - absTrigger_lastTime;
+            int millisceonds = (int)diff.TotalMilliseconds;
+            if (millisceonds <= 5)
+            {
+                sendAbsSignal_local_b = false;
+                sendTcSignal_local_b = false;
+            }
+            else
+            {
+                absTrigger_lastTime = DateTime.Now;
+            }
+
+
+            // Send ABS trigger signal via serial
+            if (sendAbsSignal_local_b)
 			{
 				if (_serialPort[1].IsOpen)
                 {
@@ -332,7 +353,7 @@ namespace User.PluginSdkDemo
 
 
             dap_config_initial_st.payloadHeader_.payloadType = 100;
-            dap_config_initial_st.payloadHeader_.version = 102;
+            dap_config_initial_st.payloadHeader_.version = 106;
             dap_config_initial_st.payloadHeader_.storeToEeprom = false;
             dap_config_initial_st.payloadPedalConfig_.pedalStartPosition = 35;
             dap_config_initial_st.payloadPedalConfig_.pedalEndPosition = 80;
@@ -353,6 +374,8 @@ namespace User.PluginSdkDemo
             dap_config_initial_st.payloadPedalConfig_.lengthPedal_CB = 200;
 
             dap_config_initial_st.payloadPedalConfig_.maxGameOutput = 100;
+
+            dap_config_initial_st.payloadPedalConfig_.kf_modelNoise = 128;
 
             dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_a_0 = 0;
             dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_a_1 = 0;

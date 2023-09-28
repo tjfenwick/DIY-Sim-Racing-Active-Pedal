@@ -616,7 +616,39 @@
 
 
 
-        <!-- JSON config file selection -->
+
+            <TextBlock HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="5,40,0,0" 
+                   Text="KF filter scaling:" 
+                   Grid.Row="9" 
+                   Grid.Column="0" 
+                   Width="120" 
+                   Foreground="White"/>
+            <Slider x:Name="kfModelNoiseScaling_slider" 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Top" 
+            Margin="120,40,0,0" 
+            Grid.Row="9" 
+            Grid.Column="0" 
+            Width="120" 
+            ValueChanged="kfModelNoiseScaling_changed" 
+            AutoToolTipPlacement="TopLeft" 
+            AutoToolTipPrecision="0"
+            Minimum="0"
+			Maximum="255"
+            TickPlacement="BottomRight"
+			TickFrequency="16" RenderTransformOrigin="0.508,0.525"
+            Value="128"
+            IsSnapToTickEnabled="False"
+            />
+
+
+
+
+
+
+            <!-- JSON config file selection -->
         <!--<ComboBox x:Name="ComboBox_JsonFileSelected" SelectionChanged="ComboBox_SelectionChanged" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Center" Width="179" Margin="5,0,0,0" >
             <ComboBoxItem IsSelected="True">DiyPedalConfig_clutch_1</ComboBoxItem>
             <ComboBoxItem>DiyPedalConfig_clutch_2</ComboBoxItem>

@@ -474,7 +474,7 @@ void pedalUpdateTask( void * pvParameters )
     float loadcellReading = loadcell->getReadingKg();
 
     // Do the loadcell signal filtering
-    float filteredReading = kalman->filteredValue(loadcellReading, 0);
+    float filteredReading = kalman->filteredValue(loadcellReading, 0, dap_config_st.payLoadPedalConfig_.kf_modelNoise);
     float changeVelocity = kalman->changeVelocity();
 
 

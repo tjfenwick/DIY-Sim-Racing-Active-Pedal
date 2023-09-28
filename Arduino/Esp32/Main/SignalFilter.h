@@ -15,6 +15,6 @@ private:
 public:
   KalmanFilter(float varianceEstimate);
 
-  float filteredValue(float observation, float command);
+  float filteredValue(float observation, float command, uint8_t modelNoiseScaling_u8);
   float changeVelocity();
 };
