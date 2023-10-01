@@ -1,0 +1,7 @@
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvStartvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+Software License Agreement (FreeBSD License)
+
+Copyright (c) 2023 Bodmer (https://github.com/uldara1)
+
+All rights reserved.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^End^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

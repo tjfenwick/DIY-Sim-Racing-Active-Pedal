@@ -1,0 +1,21 @@
+{
+  "name": "Modbus",
+  "description": "Modbus Communication Interface ",
+  "keywords": "Modbus, RS485, RTU",
+  "authors": {
+    "name": "uldara",
+    "url": "https://github.com/uldara",
+    "maintainer": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uldara1/Modbus.git"
+  },
+  "version": "1.0.1",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32", "espressif8266"],
+  "headers": "Modbus.h",
+  "build": {
+    "libArchive": false
+  }
+}
