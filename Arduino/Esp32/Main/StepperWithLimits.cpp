@@ -133,4 +133,25 @@ void StepperWithLimits::setSpeed(uint32_t speedInStepsPerSecond)
   _stepper->setSpeedInHz(speedInStepsPerSecond);            // steps/s 
 }
 
+bool StepperWithLimits::isAtMinPos()
+{
+
+  bool isNotRunning = !_stepper->isRunning();
+  bool isAtMinPos = getCurrentPositionSteps() == 0;
+
+  return isAtMinPos && isNotRunning;
+}
+bool StepperWithLimits::correctPos(int32_t posOffset)
+{
+  // how many revolutions
+  float pulsesPerRev = 0.0001f;
+  float revOffset = (float)posOffset * pulsesPerRev;
+
+  // convert revolutions to steps
+  int32_t stepOffset =  revOffset * (float)STEPS_PER_MOTOR_REVOLUTION;
+
+  // correct pos
+  _stepper->setCurrentPosition(_stepper->getCurrentPosition() + stepOffset);
+  return 1;
+}
 

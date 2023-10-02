@@ -1,13 +1,12 @@
 #define ESTIMATE_LOADCELL_VARIANCE
-#define ISV_COMMUNICATION
+//#define ISV_COMMUNICATION
 //#define PRINT_SERVO_STATES
 
 
-
+bool resetServoEncoder = true;
 #ifdef ISV_COMMUNICATION
   #include "isv57communication.h"
-  bool resetServoEncoder = true;
-  int32_t servo_offset_compensation_i32 = 0; 
+  int32_t servo_offset_compensation_steps_i32 = 0; 
 #endif
 
 
@@ -102,6 +101,7 @@ static SemaphoreHandle_t semaphore_updateConfig=NULL;
 static SemaphoreHandle_t semaphore_updateJoystick=NULL;
   int32_t joystickNormalizedToInt32 = 0;                           // semaphore protected data
 
+static SemaphoreHandle_t semaphore_resetServoPos=NULL;
 bool resetPedalPosition = false;
 
 
@@ -272,6 +272,7 @@ void setup()
   // setup multi tasking
   semaphore_updateJoystick = xSemaphoreCreateMutex();
   semaphore_updateConfig = xSemaphoreCreateMutex();
+  semaphore_resetServoPos = xSemaphoreCreateMutex();
   delay(10);
 
 
@@ -474,7 +475,7 @@ void pedalUpdateTask( void * pvParameters )
     if (resetPedalPosition) {
       stepper->refindMinLimit();
       resetPedalPosition = false;
-      resetServoEncoder = false;
+      resetServoEncoder = true;
     }
 
 
@@ -581,15 +582,18 @@ void pedalUpdateTask( void * pvParameters )
     Position_Next = (int32_t)constrain(Position_Next, dap_calculationVariables_st.stepperPosMin, dap_calculationVariables_st.stepperPosMax);
 
     // if pedal in min position, recalibrate position 
-    /*#ifdef ISV_COMMUNICATION
-      if (Position_Next == dap_calculationVariables_st.stepperPosMin)
-      {
-        if ( stepper->isRunning() == FALSE )
+    #ifdef ISV_COMMUNICATION
+    // Take the semaphore and just update the config file, then release the semaphore
+        if(xSemaphoreTake(semaphore_resetServoPos, (TickType_t)1)==pdTRUE)
         {
-          stepper->setCurrentPosition(stepper->getCurrentPosition + servo_offset_compensation_i32)
+          if (stepper->isAtMinPos())
+          {
+            stepper->correctPos(servo_offset_compensation_steps_i32);
+            servo_offset_compensation_steps_i32 = 0;
+          }
+          xSemaphoreGive(semaphore_resetServoPos);
         }
-      }
-    #endif*/
+    #endif
 
     // get current stepper position right before sheduling a new move
     //int32_t stepperPosCurrent = stepper->getCurrentPositionSteps();
@@ -599,6 +603,8 @@ void pedalUpdateTask( void * pvParameters )
     {
       stepper->moveTo(Position_Next, false);
     }
+
+    
 
     // compute controller output
     if(semaphore_updateJoystick!=NULL)
@@ -780,40 +786,117 @@ void serialCommunicationTask( void * pvParameters )
 
 
 
+#ifdef ISV_COMMUNICATION
 
 
-
+#define SERVO_HIST_SIZE 4
+int16_t servo_pos_hist_ai16[SERVO_HIST_SIZE];
+uint8_t servo_hist_pos_index = 0;
 void servoCommunicationTask( void * pvParameters )
 {
   for(;;){
     isv57.readServoStates();
 
-    /*// reset encoder position, when pedal is at min position
-    if (resetServoEncoder == TRUE)
+    int32_t servo_offset_compensation_steps_local_i32 = 0;
+
+    
+    // condition 1: servo must be at halt
+    // condition 2: the esp accel lib must be at halt
+    bool cond_1 = true;
+    bool cond_2 = false;
+
+    servo_pos_hist_ai16[servo_hist_pos_index] = isv57.servo_pos_given_p;
+    servo_hist_pos_index++;
+    if(SERVO_HIST_SIZE <= servo_hist_pos_index)
     {
-      isv57.setZeroPos();
-      resetServoEncoder = FALSE;
+      servo_hist_pos_index = 0;
     }
 
-    // calculate encoder offset
-    int32_t stepper_offset = servo_zero_pos_p - isv57.getZeroPos;
-    // since the encoder positions are defined in int16 space, they wrap at multiturn
-    // to correct overflow, we apply modulo to take smallest possible deviation
-    if (stepper_offset > pow(2,15)-1)
+    // check the servo hist ringbuffer
+    for (uint8_t idx = 1; idx < SERVO_HIST_SIZE; idx++)
     {
-      stepper_offset -= pow(2,16);
+      if(servo_pos_hist_ai16[idx] != servo_pos_hist_ai16[0])
+      {
+        cond_1 = false;
+      }
     }
 
-    if (stepper_offset < -pow(2,15))
+    cond_2 = stepper->isAtMinPos();
+
+    // calculate zero position offset
+    if (cond_1 && cond_2)
     {
-      stepper_offset += pow(2,16);
-    }*/
+
+      // reset encoder position, when pedal is at min position
+      if (resetServoEncoder == true)
+      {
+        isv57.setZeroPos();
+        resetServoEncoder = false;
+      }
+
+      // calculate encoder offset
+      // movement to the back will reduce encoder value
+      servo_offset_compensation_steps_local_i32 = (int32_t)isv57.getZeroPos() - (int32_t)isv57.servo_pos_given_p;
+      // when pedal has moved to the back due to step losses --> offset will be positive 
+
+      // since the encoder positions are defined in int16 space, they wrap at multiturn
+      // to correct overflow, we apply modulo to take smallest possible deviation
+      if (servo_offset_compensation_steps_local_i32 > pow(2,15)-1)
+      {
+        servo_offset_compensation_steps_local_i32 -= pow(2,16);
+      }
+
+      if (servo_offset_compensation_steps_local_i32 < -pow(2,15))
+      {
+        servo_offset_compensation_steps_local_i32 += pow(2,16);
+      }
+    }
+
+
+
+
+    if(semaphore_resetServoPos!=NULL)
+      {
+
+        // Take the semaphore and just update the config file, then release the semaphore
+        if(xSemaphoreTake(semaphore_resetServoPos, (TickType_t)1)==pdTRUE)
+        {
+          servo_offset_compensation_steps_i32 = servo_offset_compensation_steps_local_i32;
+          xSemaphoreGive(semaphore_resetServoPos);
+        }
+
+      }
+      else
+      {
+        semaphore_resetServoPos = xSemaphoreCreateMutex();
+        Serial.println("semaphore_resetServoPos == 0");
+      }
+
 
 
     #ifdef PRINT_SERVO_STATES
-      static RTDebugOutput<int16_t, 3> rtDebugFilter({ "servo_pos_given_p", "servo_pos_error_p", "servo_current_percent"});
+      static RTDebugOutput<int16_t, 3> rtDebugFilter({ "pos_p", "pos_error_p", "curr_per"});
       rtDebugFilter.offerData({ isv57.servo_pos_given_p, isv57.servo_pos_error_p, isv57.servo_current_percent});
+
+
+       /*Serial.print("resetServoEncoder: ");
+      Serial.print(resetServoEncoder);
+
+
+      Serial.print(",    Offset cond 1: ");
+      Serial.print(cond_1);
+      
+      Serial.print(",    Offset cond 2: ");
+      Serial.print(cond_2);*/
+
+      //Serial.print(",    Offset: ");
+      //Serial.println(servo_offset_compensation_steps_i32);
     #endif
+
+    
+   
 
   }
 }
+
+#endif

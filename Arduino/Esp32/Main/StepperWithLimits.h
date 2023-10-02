@@ -24,6 +24,8 @@ public:
   void refindMinLimit();
   void checkLimitsAndResetIfNecessary();
   void updatePedalMinMaxPos(uint8_t pedalStartPosPct, uint8_t pedalEndPosPct);
+  bool isAtMinPos();
+  bool correctPos(int32_t posOffset);
 
 public:
   int8_t moveTo(int32_t position, bool blocking = false);

@@ -53,6 +53,9 @@ void isv57communication::sendTunedServoParameters() {
   delay(50);
   modbus.holdingRegisterWrite(slaveId, pr_1_00+15, 0); // control switching mode
   delay(50);
+  modbus.holdingRegisterWrite(slaveId, pr_5_00+20, 2); // encoder output resolution
+  delay(50);
+
 
 
 
