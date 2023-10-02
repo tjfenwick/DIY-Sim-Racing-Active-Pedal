@@ -1,16 +1,12 @@
 #include "isv57communication.h"
 
 
-// declare variables
-byte  raw[200];
-uint8_t len;
-
+Modbus modbus(Serial1);
 
 
 // initialize the communication
-void isv57communication::init()
+isv57communication::isv57communication()
 {
-  Modbus modbus(Serial1);
   Serial1.begin(38400, SERIAL_8N1, RXPIN, TXPIN, true); // Modbus serial
   modbus.init(MODE);
 }
@@ -18,6 +14,7 @@ void isv57communication::init()
 
 // send tuned servo parameters
 void isv57communication::setupServoStateReading() {
+
   
   // The iSV57 has four registers (0x0191, 0x0192, 0x0193, 0x0194) in which we can write, which values we want to obtain cyclicly
   // These registers can be obtained by sending e.g. the command: 0x63, 0x03, 0x0191, target_sate, CRC
@@ -30,6 +27,7 @@ void isv57communication::setupServoStateReading() {
   delay(50);
   modbus.holdingRegisterWrite(slaveId, 0x0194, reg_add_velocity_current_given_percent);
   delay(50);
+
 
 }
 
@@ -49,9 +47,9 @@ void isv57communication::sendTunedServoParameters() {
   delay(50);
   modbus.holdingRegisterWrite(slaveId, pr_0_00+14, 500); // position deviation setup
   delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_1_00+0, 20); // 1st position gain
+  modbus.holdingRegisterWrite(slaveId, pr_1_00+0, 400); // 1st position gain
   delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_1_00+1, 20); // 1st velocity loop gain
+  modbus.holdingRegisterWrite(slaveId, pr_1_00+1, 300); // 1st velocity loop gain
   delay(50);
   modbus.holdingRegisterWrite(slaveId, pr_1_00+15, 0); // control switching mode
   delay(50);
@@ -70,6 +68,15 @@ void isv57communication::sendTunedServoParameters() {
 }
 
 
+void isv57communication::setZeroPos()
+{
+  zeroPos = servo_pos_given_p;
+}
+
+int16_t isv57communication::getZeroPos()
+{
+  return zeroPos;
+}
 
 
 // read servo states

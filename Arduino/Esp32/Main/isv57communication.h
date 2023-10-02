@@ -45,17 +45,24 @@
 class isv57communication {
 	
 	public:
-    void init();
+    isv57communication();
     void setupServoStateReading();
     void sendTunedServoParameters();
     void readServoStates();
 
+    void setZeroPos();
+    int16_t getZeroPos();
     int16_t regArray[4];
 
     int16_t servo_pos_given_p = 0;
     int16_t servo_pos_error_p = 0;
     int16_t servo_current_percent = 0;
-  
 
-	
-}
+  private:
+    // declare variables
+    byte  raw[200];
+    uint8_t len;
+    int16_t zeroPos;
+    //Modbus modbus;
+  
+};

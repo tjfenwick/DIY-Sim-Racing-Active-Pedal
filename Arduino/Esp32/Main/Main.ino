@@ -1,12 +1,13 @@
 #define ESTIMATE_LOADCELL_VARIANCE
-//#define ISV_COMMUNICATION
+#define ISV_COMMUNICATION
 //#define PRINT_SERVO_STATES
 
 
 
 #ifdef ISV_COMMUNICATION
   #include "isv57communication.h"
-  isv57communication isv57;
+  bool resetServoEncoder = true;
+  int32_t servo_offset_compensation_i32 = 0; 
 #endif
 
 
@@ -89,6 +90,7 @@ ForceCurve_Interpolated forceCurve;
 TaskHandle_t Task1;
 TaskHandle_t Task2;
 #ifdef ISV_COMMUNICATION
+  isv57communication isv57;
   #define STACK_SIZE_FOR_TASK_3 0.2 * (configTOTAL_HEAP_SIZE / 4) 
   TaskHandle_t Task3;
 #endif
@@ -312,9 +314,9 @@ void setup()
 
 
 #ifdef ISV_COMMUNICATION
-  isv57::init();
-  isv57::setupServoStateReading();
-	isv57::sendTunedServoParameters();
+  
+  isv57.setupServoStateReading();
+	isv57.sendTunedServoParameters();
 
   xTaskCreatePinnedToCore(
                     servoCommunicationTask,   
@@ -472,6 +474,7 @@ void pedalUpdateTask( void * pvParameters )
     if (resetPedalPosition) {
       stepper->refindMinLimit();
       resetPedalPosition = false;
+      resetServoEncoder = false;
     }
 
 
@@ -577,6 +580,16 @@ void pedalUpdateTask( void * pvParameters )
     // clip target position to configured target interval
     Position_Next = (int32_t)constrain(Position_Next, dap_calculationVariables_st.stepperPosMin, dap_calculationVariables_st.stepperPosMax);
 
+    // if pedal in min position, recalibrate position 
+    /*#ifdef ISV_COMMUNICATION
+      if (Position_Next == dap_calculationVariables_st.stepperPosMin)
+      {
+        if ( stepper->isRunning() == FALSE )
+        {
+          stepper->setCurrentPosition(stepper->getCurrentPosition + servo_offset_compensation_i32)
+        }
+      }
+    #endif*/
 
     // get current stepper position right before sheduling a new move
     //int32_t stepperPosCurrent = stepper->getCurrentPositionSteps();
@@ -773,7 +786,29 @@ void serialCommunicationTask( void * pvParameters )
 void servoCommunicationTask( void * pvParameters )
 {
   for(;;){
-    isv57::readServoStates();
+    isv57.readServoStates();
+
+    /*// reset encoder position, when pedal is at min position
+    if (resetServoEncoder == TRUE)
+    {
+      isv57.setZeroPos();
+      resetServoEncoder = FALSE;
+    }
+
+    // calculate encoder offset
+    int32_t stepper_offset = servo_zero_pos_p - isv57.getZeroPos;
+    // since the encoder positions are defined in int16 space, they wrap at multiturn
+    // to correct overflow, we apply modulo to take smallest possible deviation
+    if (stepper_offset > pow(2,15)-1)
+    {
+      stepper_offset -= pow(2,16);
+    }
+
+    if (stepper_offset < -pow(2,15))
+    {
+      stepper_offset += pow(2,16);
+    }*/
+
 
     #ifdef PRINT_SERVO_STATES
       static RTDebugOutput<int16_t, 3> rtDebugFilter({ "servo_pos_given_p", "servo_pos_error_p", "servo_current_percent"});
