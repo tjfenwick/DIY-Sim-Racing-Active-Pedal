@@ -1,4 +1,17 @@
 #define ESTIMATE_LOADCELL_VARIANCE
+//#define ISV_COMMUNICATION
+//#define PRINT_SERVO_STATES
+
+
+
+#ifdef ISV_COMMUNICATION
+  #include "isv57communication.h"
+  isv57communication isv57;
+#endif
+
+
+
+
 
 #include "Main.h"
 
@@ -72,8 +85,13 @@ ForceCurve_Interpolated forceCurve;
 #define STACK_SIZE_FOR_TASK_1 0.2 * (configTOTAL_HEAP_SIZE / 4)
 #define STACK_SIZE_FOR_TASK_2 0.2 * (configTOTAL_HEAP_SIZE / 4)
 
+
 TaskHandle_t Task1;
 TaskHandle_t Task2;
+#ifdef ISV_COMMUNICATION
+  #define STACK_SIZE_FOR_TASK_3 0.2 * (configTOTAL_HEAP_SIZE / 4) 
+  TaskHandle_t Task3;
+#endif
 
 static SemaphoreHandle_t semaphore_updateConfig=NULL;
   bool configUpdateAvailable = false;                              // semaphore protected data
@@ -291,6 +309,24 @@ void setup()
                     1);     
   delay(500);
 
+
+
+#ifdef ISV_COMMUNICATION
+  isv57::init();
+  isv57::setupServoStateReading();
+	isv57::sendTunedServoParameters();
+
+  xTaskCreatePinnedToCore(
+                    servoCommunicationTask,   
+                    "servoCommunicationTask", 
+                    10000,  
+                    //STACK_SIZE_FOR_TASK_2,    
+                    NULL,      
+                    1,         
+                    &Task2,    
+                    1);     
+  delay(500);
+#endif
 
 
   
@@ -725,6 +761,24 @@ void serialCommunicationTask( void * pvParameters )
       }
       SetControllerOutputValue(joystickNormalizedToInt32_local);
     }
+
+  }
+}
+
+
+
+
+
+
+void servoCommunicationTask( void * pvParameters )
+{
+  for(;;){
+    isv57::readServoStates();
+
+    #ifdef PRINT_SERVO_STATES
+      static RTDebugOutput<int16_t, 3> rtDebugFilter({ "servo_pos_given_p", "servo_pos_error_p", "servo_current_percent"});
+      rtDebugFilter.offerData({ isv57.servo_pos_given_p, isv57.servo_pos_error_p, isv57.servo_current_percent});
+    #endif
 
   }
 }
