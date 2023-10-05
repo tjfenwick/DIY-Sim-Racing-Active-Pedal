@@ -1,3 +1,6 @@
+#ifndef ISV57_COMMUNICATION_H
+#define ISV57_COMMUNICATION_H
+
 //#include <SoftwareSerial.h>
 #include "Modbus.h"
 
@@ -49,6 +52,7 @@ class isv57communication {
     void setupServoStateReading();
     void sendTunedServoParameters();
     void readServoStates();
+    bool checkCommunication();
 
     void setZeroPos();
     int16_t getZeroPos();
@@ -66,3 +70,5 @@ class isv57communication {
     //Modbus modbus;
   
 };
+
+#endif
