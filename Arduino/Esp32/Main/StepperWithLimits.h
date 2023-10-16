@@ -1,4 +1,5 @@
 #include <FastAccelStepper.h>
+#include "isv57communication.h"
 
 
 // these are physical properties of the stepper
@@ -26,7 +27,8 @@ public:
   void updatePedalMinMaxPos(uint8_t pedalStartPosPct, uint8_t pedalEndPosPct);
   bool isAtMinPos();
   bool correctPos(int32_t posOffset);
-
+  void findMinMaxSensorless(isv57communication * isv57);
+  void refindMinLimitSensorless(isv57communication * isv57);
 public:
   int8_t moveTo(int32_t position, bool blocking = false);
   void printStates();

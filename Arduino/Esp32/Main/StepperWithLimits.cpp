@@ -1,10 +1,11 @@
 #include "StepperWithLimits.h"
-
 #include "RTDebugOutput.h"
 
+
+#define STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT 20
 static const uint8_t LIMIT_TRIGGER_VALUE = LOW;                                   // does endstop trigger high or low
 static const int32_t ENDSTOP_MOVEMENT = STEPS_PER_MOTOR_REVOLUTION / 100;         // how much to move between trigger checks
-
+static const int32_t ENDSTOP_MOVEMENT_SENSORLESS = ENDSTOP_MOVEMENT * 5;
 FastAccelStepperEngine& stepperEngine() {
   static FastAccelStepperEngine myEngine = FastAccelStepperEngine();   // this is a factory and manager for all stepper instances
 
@@ -42,6 +43,68 @@ StepperWithLimits::StepperWithLimits(uint8_t pinStep, uint8_t pinDirection, uint
   }
 }
 
+
+void StepperWithLimits::findMinMaxSensorless(isv57communication * isv57)
+{
+
+  if (! hasValidStepper()) return;
+
+  // obtain servo states
+  isv57->readServoStates();
+  bool endPosDetected = abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;
+
+
+  int32_t setPosition = _stepper->getCurrentPosition();
+  while(!endPosDetected){
+    delay(10);
+    isv57->readServoStates();
+    endPosDetected = abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;
+
+    setPosition = setPosition - ENDSTOP_MOVEMENT_SENSORLESS;
+    _stepper->moveTo(setPosition, true);
+
+    //Serial.print("Min_DetValue: ");
+    //Serial.println(isv57->servo_current_percent);
+  }
+
+  // move away from min position to reduce servos current reading
+  _stepper->forceStop();
+  setPosition = setPosition + 5 * ENDSTOP_MOVEMENT_SENSORLESS;
+  _stepper->moveTo(setPosition, true);
+  _stepper->forceStopAndNewPosition(0);
+  _stepper->moveTo(0);
+  _limitMin = 0;
+
+  isv57->readServoStates();
+  endPosDetected = abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;
+
+  setPosition = _stepper->getCurrentPosition();
+  while(!endPosDetected){
+    delay(10);
+    isv57->readServoStates();
+    endPosDetected = abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;
+
+    setPosition = setPosition + ENDSTOP_MOVEMENT_SENSORLESS;
+    _stepper->moveTo(setPosition, true);
+
+    //Serial.print("Max_DetValue: ");
+    //Serial.println(isv57->servo_current_percent);
+  }
+
+  //_stepper->forceStop();
+  //setPosition = setPosition - 5 * ENDSTOP_MOVEMENT;
+
+  _limitMax = _stepper->getCurrentPosition();
+
+  _stepper->moveTo(_posMin, true);
+#if defined(SUPPORT_ESP32_PULSE_COUNTER)
+  _stepper->clearPulseCounter();
+#endif
+
+
+}
+
+
 void StepperWithLimits::findMinMaxEndstops() {
   if (! hasValidStepper()) return;
 
@@ -50,6 +113,7 @@ void StepperWithLimits::findMinMaxEndstops() {
     setPosition = setPosition - ENDSTOP_MOVEMENT;
     _stepper->moveTo(setPosition, true);
   }
+
   
   _stepper->forceStopAndNewPosition(0);
   _stepper->moveTo(0);
@@ -84,6 +148,33 @@ void StepperWithLimits::refindMinLimit() {
   _stepper->forceStopAndNewPosition(_limitMin);
 }
 
+void StepperWithLimits::refindMinLimitSensorless(isv57communication * isv57) {
+
+  // obtain servo states
+  isv57->readServoStates();
+  bool endPosDetected = abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;
+
+
+  int32_t setPosition = _stepper->getCurrentPosition();
+  while(!endPosDetected){
+    delay(10);
+    isv57->readServoStates();
+    endPosDetected = abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;
+
+    setPosition = setPosition - ENDSTOP_MOVEMENT_SENSORLESS;
+    _stepper->moveTo(setPosition, true);
+
+    //Serial.print("Min_DetValue: ");
+    //Serial.println(isv57->servo_current_percent);
+  }
+
+  // move away from min position to reduce servos current reading
+  _stepper->forceStop();
+  setPosition = setPosition + 5 * ENDSTOP_MOVEMENT_SENSORLESS;
+  _stepper->moveTo(setPosition, true);
+  _stepper->forceStopAndNewPosition(_limitMin);
+}
+
 void StepperWithLimits::checkLimitsAndResetIfNecessary() {
   // in case the stepper loses its position and therefore an endstop is triggered reset position
   if (LIMIT_TRIGGER_VALUE == digitalRead(_pinMin)) {
@@ -103,6 +194,8 @@ int8_t StepperWithLimits::moveTo(int32_t position, bool blocking) {
 int32_t StepperWithLimits::getCurrentPositionSteps() const {
   return _stepper->getCurrentPosition() - _posMin;
 }
+
+
 double StepperWithLimits::getCurrentPositionFraction() const {
   return double(getCurrentPositionSteps()) / getTravelSteps();
 }
@@ -143,12 +236,8 @@ bool StepperWithLimits::isAtMinPos()
 }
 bool StepperWithLimits::correctPos(int32_t posOffset)
 {
-  // how many revolutions
-  float pulsesPerRev = 0.0001f;
-  float revOffset = (float)posOffset * pulsesPerRev;
-
-  // convert revolutions to steps
-  int32_t stepOffset =  revOffset * (float)STEPS_PER_MOTOR_REVOLUTION;
+  // 
+  int32_t stepOffset =(int32_t)constrain(posOffset, -10, 10);
 
   // correct pos
   _stepper->setCurrentPosition(_stepper->getCurrentPosition() + stepOffset);

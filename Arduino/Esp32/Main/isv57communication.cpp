@@ -53,7 +53,7 @@ void isv57communication::sendTunedServoParameters() {
   delay(50);
   modbus.holdingRegisterWrite(slaveId, pr_1_00+15, 0); // control switching mode
   delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_5_00+20, 2); // encoder output resolution
+  modbus.holdingRegisterWrite(slaveId, pr_5_00+20, 1); // encoder output resolution
   delay(50);
 
 
@@ -71,6 +71,21 @@ void isv57communication::sendTunedServoParameters() {
 }
 
 
+
+bool isv57communication::checkCommunication()
+{
+  if(modbus.requestFrom(slaveId, 0x03, 0x0000,  2) > 0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+
+
 void isv57communication::setZeroPos()
 {
   zeroPos = servo_pos_given_p;
@@ -85,25 +100,20 @@ int16_t isv57communication::getZeroPos()
 // read servo states
 void isv57communication::readServoStates() {
 
-  // read the four registers
-  for (uint8_t regIdx = 0; regIdx < 4; regIdx++)
+  // read the four registers simultaneously
+  if(modbus.requestFrom(slaveId, 0x03, ref_cyclic_read_0,  8) > 0)
   {
-    regArray[regIdx] = modbus.holdingRegisterRead(slaveId, ref_cyclic_read_0 + regIdx,  2);
-
-    if(modbus.requestFrom(slaveId, 0x03, ref_cyclic_read_0 + regIdx,  1) > 0)
-    {
-      modbus.RxRaw(raw,  len);
-      regArray[regIdx] = modbus.uint16(0);
+    modbus.RxRaw(raw,  len);
+    for (uint8_t regIdx = 0; regIdx < 4; regIdx++)
+    { 
+      regArray[regIdx] = modbus.uint16(regIdx);
     }
-    delay(5);
   }
-
+  
   // write to public variables
   servo_pos_given_p = regArray[0];
   servo_pos_error_p = regArray[1];
   servo_current_percent = regArray[2];
-  
-
   
   // print registers
   if (0)
