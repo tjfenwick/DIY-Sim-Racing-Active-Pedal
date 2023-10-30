@@ -92,6 +92,16 @@ The SimHub plugin was designed to communicate with the esp32 to (a) modify the p
 
 To install the plugin, copy the plugin [binaries](SimHubPlugin/bin) content to your SimHub directory, e.g. C:/Program Files (x86)/SimHub
 
+# Steps after flashing the firmware
+Your pedal will not move initially after flashing. You'll have to open the SimHub plugin, connect to your pedal and send a config with non-zero PID values.
+Recommended PID values are:
+P=0.2-0.4
+I=50-150
+D=0.
+
+After sending the inital config, please power cycle the pedal and apply pressure. The pedal should move now.
+
+
 
 
 # Misc
