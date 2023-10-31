@@ -1,7 +1,7 @@
 #define ESTIMATE_LOADCELL_VARIANCE
 #define ISV_COMMUNICATION
 //#define PRINT_SERVO_STATES
-#define SENSORLESS_HOMING false//true
+
 
 bool resetServoEncoder = true;
 bool isv57LifeSignal_b = false;
@@ -112,18 +112,7 @@ bool resetPedalPosition = false;
 /*                                                                                            */
 /**********************************************************************************************/
 
-// Wiring connections
-#if CONFIG_IDF_TARGET_ESP32S2
-  #define minPin 11
-  #define maxPin 10
-  #define dirPinStepper    8 
-  #define stepPinStepper   9  // step pin must be pin 9
-#elif CONFIG_IDF_TARGET_ESP32
-  #define minPin 34
-  #define maxPin 35
-  #define dirPinStepper    0//8
-  #define stepPinStepper   4//9
-#endif
+
 
 
 /**********************************************************************************************/

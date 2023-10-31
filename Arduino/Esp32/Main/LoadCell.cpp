@@ -54,6 +54,7 @@ LoadCell_ADS1256::LoadCell_ADS1256(uint8_t channel0, uint8_t channel1)
   : _zeroPoint(0.0), _varianceEstimate(DEFAULT_VARIANCE_ESTIMATE)
 {
   ADC().setChannel(channel0,channel1);   // Set the MUX for differential between ch0 and ch1 
+  //ADC().setChannel(channel1, channel0);   // Set the MUX for differential between ch0 and ch1 
 }
 
 float LoadCell_ADS1256::getReadingKg() const {
