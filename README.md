@@ -16,12 +16,14 @@ Feel free to join, research before you build and ask questions.
 
 # Hardware
 ## ESP32
-The embedded code of the DIY active pedal runs on an ESP32 microcontroller. Some PCB design, which hold the ESP32 breakoutboard, the ADC breakoutboard and connectors are uploaded to the [Wiring](Wiring) directory. They were used to proof the concept. 
-The regular ESP32 is currently recommended over the ESP32 S2, as it has a FPU and it performs better with the stepper library. ESP32 S2 is losing steps currently.
+The embedded code of the DIY active pedal runs on an ESP32 microcontroller. The PCB design was developed to proof the concept. It holds the ESP32 breakoutboard, the ADC breakoutboard, a levelshifter and connectors. Currently the version 3 of this PCB deisgn is usedm which introduced sensorless homing of the servo. The PCB deisgn and pinout diagram can be found [here](Wiring/Esp32_V3).
 
-ESP32 PCB            |  ESP32 S2 mini PCB
-:-------------------------:|:-------------------------:
-![](Wiring/Esp32/Esp32_PCB_0.png)  |  ![](Wiring/Esp32_s2_mini/Esp32_S2_mini_PCB_0.png)
+Here is an image of the plain PCB:
+![](Wiring/Esp32_V3/PCB_empty.jpg)
+
+
+Here is an image of the assembled PCB:
+![](Wiring/Esp32_V3/PCB_assembled.jpg)
 
 A more sophisticated custom PCB is currently under development and tested. Please refer to the Discord for up-to-date designs.
 
@@ -95,13 +97,21 @@ To install the plugin, copy the plugin [binaries](SimHubPlugin/bin) content to y
 # Steps after flashing the firmware
 Your pedal will not move initially after flashing. You'll have to open the SimHub plugin, connect to your pedal and send a config with non-zero PID values.
 Recommended PID values are:
+
 P=0.2-0.4
+
 I=50-150
+
 D=0.
 
 After sending the inital config, please power cycle the pedal and apply pressure. The pedal should move now.
 
 
+
+# Error handling
+## Pedal doesn't move after initial setup
+1. Make sure, that you followed the above instructions. The default PID values are set to 0 thus the pedal will not move. You have to send non-zero PID values and restart the pedal to the pedal in order to observe pedal travel.
+2. Open the serial monitor in Arduino IDE, set baudrate to 921600 and restart the pedal. You should see some debug info. Make a screenshot and kindly ask in the Discord server for help.
 
 
 # Misc
@@ -124,3 +134,5 @@ To get a better understanding of the motion and forces, a [python](Validation/Pe
 - [x] SimHub plugin: Bugfix for COM port selection wrong, when switching between pedals
 - [ ] Send SimHub data via wifi to ESP
 - [ ] Automatically generate the bin files and refer to the ESP32 [webflasher](https://esp.huhn.me/)
+- [x] Sensorless homing
+- [x] Parameterize the iSV57 via direct communication with the ESP32 
