@@ -2,6 +2,7 @@
 
 #include <SPI.h>
 #include <ADS1256.h>
+#include "Main.h"
 
 static const float ADC_CLOCK_MHZ = 7.68;  // crystal frequency used on ADS1256
 static const float ADC_VREF = 2.5;        // voltage reference
@@ -22,7 +23,9 @@ static const float CONVERSION_FACTOR = LOADCELL_WEIGHT_RATING_KG / (LOADCELL_EXC
 
 
 ADS1256& ADC() {
-  static ADS1256 adc(ADC_CLOCK_MHZ, ADC_VREF, /*useresetpin=*/false);    // RESETPIN is permanently tied to 3.3v
+  static ADS1256 adc(ADC_CLOCK_MHZ, ADC_VREF, /*useresetpin=*/false
+  , PIN_DRDY, PIN_SCK, PIN_MISO, PIN_MOSI, PIN_CS);    // RESETPIN is permanently tied to 3.3v
+
 
   static bool firstTime = true;
   if (firstTime) {
