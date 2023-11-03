@@ -15,17 +15,53 @@ Feel free to join, research before you build and ask questions.
 
 
 # Hardware
-## ESP32
-The embedded code of the DIY active pedal runs on an ESP32 microcontroller. The PCB design was developed to proof the concept. It holds the ESP32 breakoutboard, the ADC breakoutboard, a levelshifter and connectors. Currently the version 3 of this PCB deisgn is usedm which introduced sensorless homing of the servo. The PCB deisgn and pinout diagram can be found [here](Wiring/Esp32_V3).
+## Electronics
+
+### PCB design
+The embedded code of the DIY active pedal runs on an ESP32 microcontroller. The PCB design was developed to proof the concept. It holds the ESP32 breakoutboard, the ADC breakoutboard, a levelshifter and connectors. Currently the version 3 of this PCB design is usedm which introduced sensorless homing of the servo. The PCB deisgn and pinout diagram can be found [here](Wiring/Esp32_V3).
 
 Here is an image of the plain PCB:
 ![](Wiring/Esp32_V3/PCB_empty.jpg)
 
-
 Here is an image of the assembled PCB:
 ![](Wiring/Esp32_V3/PCB_assembled.jpg)
 
-A more sophisticated custom PCB is currently under development and tested. Please refer to the Discord for up-to-date designs.
+
+### Wiring
+The PCB has some three connectors. Please wire as follows:
+
+#### Servo motion port
+| Connector at PCB           |  Servo |
+:------------------------- | :-------------------------
+| Dir-| Dir-|
+| Dir+| Dir+|
+| Pul-| Pul-|
+| Pul+| Pul+|
+
+#### Servo debug port 
+| Connector at PCB           |  Servo |
+:------------------------- | :-------------------------
+| Gnd| Gnd|
+| Tx| Rx|
+| Rx| Tx|
+
+#### Loadcell port 
+| Connector at PCB           |  Loadcell |
+:------------------------- | :-------------------------
+| 5V| V+|
+| Gnd| V-|
+| Gnd| Shield|
+| S+| S+|
+| S-| S-|
+
+#### Servo power port 
+It is recommended to use a Schottky diode in the positive line from the PSU to the servo. The plated side facing the servo.
+| PSU           |  Servo |
+:------------------------- | :-------------------------
+| 36V/48V| Vdd+|
+| Gnd| Gnd|
+
+
 
 ## Mechanical design
 Here are some examples of mechanical designs awesome DIYers have done: 
@@ -74,7 +110,7 @@ There are two recommended ways to install the code on the ESP32. (a) built the s
 3. Flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32.
 
 #### Flash prebuilt binaries via webflasher
-The prebuilt binaries for the [regular ESP32](Arduino/Esp32/bin) the and [ESP32 S2 mini](Arduino/Esp32/bin_s2_mini) are available. They can be flashed via the ESP [webflasher](https://esp.huhn.me/). 
+The prebuilt binaries for the [regular ESP32](Arduino/Esp32/bin) are available. They can be flashed via the ESP [webflasher](https://esp.huhn.me/). 
 
 Memory adress            |  File
 :-------------------------:|:-------------------------:
@@ -98,11 +134,11 @@ To install the plugin, copy the plugin [binaries](SimHubPlugin/bin) content to y
 Your pedal will not move initially after flashing. You'll have to open the SimHub plugin, connect to your pedal and send a config with non-zero PID values.
 Recommended PID values are:
 
+```
 P=0.2-0.4
-
 I=50-150
-
-D=0.
+D=0
+```
 
 After sending the inital config, please power cycle the pedal and apply pressure. The pedal should move now.
 
@@ -136,3 +172,5 @@ To get a better understanding of the motion and forces, a [python](Validation/Pe
 - [ ] Automatically generate the bin files and refer to the ESP32 [webflasher](https://esp.huhn.me/)
 - [x] Sensorless homing
 - [x] Parameterize the iSV57 via direct communication with the ESP32 
+- [ ] Read the actual pedal config from SimHub
+- [ ] Parameterize all servo registers from ESP
