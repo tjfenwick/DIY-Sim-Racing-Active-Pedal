@@ -174,3 +174,4 @@ To get a better understanding of the motion and forces, a [python](Validation/Pe
 - [x] Parameterize the iSV57 via direct communication with the ESP32 
 - [ ] Read the actual pedal config from SimHub
 - [ ] Parameterize all servo registers from ESP
+    - [ ] Add a SimHub button to send and store the register values 
