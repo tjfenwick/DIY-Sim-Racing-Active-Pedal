@@ -98,7 +98,7 @@
 #if PCB_VERSION == 3
   // ADC defines
   #define PIN_DRDY 19// 19 --> DRDY
-  #define PIN_RST  16 // X --> X
+  #define PIN_RST  15 // X --> X
   #define PIN_SCK 16 // 16 -->SCLK
   #define PIN_MISO 18 // 18 --> DOUT
   #define PIN_MOSI 17 // 17 --> DIN
@@ -109,8 +109,8 @@
   #define stepPinStepper   23
   
   // endstop pins
-  #define minPin 11
-  #define maxPin 10
+  #define minPin 12
+  #define maxPin 13
 
   // level shifter is present on this PCB design
   #define SENSORLESS_HOMING true

@@ -25,10 +25,15 @@ StepperWithLimits::StepperWithLimits(uint8_t pinStep, uint8_t pinDirection, uint
   , _limitMin(0),    _limitMax(0)
   , _posMin(0),      _posMax(0)
 {
+
+  
   pinMode(pinMin, INPUT);
   pinMode(pinMax, INPUT);
   
+  
   _stepper = stepperEngine().stepperConnectToPin(pinStep);
+
+  
 
   // Stepper Parameters
   if (_stepper) {
@@ -37,9 +42,9 @@ StepperWithLimits::StepperWithLimits(uint8_t pinStep, uint8_t pinDirection, uint
     _stepper->setSpeedInHz(MAXIMUM_STEPPER_SPEED);            // steps/s
     _stepper->setAcceleration(MAXIMUM_STEPPER_ACCELERATION);  // steps/s²
 
-#if defined(SUPPORT_ESP32_PULSE_COUNTER)
-    _stepper->attachToPulseCounter(1, 0, 0);
-#endif
+//#if defined(SUPPORT_ESP32_PULSE_COUNTER)
+//    _stepper->attachToPulseCounter(1, 0, 0);
+//#endif
   }
 }
 
