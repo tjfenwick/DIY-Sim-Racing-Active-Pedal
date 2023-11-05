@@ -60,7 +60,7 @@ jobs:
 
       - name: List files in the repository
         run: |
-          ls ${{ github.workspace }}
+          ls ${{ github.workspace }}/Arduino/libs/
       
       # Finally, we compile the sketch, using the FQBN that was set
       # in the build matrix.
