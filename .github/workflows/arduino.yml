@@ -56,7 +56,7 @@ jobs:
       - name: Install platform
         run: |
           arduino-cli core update-index --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-          arduino-cli core install $
+          arduino-cli core install esp32:esp32
       # Finally, we compile the sketch, using the FQBN that was set
       # in the build matrix.
       - name: Compile Sketch
