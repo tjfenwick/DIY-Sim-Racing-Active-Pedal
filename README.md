@@ -1,3 +1,5 @@
+[![Arduino Build](https://github.com/ChrGri/DIY-Sim-Racing-Active-Pedal/actions/workflows/arduino.yml/badge.svg?branch=main)](https://github.com/ChrGri/DIY-Sim-Racing-Active-Pedal/actions/workflows/arduino.yml)
+[![Doxygen Action](https://github.com/ChrGri/DIY-Sim-Racing-Active-Pedal/actions/workflows/main.yml/badge.svg)](https://github.com/ChrGri/DIY-Sim-Racing-Active-Pedal/actions/workflows/main.yml)
 
 # DIY-Sim-Racing-Active-Pedal
 This DIY active pedal design is based on the original design from @tjfenwick.

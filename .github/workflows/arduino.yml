@@ -1,0 +1,114 @@
+# This is the name of the workflow, visible on GitHub UI.
+name: Arduino Build
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# This is the list of jobs that will be run concurrently.
+# Since we use a build matrix, the actual number of jobs
+# started depends on how many configurations the matrix
+# will produce.
+jobs:
+  # This is the name of the job - can be whatever.
+  build:
+    # Here we tell GitHub that the jobs must be determined
+    # dynamically depending on a matrix configuration.
+    strategy:
+      matrix:
+        # The matrix will produce one job for each configuration
+        # parameter of type `arduino-platform`, in this case, it
+        # is only 1.
+        arduino-platform: ["esp32:esp32"]
+        # This is usually optional but we need to statically define the
+        # FQBN of the boards we want to test for each platform. In the
+        # future the CLI might automatically detect and download the core
+        # needed to compile against a certain FQBN, at that point the
+        # following `include` section will be useless.
+        include:
+          # This works like this: when the platformn is "arduino:avr", the
+          # variable `fqbn` is set to "arduino:avr:uno".
+          - arduino-platform: "esp32:esp32"
+            fqbn: "esp32:esp32:fm-devkit"
+
+    # This is the platform GitHub will use to run our workflow,
+    # I picked ubuntu.
+    runs-on: ubuntu-latest
+
+    # This is the list of steps this job will run.
+    steps:
+      # First of all, we clone the repo using the `checkout` action.
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+            submodules: recursive
+
+      # We use the `arduino/setup-arduino-cli` action to install and
+      # configure the Arduino CLI on the system.
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v1.1.1
+      
+      
+      # We then install the platform, which one will be determined
+      # dynamically by the build matrix.
+      - name: Install platform
+        run: |
+          arduino-cli core update-index --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core install esp32:esp32
+
+      - name: List Arduino libs
+        run: |
+          ls ${{ github.workspace }}/Arduino/libs/
+
+          
+      - name: List files in Kalman lib
+        run: |
+          ls ${{ github.workspace }}/Arduino/libs/Kalman
+      
+      # Finally, we compile the sketch, using the FQBN that was set
+      # in the build matrix.
+      - name: Compile Sketch
+        run: arduino-cli compile --fqbn esp32:esp32:fm-devkit --output-dir ./Arduino/Esp32/bin --libraries ./Arduino/libs/ ./Arduino/Esp32/Main
+
+      # upload the build artifacts
+      # see https://thecurve.io/production-arduino-binary-builds-with-github-actions/
+      # see https://github.com/actions/upload-artifact
+      - name: Upload Arduino artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: arduino_artifacts
+          path: ./Arduino/Esp32/bin/
+
+      # zip binaries
+      - uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r ./Arduino/Esp32/bin/esp32_0.zip ./Arduino/Esp32/bin/
+
+      # create a release
+      # see https://www.youtube.com/watch?v=_ueJ3LrRqPU
+      - name: Create Release
+        id: create-new-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
+
+      # upload release asset
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-new-release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./Arduino/Esp32/bin/esp32_0.zip
+          asset_name: esp32_0.zip
+          asset_content_type: application/zip
+      
+
