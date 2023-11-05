@@ -60,6 +60,7 @@ jobs:
       # Finally, we compile the sketch, using the FQBN that was set
       # in the build matrix.
       - name: Compile Sketch
-        run: arduino-cli compile --fqbn $ ./Arduino/Esp32/Main --warnings more --output-dir bin ./Arduino/Esp32/bin --libraries ./Arduino/libs/
-
+        run: arduino-cli compile --fqbn esp32:esp32:fm-devkit --output-dir ./Arduino/Esp32/bin --libraries ./Arduino/libs/ ./Arduino/Esp32/Main
+  
+      
 
