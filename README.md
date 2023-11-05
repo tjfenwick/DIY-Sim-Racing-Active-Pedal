@@ -112,7 +112,7 @@ There are two recommended ways to install the code on the ESP32. (a) built the s
 3. Flash the [code](Arduino/Esp32/Main), e.g. via Ardiono IDE to esp32.
 
 #### Flash prebuilt binaries via webflasher
-The binaries for the [ESP32](releases) are available. They can be flashed via the ESP [webflasher](https://esp.huhn.me/). 
+The binaries for the [ESP32](https://github.com/ChrGri/DIY-Sim-Racing-Active-Pedal/releases) are available. They can be flashed via the ESP [webflasher](https://esp.huhn.me/). 
 
 Memory adress            |  File
 :-------------------------:|:-------------------------:

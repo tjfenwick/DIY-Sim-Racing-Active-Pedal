@@ -3,18 +3,19 @@
 //#include <ADS1256.h>
 
 /********************************************************************/
-/*                      Select the PCB                              */
+/*                      Select the PCB      */
 /********************************************************************/
 //#define PCB_VERSION 1 // V1 for regular ESP32
 //#define PCB_VERSION 2 // V1 for ESP32 S2 mini
 #define PCB_VERSION 3 // V3 for regular ESP32
+//#define PCB_VERSION 4 // speedcrafter PCB V1.3
 
 
 
 
 
 /********************************************************************/
-/*                      Other defines                               */
+/*                      Other defines       */
 /********************************************************************/
 
 // target cycle time for pedal update task, to get constant cycle times, required for FIR filtering
@@ -111,6 +112,31 @@
   // endstop pins
   #define minPin 12
   #define maxPin 13
+
+  // level shifter is present on this PCB design
+  #define SENSORLESS_HOMING true
+
+#endif
+
+
+
+// speedcrafter PCB V1.3
+#if PCB_VERSION == 4
+  // ADC defines
+  #define PIN_DRDY 27// 19 --> DRDY
+  #define PIN_RST  5 // X --> X
+  #define PIN_SCK 14 // 16 -->SCLK
+  #define PIN_MISO 12 // 18 --> DOUT
+  #define PIN_MOSI 13 // 17 --> DIN
+  #define PIN_CS 15 // 21 --> CS
+
+  // stepper pins
+  #define dirPinStepper    32
+  #define stepPinStepper   33
+  
+  // endstop pins
+  #define minPin 35
+  #define maxPin 34
 
   // level shifter is present on this PCB design
   #define SENSORLESS_HOMING true
