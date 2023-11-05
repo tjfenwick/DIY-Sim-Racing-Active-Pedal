@@ -58,9 +58,14 @@ jobs:
           arduino-cli core update-index --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli core install esp32:esp32
 
-      - name: List files in the repository
+      - name: List Arduino libs
         run: |
           ls ${{ github.workspace }}/Arduino/libs/
+
+          
+      - name: List files in Kalman lib
+        run: |
+          ls ${{ github.workspace }}/Arduino/libs/Kalman
       
       # Finally, we compile the sketch, using the FQBN that was set
       # in the build matrix.
