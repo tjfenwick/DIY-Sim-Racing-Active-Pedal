@@ -82,5 +82,33 @@ jobs:
         with:
           name: arduino_artifacts
           path: ./Arduino/Esp32/bin/
+
+      # zip binaries
+      - uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r ./Arduino/Esp32/bin/esp32_0.zip ./Arduino/Esp32/bin/
+
+      # create a release
+      # see https://www.youtube.com/watch?v=_ueJ3LrRqPU
+      - name: Create Release
+        id: create-new-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
+
+      # upload release asset
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-new-release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./Arduino/Esp32/bin/esp32_0.zip
+          asset_name: esp32_0.zip
+          asset_content_type: application/zip
       
 
