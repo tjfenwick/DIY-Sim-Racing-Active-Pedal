@@ -24,8 +24,6 @@ jobs:
         # parameter of type `arduino-platform`, in this case, it
         # is only 1.
         arduino-platform: ["esp32:esp32"]
-        additional_urls:
-          - https://dl.espressif.com/dl/package_esp32_index.json
         # This is usually optional but we need to statically define the
         # FQBN of the boards we want to test for each platform. In the
         # future the CLI might automatically detect and download the core
