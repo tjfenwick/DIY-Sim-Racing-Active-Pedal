@@ -34,7 +34,6 @@ jobs:
           # variable `fqbn` is set to "arduino:avr:uno".
           - arduino-platform: "esp32:esp32"
             fqbn: "esp32:esp32:fm-devkit"
-            platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
 
     # This is the platform GitHub will use to run our workflow,
     # I picked ubuntu.
@@ -56,7 +55,7 @@ jobs:
       # dynamically by the build matrix.
       - name: Install platform
         run: |
-          arduino-cli core update-index
+          arduino-cli core update-index --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli core install $
       # Finally, we compile the sketch, using the FQBN that was set
       # in the build matrix.
