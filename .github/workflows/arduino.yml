@@ -73,6 +73,14 @@ jobs:
       # in the build matrix.
       - name: Compile Sketch
         run: arduino-cli compile --fqbn esp32:esp32:fm-devkit --output-dir ./Arduino/Esp32/bin --libraries ./Arduino/libs/ ./Arduino/Esp32/Main
-  
+
+      # upload the build artifacts
+      # see https://thecurve.io/production-arduino-binary-builds-with-github-actions/
+      # see https://github.com/actions/upload-artifact
+      - name: Upload Arduino artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: arduino_artifacts
+          path: ./Arduino/Esp32/bin/
       
 
