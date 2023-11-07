@@ -62,6 +62,7 @@ public:
     //int requestFrom(int type, int address, int nb, byte *ret,int len);
     int requestFrom(int slaveId, int type, int address,int nb);
     //  ~Modbus();
+    bool checkAndReplaceParameter(uint16_t slaveId_local_u16, uint16_t parameterAdress, long value);
 
 
     // Read Coil Register       0x01

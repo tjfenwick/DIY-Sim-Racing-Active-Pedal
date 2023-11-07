@@ -80,6 +80,10 @@ void StepperWithLimits::findMinMaxSensorless(isv57communication * isv57)
   _stepper->moveTo(0);
   _limitMin = 0;
 
+  // wait N ms to let the endPosDetected become 0 again
+  delay(300);
+
+  // read servo states again
   isv57->readServoStates();
   endPosDetected = abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;
 

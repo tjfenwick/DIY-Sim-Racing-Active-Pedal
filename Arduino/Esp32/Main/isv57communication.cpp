@@ -12,6 +12,8 @@ isv57communication::isv57communication()
 }
 
 
+
+
 // send tuned servo parameters
 void isv57communication::setupServoStateReading() {
 
@@ -36,32 +38,79 @@ void isv57communication::setupServoStateReading() {
 // send tuned servo parameters
 void isv57communication::sendTunedServoParameters() {
   
+  bool retValue_b = false;
+
   // servo config update
-  modbus.holdingRegisterWrite(slaveId, pr_0_00+2, 0); // deactivate auto gain
-  delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_0_00+3, 10); // machine stiffness
-  delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_0_00+4, 80); // ratio of inertia
-  delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_0_00+8, 1600); // microsteps
-  delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_0_00+14, 500); // position deviation setup
-  delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_1_00+0, 400); // 1st position gain
-  delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_1_00+1, 300); // 1st velocity loop gain
-  delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_1_00+15, 0); // control switching mode
-  delay(50);
-  modbus.holdingRegisterWrite(slaveId, pr_5_00+20, 1); // encoder output resolution
-  delay(50);
+  //modbus.holdingRegisterWrite(slaveId, pr_0_00+2, 0); // deactivate auto gain
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+2, 0);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_0_00+3, 10); // machine stiffness
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+3, 10);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_0_00+4, 80); // ratio of inertia
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+4, 80);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_0_00+8, 1600); // microsteps
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+8, 1600);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_0_00+13, 300); // 1st torque limit
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+13, 300);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_0_00+14, 500); // position deviation setup
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+14, 500);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+0, 500); // 1st position gain
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+0, 600);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+1, 300); // 1st velocity loop gain
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+1, 300);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+2, 300); // 1st time constant of velocity loop
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+2, 500);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+3, 15); // 1st filter of velocity detection
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+3, 15);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+4, 150); // 1st torque filter
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+4, 150);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+10, 150); // velocity feed forward gain
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+10, 0);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+11, 6000); // velocity feed forward filter
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+11, 6000);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+12, 0); // torque feed forward gain
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+12, 0);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+13, 0); // torque feed forward filter
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+13, 0);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+15, 0); // control switching mode
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+15, 0);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_1_00+37, 0); // special function register
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+37, 1048);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_3_00+24, 5000); // maximum rpm
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_3_00+24, 5000);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_5_00+13, 1); // overspeed level
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_5_00+13, 5000);
+
+  //modbus.holdingRegisterWrite(slaveId, pr_5_00+20, 1); // encoder output resolution
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_5_00+20, 1);
+
+  
+
 
 
 
 
   // store the settings to servos NVM
-  if (0)
+  if (retValue_b)
   {
+    Serial.println("Servo registered in NVM have been updated! Please power cycle the servo and the ESP!");
     modbus.holdingRegisterWrite(slaveId, 0x019A, 0x5555); // store the settings to servos NVM
     delay(2000);
   }

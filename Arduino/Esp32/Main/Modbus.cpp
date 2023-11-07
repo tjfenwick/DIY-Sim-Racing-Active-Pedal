@@ -70,6 +70,50 @@ int Modbus::discreteInputRead(int id, int address)
    }
 }
 
+
+// check target values at register address. If target value was already present, return 0. If target value has to be set, return 1.
+bool Modbus::checkAndReplaceParameter(uint16_t slaveId_local_u16, uint16_t parameterAdress, long value) {
+
+  bool retValue_b = false;
+
+  // check if value at address is already target value
+  byte  raw2[2];
+  uint8_t len;
+  int16_t regArray[4];
+
+  // read the four registers simultaneously
+  if(requestFrom(slaveId_local_u16, 0x03, parameterAdress,  2) > 0)
+  {
+    RxRaw(raw2,  len);
+    regArray[0] = uint16(0);
+  }
+  
+  // write to public variables
+  int16_t returnValue = regArray[0];
+
+
+
+  // if value is not target value --> overwrite value
+  if(returnValue!= value)
+  {
+    Serial.print("Parameter adresse: ");
+    Serial.print(parameterAdress);
+    Serial.print(",    actual:");
+    Serial.print(returnValue);
+    Serial.print(",    target:");
+    Serial.println(value);
+
+
+
+    holdingRegisterWrite(slaveId_local_u16, parameterAdress, value); // deactivate auto gain
+    delay(50);
+    retValue_b = true;
+  }
+
+  return retValue_b;
+}
+
+
 long Modbus::holdingRegisterRead(int address)
 {
   return holdingRegisterRead(SlaveID, address, 1);
