@@ -63,7 +63,9 @@ LoadCell_ADS1256::LoadCell_ADS1256(uint8_t channel0, uint8_t channel1)
 float LoadCell_ADS1256::getReadingKg() const {
   ADS1256& adc = ADC();
   adc.waitDRDY();        // wait for DRDY to go low before next register read
-  return adc.readCurrentChannel() - _zeroPoint;
+
+  // correct bias, assume AWGN --> 3 * sigma is 99.9 %
+  return adc.readCurrentChannel() - ( _zeroPoint + 3.0 * _standardDeviationEstimate );
 }
 
 void LoadCell_ADS1256::setZeroPoint() {
@@ -86,6 +88,7 @@ void LoadCell_ADS1256::setZeroPoint() {
 void LoadCell_ADS1256::estimateVariance() {
   ADS1256& adc = ADC();
   
+
   Serial.println("ADC: Identify loadcell variance");
   float varNormalizer = 1. / (float)(NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION - 1);
   float varEstimate = 0.0f;
@@ -95,11 +98,13 @@ void LoadCell_ADS1256::estimateVariance() {
     varEstimate += sq(loadcellReading) * varNormalizer;
   }
 
+  _standardDeviationEstimate = sqrt(varEstimate);
+
   Serial.println("Variance est.:");
   Serial.println(varEstimate);
 
   Serial.println("Stddev est.:");
-  Serial.println(sqrt(varEstimate));
+  Serial.println(_standardDeviationEstimate);
 
   // make sure estimate is nonzero
   if (varEstimate < LOADCELL_VARIANCE_MIN) { 
@@ -108,4 +113,7 @@ void LoadCell_ADS1256::estimateVariance() {
   varEstimate *= 9;
 
   _varianceEstimate = varEstimate;
+
+  
+  
 }

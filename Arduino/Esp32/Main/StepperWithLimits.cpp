@@ -3,9 +3,13 @@
 
 
 #define STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT 20
+#define MIN_POS_MAX_ENDSTOP STEPS_PER_MOTOR_REVOLUTION * 3 // servo has to drive minimum N steps before it allows the detection of the max endstop
+
 static const uint8_t LIMIT_TRIGGER_VALUE = LOW;                                   // does endstop trigger high or low
 static const int32_t ENDSTOP_MOVEMENT = STEPS_PER_MOTOR_REVOLUTION / 100;         // how much to move between trigger checks
 static const int32_t ENDSTOP_MOVEMENT_SENSORLESS = ENDSTOP_MOVEMENT * 5;
+
+
 FastAccelStepperEngine& stepperEngine() {
   static FastAccelStepperEngine myEngine = FastAccelStepperEngine();   // this is a factory and manager for all stepper instances
 
@@ -81,17 +85,23 @@ void StepperWithLimits::findMinMaxSensorless(isv57communication * isv57)
   _limitMin = 0;
 
   // wait N ms to let the endPosDetected become 0 again
-  delay(300);
+  //delay(300);
 
   // read servo states again
-  isv57->readServoStates();
-  endPosDetected = abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;
+  //isv57->readServoStates();
+  endPosDetected = 0;//abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;
 
   setPosition = _stepper->getCurrentPosition();
-  while(!endPosDetected){
+  while (!endPosDetected) {
     delay(10);
     isv57->readServoStates();
-    endPosDetected = abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;
+
+    // only trigger when difference is significant
+    if (setPosition > MIN_POS_MAX_ENDSTOP)
+    {
+      endPosDetected = abs( isv57->servo_current_percent) > STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT;  
+    }
+    
 
     setPosition = setPosition + ENDSTOP_MOVEMENT_SENSORLESS;
     _stepper->moveTo(setPosition, true);
