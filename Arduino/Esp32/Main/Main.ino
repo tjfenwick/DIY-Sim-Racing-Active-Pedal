@@ -821,6 +821,9 @@ int64_t timeDiff = 0;
 
 #define TIME_SINCE_SERVO_POS_CHANGE_TO_DETECT_STANDSTILL_IN_MS 200
 
+
+
+uint64_t print_cycle_counter_u64 = 0;
 void servoCommunicationTask( void * pvParameters )
 {
   
@@ -848,6 +851,18 @@ void servoCommunicationTask( void * pvParameters )
           isv57.readServoStates();
           int16_t servoPos_now_i16 = isv57.servo_pos_given_p;
           timeNow_l = millis();
+
+//#define PRINT_SERVO_POS_EVERY_N_CYCLES
+#ifdef PRINT_SERVO_POS_EVERY_N_CYCLES
+          print_cycle_counter_u64++;
+          // print servo pos every N cycles
+          if ( (print_cycle_counter_u64 % 2000) == 0 )
+          {
+            Serial.println(servoPos_now_i16);
+            print_cycle_counter_u64 = 0;
+          }
+#endif
+
 
           // check whether servo position has changed, in case, update the halt detection variable
           if (servoPos_last_i16 != servoPos_now_i16)
