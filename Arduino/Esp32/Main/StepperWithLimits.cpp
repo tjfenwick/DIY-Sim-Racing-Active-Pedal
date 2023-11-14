@@ -1,5 +1,6 @@
 #include "StepperWithLimits.h"
 #include "RTDebugOutput.h"
+#include "Main.h"
 
 
 #define STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT 20
@@ -41,7 +42,7 @@ StepperWithLimits::StepperWithLimits(uint8_t pinStep, uint8_t pinDirection, uint
 
   // Stepper Parameters
   if (_stepper) {
-    _stepper->setDirectionPin(pinDirection, false);
+    _stepper->setDirectionPin(pinDirection, MOTOR_INVERT_MOTOR_DIR);
     _stepper->setAutoEnable(true);
     _stepper->setSpeedInHz(MAXIMUM_STEPPER_SPEED);            // steps/s
     _stepper->setAcceleration(MAXIMUM_STEPPER_ACCELERATION);  // steps/s²
