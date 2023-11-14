@@ -1,6 +1,6 @@
 #define ESTIMATE_LOADCELL_VARIANCE
 #define ISV_COMMUNICATION
-#define PRINT_SERVO_STATES
+//#define PRINT_SERVO_STATES
 
 
 bool resetServoEncoder = true;
@@ -919,6 +919,11 @@ void servoCommunicationTask( void * pvParameters )
         }
 
 
+        // invert the compensation wrt the motor direction
+        if (MOTOR_INVERT_MOTOR_DIR)
+        {
+          servo_offset_compensation_steps_local_i32 *= -1;
+        }
 
 
         if(semaphore_resetServoPos!=NULL)
@@ -927,8 +932,7 @@ void servoCommunicationTask( void * pvParameters )
             // Take the semaphore and just update the config file, then release the semaphore
             if(xSemaphoreTake(semaphore_resetServoPos, (TickType_t)1)==pdTRUE)
             {
-              //servo_offset_compensation_steps_i32 = servo_offset_compensation_steps_local_i32;
-              servo_offset_compensation_steps_i32 = -servo_offset_compensation_steps_local_i32;
+              servo_offset_compensation_steps_i32 = servo_offset_compensation_steps_local_i32;
               xSemaphoreGive(semaphore_resetServoPos);
             }
 
