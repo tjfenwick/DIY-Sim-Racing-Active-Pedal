@@ -66,7 +66,7 @@ void isv57communication::sendTunedServoParameters() {
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+1, 300);
 
   //modbus.holdingRegisterWrite(slaveId, pr_1_00+2, 300); // 1st time constant of velocity loop
-  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+2, 500);
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+2, 300);
 
   //modbus.holdingRegisterWrite(slaveId, pr_1_00+3, 15); // 1st filter of velocity detection
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+3, 15);
@@ -75,7 +75,7 @@ void isv57communication::sendTunedServoParameters() {
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+4, 150);
 
   //modbus.holdingRegisterWrite(slaveId, pr_1_00+10, 150); // velocity feed forward gain
-  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+10, 0);
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+10, 200);
 
   //modbus.holdingRegisterWrite(slaveId, pr_1_00+11, 6000); // velocity feed forward filter
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_1_00+11, 6000);

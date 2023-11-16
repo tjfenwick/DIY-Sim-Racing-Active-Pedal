@@ -74,10 +74,10 @@ namespace User.PluginSdkDemo
         //        DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(DAP_config_st));
         //        var ms = new MemoryStream(Encoding.UTF8.GetBytes(text));
         //        dap_config_st[indexOfSelectedPedal_u] = (DAP_config_st)deserializer.ReadObject(ms);
-        //        //TextBox1.Text = "Config loaded!";
-        //        //TextBox1.Text += ComboBox_JsonFileSelected.Text;
-        //        //TextBox1.Text += "    ";
-        //        //TextBox1.Text += ComboBox_JsonFileSelected.SelectedIndex;
+        //        //TextBox_debugOutput.Text = "Config loaded!";
+        //        //TextBox_debugOutput.Text += ComboBox_JsonFileSelected.Text;
+        //        //TextBox_debugOutput.Text += "    ";
+        //        //TextBox_debugOutput.Text += ComboBox_JsonFileSelected.SelectedIndex;
 
         //        updateTheGuiFromConfig();
 
@@ -86,7 +86,7 @@ namespace User.PluginSdkDemo
         //    {
 
         //        string errorMessage = caughtEx.Message;
-        //        TextBox1.Text = errorMessage;
+        //        TextBox_debugOutput.Text = errorMessage;
         //    }
 
 
@@ -127,10 +127,10 @@ namespace User.PluginSdkDemo
                 DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(DAP_config_st));
                 var ms = new MemoryStream(Encoding.UTF8.GetBytes(text));
                 dap_config_st[indexOfSelectedPedal_u] = (DAP_config_st)deserializer.ReadObject(ms);
-                TextBox1.Text = "Config loaded!"+ jsonFileName;
-                //TextBox1.Text += ComboBox_JsonFileSelected.Text;
-                //TextBox1.Text += "    ";
-                //TextBox1.Text += ComboBox_JsonFileSelected.SelectedIndex;
+                TextBox_debugOutput.Text = "Config loaded!"+ jsonFileName;
+                //TextBox_debugOutput.Text += ComboBox_JsonFileSelected.Text;
+                //TextBox_debugOutput.Text += "    ";
+                //TextBox_debugOutput.Text += ComboBox_JsonFileSelected.SelectedIndex;
 
                 updateTheGuiFromConfig();
 
@@ -139,7 +139,7 @@ namespace User.PluginSdkDemo
             {
 
                 string errorMessage = caughtEx.Message;
-                TextBox1.Text = errorMessage;
+                TextBox_debugOutput.Text = errorMessage;
             }
 
 
@@ -420,7 +420,7 @@ namespace User.PluginSdkDemo
             try
             {
                 SerialPortSelection.SelectedValue = tmp;
-                TextBox1.Text = "Serial port selected: " + SerialPortSelection.SelectedValue;
+                TextBox_debugOutput.Text = "Serial port selected: " + SerialPortSelection.SelectedValue;
 
             }
             catch (Exception caughtEx)
@@ -448,25 +448,25 @@ namespace User.PluginSdkDemo
 
 
             //    //SerialPortSelection.SelectedValue
-            //    //TextBox1.Text = "Error 2: ";
-            //    //TextBox1.Text += Plugin.Settings.selectedJsonFileNames[indexOfSelectedPedal_u];
-            //    //TextBox1.Text += "     ";
-            //    //TextBox1.Text += ComboBox_JsonFileSelected.SelectedValue;
+            //    //TextBox_debugOutput.Text = "Error 2: ";
+            //    //TextBox_debugOutput.Text += Plugin.Settings.selectedJsonFileNames[indexOfSelectedPedal_u];
+            //    //TextBox_debugOutput.Text += "     ";
+            //    //TextBox_debugOutput.Text += ComboBox_JsonFileSelected.SelectedValue;
             //}
             //catch (Exception caughtEx)
             //{
             //    string errorMessage = caughtEx.Message;
-            //    TextBox1.Text = "Error 1: ";
-            //    TextBox1.Text += errorMessage;
+            //    TextBox_debugOutput.Text = "Error 1: ";
+            //    TextBox_debugOutput.Text += errorMessage;
             //}
 
             //= ComboBox_JsonFileSelected.SelectedItem.ToString();
 
             //ConnectToPedal.IsChecked = true;
 
-            //TextBox1.Text = "Pedal selected: " + indexOfSelectedPedal_u;
-            //TextBox1.Text += ",    connected: " + ConnectToPedal.IsChecked;
-            //TextBox1.Text += ",    serial port name: " + tmp;
+            //TextBox_debugOutput.Text = "Pedal selected: " + indexOfSelectedPedal_u;
+            //TextBox_debugOutput.Text += ",    connected: " + ConnectToPedal.IsChecked;
+            //TextBox_debugOutput.Text += ",    serial port name: " + tmp;
 
         }
 
@@ -509,10 +509,10 @@ namespace User.PluginSdkDemo
             dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_b_4 = (float)b[4];
 
 
-            TextBox1.Text = "";
+            TextBox_debugOutput.Text = "";
             for (uint i = 0; i < a.Length; i++)
             {
-                TextBox1.Text += "\na[" + i + "]: " + a[i] + "      b[" + i + "]: " + b[i];
+                TextBox_debugOutput.Text += "\na[" + i + "]: " + a[i] + "      b[" + i + "]: " + b[i];
             }
 
 
@@ -624,14 +624,14 @@ namespace User.PluginSdkDemo
                 { 
                     TestAbs.IsChecked= true;
                     Plugin.sendAbsSignal = (bool)TestAbs.IsChecked;
-                    TextBox1.Text = "ABS-Test begin";
+                    TextBox_debugOutput.Text = "ABS-Test begin";
                 }
                 else
                 {
                     TestAbs.IsChecked = false;
                     //Plugin.sendAbsSignal = !Plugin.sendAbsSignal;
                     Plugin.sendAbsSignal = (bool)TestAbs.IsChecked;
-                    TextBox1.Text = "ABS-Test stopped";
+                    TextBox_debugOutput.Text = "ABS-Test stopped";
                 }
         }
 
@@ -724,7 +724,7 @@ namespace User.PluginSdkDemo
 
         //        // string stringValue = ComboBox_JsonFileSelected.SelectedValue.ToString();
 
-        //        //TextBox1.Text = stringValue;
+        //        //TextBox_debugOutput.Text = stringValue;
         //        Plugin.Settings.selectedJsonFileNames[indexOfSelectedPedal_u] = stringValue;
 
         //        Plugin.Settings.selectedJsonIndexLast[indexOfSelectedPedal_u] = ComboBox_JsonFileSelected.SelectedIndex;
@@ -737,7 +737,7 @@ namespace User.PluginSdkDemo
         //    {
 
         //        string errorMessage = caughtEx.Message;
-        //        TextBox1.Text = errorMessage;
+        //        TextBox_debugOutput.Text = errorMessage;
         //    }
         //}
 
@@ -776,14 +776,14 @@ namespace User.PluginSdkDemo
 
 
         //        System.IO.File.WriteAllText(fileName, jsonString);
-        //        TextBox1.Text = "Config exported!";
+        //        TextBox_debugOutput.Text = "Config exported!";
 
         //    }
         //    catch (Exception caughtEx)
         //    {
 
         //        string errorMessage = caughtEx.Message;
-        //        TextBox1.Text = errorMessage;
+        //        TextBox_debugOutput.Text = errorMessage;
         //    }
 
         //}
@@ -822,7 +822,7 @@ namespace User.PluginSdkDemo
                 catch (Exception caughtEx)
                 {
                     string errorMessage = caughtEx.Message;
-                    TextBox1.Text = errorMessage;
+                    TextBox_debugOutput.Text = errorMessage;
                 }
 
 
@@ -842,12 +842,12 @@ namespace User.PluginSdkDemo
 
 
         /********************************************************************************************************************/
-        /*							Refind min endstop																		*/
+        /*							System identification																	*/
         /********************************************************************************************************************/
         public void StartSystemIdentification_click(object sender, RoutedEventArgs e)
         {
 
-            TextBox1.Text = "Start system identification";
+            TextBox_debugOutput.Text = "Start system identification";
 
 
             try
@@ -889,7 +889,7 @@ namespace User.PluginSdkDemo
 
                 }
 
-                TextBox1.Text = "Finished system identification";
+                TextBox_debugOutput.Text = "Finished system identification";
 
 
                 ////// trigger system identification
@@ -914,9 +914,31 @@ namespace User.PluginSdkDemo
             catch (Exception caughtEx)
             {
                 string errorMessage = caughtEx.Message;
-                TextBox1.Text = errorMessage;
+                TextBox_debugOutput.Text = errorMessage;
             }
 
+        }
+
+
+
+
+        /********************************************************************************************************************/
+        /*							Serial monitor update																	*/
+        /********************************************************************************************************************/
+        public void SerialMonitorRead_click(object sender, RoutedEventArgs e)
+        {
+
+            // read system return log
+            try
+            {
+                while (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0)
+                {
+                    string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
+
+                    TextBox_serialMonitor.Text += message;
+                }
+            }
+            catch (TimeoutException) { }
         }
 
 
@@ -936,7 +958,7 @@ namespace User.PluginSdkDemo
                 this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum = checksumCalc(p, sizeof(payloadPedalConfig));
 
 
-                TextBox1.Text = "CRC simhub calc: " + this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum + "    ";
+                TextBox_debugOutput.Text = "CRC simhub calc: " + this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum + "    ";
 
 
                 try
@@ -944,19 +966,26 @@ namespace User.PluginSdkDemo
                     this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.version = (byte)pedalConfigPayload_version;
                     this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.storeToEeprom = true;
                     int length = sizeof(DAP_config_st);
-                    int val = this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum;
-                    string msg = "CRC value: " + val.ToString();
+                    //int val = this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum;
+                    //string msg = "CRC value: " + val.ToString();
                     byte[] newBuffer = new byte[length];
                     newBuffer = getBytes(this.dap_config_st[indexOfSelectedPedal_u]);
+
+                    // clear inbuffer 
+                    Plugin._serialPort[indexOfSelectedPedal_u].DiscardInBuffer();
+
+                    // send data
                     Plugin._serialPort[indexOfSelectedPedal_u].Write(newBuffer, 0, newBuffer.Length);
                     //Plugin._serialPort[indexOfSelectedPedal_u].Write("\n");
                 }
                 catch (Exception caughtEx)
                 {
                     string errorMessage = caughtEx.Message;
-                    TextBox1.Text = errorMessage;
+                    TextBox_debugOutput.Text = errorMessage;
                 }
 
+
+                
                 System.Threading.Thread.Sleep(100);
                 try
                 {
@@ -964,7 +993,9 @@ namespace User.PluginSdkDemo
                     {
                         string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
 
-                        TextBox1.Text += "      -->   " + message;
+                        TextBox_debugOutput.Text += message;
+
+
                     }
                 }
                 catch (TimeoutException) { }
@@ -992,7 +1023,7 @@ namespace User.PluginSdkDemo
                     try
                     {
                         Plugin._serialPort[indexOfSelectedPedal_u].Open();
-                        TextBox1.Text = "Serialport open";
+                        TextBox_debugOutput.Text = "Serialport open";
                         ConnectToPedal.IsChecked = true;
 
                         try
@@ -1007,7 +1038,7 @@ namespace User.PluginSdkDemo
                     }
                     catch (Exception ex)
                     {
-                        TextBox1.Text = ex.Message;
+                        TextBox_debugOutput.Text = ex.Message;
                         ConnectToPedal.IsChecked = false;
                     }
 
@@ -1016,14 +1047,14 @@ namespace User.PluginSdkDemo
                 {
                     Plugin._serialPort[indexOfSelectedPedal_u].Close();
                     ConnectToPedal.IsChecked = false;
-                    TextBox1.Text = "Serialport already open, close it";
+                    TextBox_debugOutput.Text = "Serialport already open, close it";
                 }
             }
             else
             {
                 ConnectToPedal.IsChecked = false;
                 Plugin._serialPort[indexOfSelectedPedal_u].Close();
-                TextBox1.Text = "Serialport close";
+                TextBox_debugOutput.Text = "Serialport close";
             }
 
         }
@@ -1044,12 +1075,12 @@ namespace User.PluginSdkDemo
 
             //try 
             //{
-            //    TextBox1.Text = "Debug: " + Plugin.Settings.selectedComPortNames[indexOfSelectedPedal_u];
+            //    TextBox_debugOutput.Text = "Debug: " + Plugin.Settings.selectedComPortNames[indexOfSelectedPedal_u];
             //}
             //catch (Exception caughtEx)
             //{
             //    string errorMessage = caughtEx.Message;
-            //    TextBox1.Text = errorMessage;
+            //    TextBox_debugOutput.Text = errorMessage;
             //}
 
             try
@@ -1057,12 +1088,12 @@ namespace User.PluginSdkDemo
                 Plugin.Settings.selectedComPortNames[indexOfSelectedPedal_u] = tmp;
                 Plugin._serialPort[indexOfSelectedPedal_u].PortName = tmp;
 
-                TextBox1.Text = "COM port selected: " + Plugin.Settings.selectedComPortNames[indexOfSelectedPedal_u];
+                TextBox_debugOutput.Text = "COM port selected: " + Plugin.Settings.selectedComPortNames[indexOfSelectedPedal_u];
             }
             catch (Exception caughtEx)
             {
                 string errorMessage = caughtEx.Message;
-                TextBox1.Text = errorMessage;
+                TextBox_debugOutput.Text = errorMessage;
             }
 
 
@@ -1083,16 +1114,16 @@ namespace User.PluginSdkDemo
                     string filePath = openFileDialog.FileName;
                     string text1 = System.IO.File.ReadAllText(filePath);
                     string content = (string)openFileDialog.FileName;
-                    TextBox1.Text = content;
+                    TextBox_debugOutput.Text = content;
                     DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(DAP_config_st));
                     var ms = new MemoryStream(Encoding.UTF8.GetBytes(text1));
                     dap_config_st[indexOfSelectedPedal_u] = (DAP_config_st)deserializer.ReadObject(ms);
-                    //TextBox1.Text = "Config loaded!";
-                    //TextBox1.Text += ComboBox_JsonFileSelected.Text;
-                    //TextBox1.Text += "    ";
-                    //TextBox1.Text += ComboBox_JsonFileSelected.SelectedIndex;
+                    //TextBox_debugOutput.Text = "Config loaded!";
+                    //TextBox_debugOutput.Text += ComboBox_JsonFileSelected.Text;
+                    //TextBox_debugOutput.Text += "    ";
+                    //TextBox_debugOutput.Text += ComboBox_JsonFileSelected.SelectedIndex;
                     updateTheGuiFromConfig();
-                    TextBox1.Text = "Config new imported!";
+                    TextBox_debugOutput.Text = "Config new imported!";
                     TextBox2.Text = "Open "+openFileDialog.FileName;
                 }
             }
@@ -1133,7 +1164,7 @@ namespace User.PluginSdkDemo
 
 
                 System.IO.File.WriteAllText(fileName, jsonString);
-                TextBox1.Text = "Config new exported!";
+                TextBox_debugOutput.Text = "Config new exported!";
                 TextBox2.Text = "Save " + saveFileDialog.FileName;
                 }
             }
@@ -1145,13 +1176,13 @@ namespace User.PluginSdkDemo
             {
                 Plugin._serialPort[indexOfSelectedPedal_u].Close();
                 ConnectToPedal.IsChecked = false;
-                TextBox1.Text = "Serialport close";
+                TextBox_debugOutput.Text = "Serialport close";
             }           
             else
             {
                 ConnectToPedal.IsChecked = false;
                 Plugin._serialPort[indexOfSelectedPedal_u].Close();
-                TextBox1.Text = "Not Checked Serialport close";
+                TextBox_debugOutput.Text = "Not Checked Serialport close";
             }
 
         }

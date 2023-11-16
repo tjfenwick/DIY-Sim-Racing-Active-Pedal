@@ -275,6 +275,7 @@ namespace User.PluginSdkDemo
             // Declare an event
             this.AddEvent("SpeedWarning");
 
+
             // Declare an action which can be called
             this.AddAction("IncrementSpeedWarning",(a, b) =>
             {
