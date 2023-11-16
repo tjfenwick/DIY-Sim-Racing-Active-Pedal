@@ -476,7 +476,7 @@ void pedalUpdateTask( void * pvParameters )
       else
       {
         semaphore_updateConfig = xSemaphoreCreateMutex();
-        Serial.println("semaphore_updateConfig == 0");
+        //Serial.println("semaphore_updateConfig == 0");
       }
     }
 
@@ -645,7 +645,7 @@ void pedalUpdateTask( void * pvParameters )
     else
     {
       semaphore_updateJoystick = xSemaphoreCreateMutex();
-      Serial.println("semaphore_updateJoystick == 0");
+      //Serial.println("semaphore_updateJoystick == 0");
     }
 
     #ifdef PRINT_USED_STACK_SIZE
@@ -798,10 +798,10 @@ void serialCommunicationTask( void * pvParameters )
           joystickNormalizedToInt32_local = joystickNormalizedToInt32;
           xSemaphoreGive(semaphore_updateJoystick);
         }
-        else
-        {
-          Serial.println("semaphore_updateJoystick == 0");
-        }
+        //else
+        //{
+          //Serial.println("semaphore_updateJoystick == 0");
+        //}
       }
       SetControllerOutputValue(joystickNormalizedToInt32_local);
     }
@@ -940,7 +940,7 @@ void servoCommunicationTask( void * pvParameters )
           else
           {
             semaphore_resetServoPos = xSemaphoreCreateMutex();
-            Serial.println("semaphore_resetServoPos == 0");
+            //Serial.println("semaphore_resetServoPos == 0");
           }
 
 
