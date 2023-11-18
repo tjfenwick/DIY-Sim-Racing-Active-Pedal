@@ -116,7 +116,20 @@ void StepperWithLimits::findMinMaxSensorless(isv57communication * isv57)
 
   _limitMax = _stepper->getCurrentPosition();
 
+  // reduce speed and accelerartion
+  _stepper->setSpeedInHz(MAXIMUM_STEPPER_SPEED / 4);
+  _stepper->setAcceleration(MAXIMUM_STEPPER_ACCELERATION / 4);
+
+  // move to min
   _stepper->moveTo(_posMin, true);
+
+  // increase speed and accelerartion
+  _stepper->setAcceleration(MAXIMUM_STEPPER_ACCELERATION);
+  _stepper->setSpeedInHz(MAXIMUM_STEPPER_SPEED);
+
+
+
+
 #if defined(SUPPORT_ESP32_PULSE_COUNTER)
   _stepper->clearPulseCounter();
 #endif
