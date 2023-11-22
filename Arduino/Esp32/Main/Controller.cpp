@@ -61,9 +61,19 @@ static const int16_t JOYSTICK_RANGE = JOYSTICK_MAX_VALUE - JOYSTICK_MIN_VALUE;
 
   void SetControllerOutputValue(int32_t value) {
     //bleGamepad.setBrake(value);
-    bleGamepad.setAxes(value, 0, 0, 0, 0, 0, 0, 0);
-    bleGamepad.sendReport();
-    //Serial.println(value);
+
+    if (bleGamepad.isConnected() )
+    {
+      bleGamepad.setAxes(value, 0, 0, 0, 0, 0, 0, 0);
+      bleGamepad.sendReport();
+    }
+    else
+    {
+      Serial.println("BLE not connected!");
+      delay(500);
+    }
+    
+    
   }
   
 #endif
