@@ -69,6 +69,7 @@
             <!-- send config buttons -->
             <styles:SHButtonPrimary Click="ResetPedalPosition_click" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0" Width="180" >Reset pedal position</styles:SHButtonPrimary>
             <styles:SHButtonPrimary Click="SendConfigToPedal_click" HorizontalAlignment="Left" Grid.Row="3"  Grid.Column="0" Width="180" >Send config to pedal</styles:SHButtonPrimary>
+            <styles:SHButtonPrimary Click="ReadConfigFromPedal_click" HorizontalAlignment="Left" Grid.Row="4"  Grid.Column="0" Width="180" >Read config from pedal</styles:SHButtonPrimary>
 
             <!-- read/write config from/to JSON file buttons -->
             <!--<styles:SHButtonPrimary Click="SaveStructToJson_click" HorizontalAlignment="Left" Grid.Row="4"  Grid.Column="1" Width="180" >Save config to JSON</styles:SHButtonPrimary>-->

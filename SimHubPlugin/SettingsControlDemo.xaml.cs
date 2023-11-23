@@ -247,6 +247,23 @@ namespace User.PluginSdkDemo
         }
 
 
+        public DAP_config_st getConfigFromBytes(byte[] myBuffer)
+        {
+            DAP_config_st aux;
+
+            // see https://stackoverflow.com/questions/31045358/how-do-i-copy-bytes-into-a-struct-variable-in-c
+            int size = Marshal.SizeOf(typeof(DAP_config_st));
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+
+            Marshal.Copy(myBuffer, 0, ptr, size);
+
+            aux = (DAP_config_st)Marshal.PtrToStructure(ptr, typeof(DAP_config_st));
+            Marshal.FreeHGlobal(ptr);
+
+            return aux;
+        }
+
+
         unsafe private UInt16 checksumCalc(byte* data, int length)
         {
 
@@ -992,11 +1009,69 @@ namespace User.PluginSdkDemo
                     while (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0)
                     {
                         string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
-
                         TextBox_debugOutput.Text += message;
 
-
                     }
+                }
+                catch (TimeoutException) { }
+
+
+
+            }
+        }
+
+
+
+
+        /********************************************************************************************************************/
+        /*							Read config from pedal																	*/
+        /********************************************************************************************************************/
+        unsafe public void ReadConfigFromPedal_click(object sender, RoutedEventArgs e)
+        {
+            if (Plugin._serialPort[indexOfSelectedPedal_u].IsOpen)
+            {
+
+                // send query command
+                Plugin._serialPort[indexOfSelectedPedal_u].DiscardInBuffer();
+                Plugin._serialPort[indexOfSelectedPedal_u].Write("4");
+                
+                // wait for response
+                System.Threading.Thread.Sleep(100);
+
+                try
+                {
+                    int length = sizeof(DAP_config_st);
+                    byte[] newBuffer = new byte[length];
+
+                    if (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead == length)
+                    {
+                        Plugin._serialPort[indexOfSelectedPedal_u].Read(newBuffer, 0, length);
+                        DAP_config_st pedalConfig_read_st = getConfigFromBytes(newBuffer);
+
+                        // check CRC
+                        payloadPedalConfig tmp = pedalConfig_read_st.payloadPedalConfig_;
+                        payloadPedalConfig* v = &tmp;
+                        byte* p = (byte*)v;
+
+                        if (checksumCalc(p, sizeof(payloadPedalConfig)) == pedalConfig_read_st.payloadHeader_.checkSum)
+                        {
+                            this.dap_config_st[indexOfSelectedPedal_u] = pedalConfig_read_st;
+                            updateTheGuiFromConfig();
+                            TextBox_debugOutput.Text = "Read config from pedal successful!";
+                        }
+                        else
+                        {
+                            TextBox_debugOutput.Text = "CRC mismatch!";
+                        }
+                    }
+                    else 
+                    {
+                        TextBox_debugOutput.Text = "Data size mismatch!";
+                    }
+
+                    
+                    
+
                 }
                 catch (TimeoutException) { }
 

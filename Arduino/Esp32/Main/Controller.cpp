@@ -54,6 +54,8 @@ static const int16_t JOYSTICK_RANGE = JOYSTICK_MAX_VALUE - JOYSTICK_MIN_VALUE;
     bleGamepadConfig.setButtonCount(0);
     bleGamepadConfig.setHatSwitchCount(0);
     bleGamepadConfig.setAutoReport(false);
+    bleGamepadConfig.setPid(chip); // product id
+
     bleGamepad.begin(&bleGamepadConfig);
   }
 

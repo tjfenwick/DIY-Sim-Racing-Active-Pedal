@@ -779,6 +779,11 @@ void serialCommunicationTask( void * pvParameters )
             Serial.println("Start system identification");
             systemIdentificationMode_b = true;
             break;
+          case 4:
+            DAP_config_st * dap_config_st_local_ptr;
+            dap_config_st_local_ptr = &dap_config_st;
+            Serial.write((char*)dap_config_st_local_ptr, sizeof(DAP_config_st));
+            break;
 
           default:
             Serial.println("Default case:");
