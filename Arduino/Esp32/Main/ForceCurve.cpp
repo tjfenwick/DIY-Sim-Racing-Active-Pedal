@@ -32,8 +32,8 @@ float ForceCurve_Interpolated::EvalForceCubicSpline(const DAP_config_st* config_
   yOrig[4] = config_st->payLoadPedalConfig_.relativeForce_p080;
   yOrig[5] = config_st->payLoadPedalConfig_.relativeForce_p100;
 
-  double dx = 1.0f;
-  double t = (splineSegment_fl32 - (float)splineSegment_u8) / dx;
+  //double dx = 1.0f;
+  double t = (splineSegment_fl32 - (float)splineSegment_u8);// / dx;
   double y = (1 - t) * yOrig[splineSegment_u8] + t * yOrig[splineSegment_u8 + 1] + t * (1 - t) * (a * (1 - t) + b * t);
 
   y = calc_st->Force_Min + y / 100.0f * calc_st->Force_Range;
@@ -48,10 +48,12 @@ float ForceCurve_Interpolated::EvalForceCubicSpline(const DAP_config_st* config_
 /*                                                                                            */
 /**********************************************************************************************/
 
-float ForceCurve_Interpolated::EvalForceGradientCubicSpline(const DAP_config_st* config_st, const DAP_calculationVariables_st* calc_st, float fractionalPos)
+float ForceCurve_Interpolated::EvalForceGradientCubicSpline(const DAP_config_st* config_st, const DAP_calculationVariables_st* calc_st, float fractionalPos, bool normalized_b)
 {
 
-  float splineSegment_fl32 = fractionalPos * 5;
+  float fractionalPos_lcl = constrain(fractionalPos, 0, 1);
+
+  float splineSegment_fl32 = fractionalPos_lcl * 5;
   uint8_t splineSegment_u8 = (uint8_t)floor(splineSegment_fl32);
   
   if (splineSegment_u8 < 0){splineSegment_u8 = 0;}
@@ -69,17 +71,20 @@ float ForceCurve_Interpolated::EvalForceGradientCubicSpline(const DAP_config_st*
 
 
 
-  double Delta_x_orig = 100; 
-  double dx = Delta_x_orig / NUMBER_OF_SPLINE_SEGMENTS;
-  double t = (splineSegment_fl32 - (float)splineSegment_u8) / dx;
-  double dy = yOrig[splineSegment_u8 + 1] - yOrig[splineSegment_u8];
+  double Delta_x_orig = 100; // total horizontal range [0,100]
+  double dx = Delta_x_orig / NUMBER_OF_SPLINE_SEGMENTS; // spline segment horizontal range
+  double t = (splineSegment_fl32 - (float)splineSegment_u8); // relative position in spline segment [0, 1]
+  double dy = yOrig[splineSegment_u8 + 1] - yOrig[splineSegment_u8]; // spline segment vertical range
   double y_prime = dy / dx + (1 - 2 * t) * (a * (1 - t) + b * t) / dx + t * (1 - t) * (b - a) / dx;
 
   // when the spline was identified, x and y were givin in the unit of percent --> 0-100
-  // --> conversion of the gradient to the proper axis scling is performed
-  double d_y_scale = calc_st->Force_Range / 100.0;
-  double d_x_scale = 100.0 / calc_st->stepperPosRange;
-  y_prime *= d_x_scale * d_y_scale;
+  // --> conversion of the gradient to the proper axis scaling is performed
+  if (normalized_b == false)
+  {
+    double d_y_scale = calc_st->Force_Range / 100.0;
+    double d_x_scale = 100.0 / calc_st->stepperPosRange;
+    y_prime *= d_x_scale * d_y_scale;
+  }
 
   return y_prime;
 }

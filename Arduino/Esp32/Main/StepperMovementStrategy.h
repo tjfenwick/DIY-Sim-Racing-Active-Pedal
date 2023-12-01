@@ -15,6 +15,7 @@ float Setpoint, Input, Output;
 
 //Specify the links and initial tuning parameters
 double Kp=0.3, Ki=50.0, Kd=0.000;
+uint8_t control_strategy_u8 = 0;
 QuickPID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd,  /* OPTIONS */
                myPID.pMode::pOnError,                   /* pOnError, pOnMeas, pOnErrorMeas */
                myPID.dMode::dOnMeas,                    /* dOnError, dOnMeas */
@@ -32,7 +33,7 @@ bool pidWasInitialized = false;
 int32_t MoveByInterpolatedStrategy(float filteredLoadReadingKg, float stepperPosFraction, ForceCurve_Interpolated* forceCurve, const DAP_calculationVariables_st* calc_st, const DAP_config_st* config_st) {
   float spingStiffnessInv_lcl = calc_st->springStiffnesssInv;
   //float springStiffnessInterp = forceCurve->stiffnessAtPosition(stepperPosFraction);
-  float springStiffnessInterp = forceCurve->EvalForceGradientCubicSpline(config_st, calc_st, stepperPosFraction);
+  float springStiffnessInterp = forceCurve->EvalForceGradientCubicSpline(config_st, calc_st, stepperPosFraction, false);
 
   
   if (springStiffnessInterp > 0) {
@@ -56,6 +57,12 @@ int32_t MoveByInterpolatedStrategy(float filteredLoadReadingKg, float stepperPos
 
 void tunePidValues(DAP_config_st& config_st)
 {
+  Kp=config_st.payLoadPedalConfig_.PID_p_gain;
+  Ki=config_st.payLoadPedalConfig_.PID_i_gain;
+  Kd=config_st.payLoadPedalConfig_.PID_d_gain;
+
+  control_strategy_u8 = config_st.payLoadPedalConfig_.control_strategy_b;
+
   myPID.SetTunings(config_st.payLoadPedalConfig_.PID_p_gain, config_st.payLoadPedalConfig_.PID_i_gain, config_st.payLoadPedalConfig_.PID_d_gain);
 }
 
@@ -80,6 +87,36 @@ int32_t MoveByPidStrategy(float loadCellReadingKg, float stepperPosFraction, Ste
 
 
   float loadCellTargetKg = forceCurve->EvalForceCubicSpline(config_st, calc_st, stepperPosFraction);
+
+
+  if (control_strategy_u8 == 1) // dynamic PID parameters depending on force curve gradient
+  {
+    float gradient_orig_fl32 = forceCurve->EvalForceGradientCubicSpline(config_st, calc_st, stepperPosFraction, true); // determine gradient to modify the PID gain. The steeper the gradient, the less gain should be used
+
+    // normalize gradient
+    float gradient_fl32 = gradient_orig_fl32;
+    float gradient_abs_fl32 = fabs(gradient_fl32);
+
+    float gain_modifier_fl32 = 10.0;
+    if (gradient_abs_fl32 > 1e-5)
+    {
+       gain_modifier_fl32 = 1.0 / pow( gradient_abs_fl32 , 1);
+    }
+    gain_modifier_fl32 = constrain( gain_modifier_fl32, 0.1, 10);
+
+//#define PRINT_PID_DYNAMIC_PARAMETERS
+#ifdef PRINT_PID_DYNAMIC_PARAMETERS
+    {
+      static RTDebugOutput<float, 5> rtDebugFilter({ "gradient_orig_fl32", "gradient_fl32", "gain_modifier_fl32", "KP_default", "KP_mod"});
+      rtDebugFilter.offerData({ gradient_orig_fl32, gradient_fl32, gain_modifier_fl32, Kp, gain_modifier_fl32 * Kp}); 
+    }
+#endif
+
+    myPID.SetTunings(gain_modifier_fl32 * Kp, gain_modifier_fl32 * Ki, Kd);
+  }
+    
+
+
   loadCellTargetKg -=absForceOffset_fl32;
   
   // ToDO

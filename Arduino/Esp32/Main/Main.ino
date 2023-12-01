@@ -579,13 +579,15 @@ void pedalUpdateTask( void * pvParameters )
 
     // use interpolation to determine local linearized spring stiffness
     double stepperPosFraction = stepper->getCurrentPositionFraction();
+    //double stepperPosFraction2 = stepper->getCurrentPositionFractionFromExternalPos( -(int32_t)(isv57.servo_pos_given_p + isv57.servo_pos_error_p - isv57.getZeroPos()) );
     //int32_t Position_Next = MoveByInterpolatedStrategy(filteredReading, stepperPosFraction, &forceCurve, &dap_calculationVariables_st, &dap_config_st);
     int32_t Position_Next = MoveByPidStrategy(filteredReading, stepperPosFraction, stepper, &forceCurve, &dap_calculationVariables_st, &dap_config_st, absForceOffset_fl32);
 
+
     //#define DEBUG_STEPPER_POS
     #ifdef DEBUG_STEPPER_POS
-      static RTDebugOutput<int32_t, 3> rtDebugFilter({ "ESP_pos", "ESP_tar_pos", "ISV_pos"});
-      rtDebugFilter.offerData({ stepper->getCurrentPositionSteps(), Position_Next, -(int32_t)isv57.servo_pos_given_p});
+      static RTDebugOutput<int32_t, 5> rtDebugFilter({ "ESP_pos", "ESP_tar_pos", "ISV_pos", "frac1", "frac2"});
+      rtDebugFilter.offerData({ stepper->getCurrentPositionSteps(), Position_Next, -(int32_t)(isv57.servo_pos_given_p + isv57.servo_pos_error_p - isv57.getZeroPos()), (int32_t)(stepperPosFraction * 10000.), (int32_t)(stepperPosFraction2 * 10000.)});
     #endif
 
     
@@ -638,7 +640,8 @@ void pedalUpdateTask( void * pvParameters )
     if(semaphore_updateJoystick!=NULL)
     {
       if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE) {
-        joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
+        joystickNormalizedToInt32 = NormalizeControllerOutputValue(loadcellReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
+        //joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
         xSemaphoreGive(semaphore_updateJoystick);
       }
     }
@@ -837,7 +840,8 @@ void servoCommunicationTask( void * pvParameters )
     if (isv57LifeSignal_b)
     {
 
-        delay(20);
+        //delay(5);
+        isv57.readServoStates();
         
 
         int32_t servo_offset_compensation_steps_local_i32 = 0;
@@ -853,7 +857,7 @@ void servoCommunicationTask( void * pvParameters )
 
         if (cond_2 == true)
         {
-          isv57.readServoStates();
+          //isv57.readServoStates();
           int16_t servoPos_now_i16 = isv57.servo_pos_given_p;
           timeNow_l = millis();
 

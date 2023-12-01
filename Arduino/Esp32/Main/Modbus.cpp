@@ -16,8 +16,8 @@ bool Modbus::init(int mode, bool en_log)
 {
      this->mode_ =  mode;
      this->log   =  en_log;
-     pinMode(mode_,OUTPUT);
-     digitalWrite(mode_, 0);  
+     //pinMode(mode_,OUTPUT);
+     //digitalWrite(mode_, 0);  
      
      return true;
 }
@@ -192,12 +192,12 @@ int Modbus::requestFrom(int slaveId, int type, int address,int nb)
             Serial.print("\t");
      }
 
-    digitalWrite(mode_,1);
-    delay(1);
+    //digitalWrite(mode_,1);
+    //delay(1);
     this->s->write(txout,8);
     this->s->flush();
-    digitalWrite(mode_,0);
-    delay(1);
+    //digitalWrite(mode_,0);
+    //delay(1);
     uint32_t t = millis();
     lenRx   = 0;
     datalen = 0;

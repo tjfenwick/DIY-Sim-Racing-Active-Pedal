@@ -84,6 +84,8 @@ public struct payloadPedalConfig
     public float PID_i_gain;
     public float PID_d_gain;
 
+    public byte control_strategy_b;
+
     public byte maxGameOutput;
 
     // Kalman filter model noise
@@ -354,7 +356,7 @@ namespace User.PluginSdkDemo
 
 
             dap_config_initial_st.payloadHeader_.payloadType = 100;
-            dap_config_initial_st.payloadHeader_.version = 106;
+            dap_config_initial_st.payloadHeader_.version = 107;
             dap_config_initial_st.payloadHeader_.storeToEeprom = false;
             dap_config_initial_st.payloadPedalConfig_.pedalStartPosition = 35;
             dap_config_initial_st.payloadPedalConfig_.pedalEndPosition = 80;
@@ -393,6 +395,8 @@ namespace User.PluginSdkDemo
             dap_config_initial_st.payloadPedalConfig_.PID_p_gain = 0.3f;
             dap_config_initial_st.payloadPedalConfig_.PID_i_gain = 50.0f;
             dap_config_initial_st.payloadPedalConfig_.PID_d_gain = 0.0f;
+
+            dap_config_initial_st.payloadPedalConfig_.control_strategy_b = 0;
 
 
         }

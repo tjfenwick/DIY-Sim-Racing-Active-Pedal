@@ -3,7 +3,7 @@
 
 
 // these are physical properties of the stepper
-static const uint32_t MAXIMUM_STEPPER_RPM = 7000;     
+static const uint32_t MAXIMUM_STEPPER_RPM = 4000;     
 static const uint32_t STEPS_PER_MOTOR_REVOLUTION = 1600;
 static const uint32_t MAXIMUM_STEPPER_SPEED = (MAXIMUM_STEPPER_RPM * STEPS_PER_MOTOR_REVOLUTION) / 60;   // steps/s
 static const int32_t MAXIMUM_STEPPER_ACCELERATION = 1e10;                                                 // steps/s²
@@ -36,6 +36,7 @@ public:
 public:
   int32_t getCurrentPositionSteps() const;
   double getCurrentPositionFraction() const;
+  double getCurrentPositionFractionFromExternalPos(int32_t extPos_i32) const;
   int32_t getTargetPositionSteps() const;
 
 public:

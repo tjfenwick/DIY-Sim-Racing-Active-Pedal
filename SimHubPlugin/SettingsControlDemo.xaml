@@ -5,8 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:User.PluginSdkDemo"
              xmlns:styles="clr-namespace:SimHub.Plugins.Styles;assembly=SimHub.Plugins" mc:Ignorable="d" 
-             xmlns:ui="clr-namespace:SimHub.Plugins.UI;assembly=SimHub.Plugins" 
-             d:DesignHeight="900" d:DesignWidth="1400">
+             xmlns:ui="clr-namespace:SimHub.Plugins.UI;assembly=SimHub.Plugins" Height="1016" Width="1296">
 
 
 
@@ -688,6 +687,37 @@
             <TextBox x:Name="TextBox2" Grid.Column="1" HorizontalAlignment="Left" Margin="7,36,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="373" AutomationProperties.Name="TextBox2" Height="46" Grid.RowSpan="2"/>
             <Button Content="Test-ABS/TC" Margin="27,54,0,0" Grid.Row="6" VerticalAlignment="Top" Click="TestAbs_click" Height="20" Background="#FF050550" HorizontalAlignment="Left" FontWeight="Bold" FontSize="9"/>
             <styles:SHButtonSecondary Click="DisconnectToPedal_click" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0" Width="120" Margin="200,35,0,29" FontSize="10" Background="Red" Content="Disconnect from Pedal" Grid.RowSpan="2" />
+            <TextBlock HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="4,132,0,0" 
+                Text="Control strategy:" 
+                Grid.Row="11" 
+                Grid.Column="0" 
+                Width="120" 
+                Foreground="White"/>
+            <Slider x:Name="PID_tuning_control_strategy_slider" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Grid.Row="11" 
+                Width="240" 
+                ValueChanged="PID_tuning_control_strategy_changed" 
+                AutoToolTipPlacement="TopLeft" 
+                AutoToolTipPrecision="0"
+                Minimum="0"
+                Maximum="1"
+                TickPlacement="BottomRight"
+                TickFrequency="1" RenderTransformOrigin="0.508,0.525"
+                Value="0"
+                IsSnapToTickEnabled="False" Margin="110,132,0,0" Height="16"
+            />
+            <TextBlock HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="124,148,0,0" 
+                Text="0: conventional PID, 1: dynamic PID" 
+                Grid.Row="11" 
+                Grid.Column="0" 
+                Width="257" 
+                Foreground="White" Height="37"/>
 
 
 

@@ -53,6 +53,8 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.PID_i_gain = 50.0;
   payLoadPedalConfig_.PID_d_gain = 0.0;
 
+  payLoadPedalConfig_.control_strategy_b = 0;
+
   payLoadPedalConfig_.maxGameOutput = 100;
 
   payLoadPedalConfig_.kf_modelNoise = 128;

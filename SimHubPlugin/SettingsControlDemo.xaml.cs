@@ -33,7 +33,7 @@ namespace User.PluginSdkDemo
     {
 
 
-        public uint pedalConfigPayload_version = 106;
+        public uint pedalConfigPayload_version = 107;
 
         public uint indexOfSelectedPedal_u = 1;
 
@@ -210,6 +210,8 @@ namespace User.PluginSdkDemo
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_p_gain = 0.3f;
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_i_gain = 50.0f;
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_d_gain = 0.0f;
+
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.control_strategy_b = 0;
 
                 InitializeComponent();
 
@@ -423,6 +425,8 @@ namespace User.PluginSdkDemo
             PID_tuning_P_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_p_gain;
             PID_tuning_I_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_i_gain;
             PID_tuning_D_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_d_gain;
+
+            PID_tuning_control_strategy_slider.Value = (byte)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.control_strategy_b;
 
 
             maxGameOutput_slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput;
@@ -711,6 +715,14 @@ namespace User.PluginSdkDemo
         {
             dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_d_gain = (float)e.NewValue;
         }
+
+        public void PID_tuning_control_strategy_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.control_strategy_b = (byte)e.NewValue;
+        }
+
+
+        
 
 
         public void maxGameOutput_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
