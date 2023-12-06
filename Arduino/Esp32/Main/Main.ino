@@ -840,8 +840,8 @@ void servoCommunicationTask( void * pvParameters )
     if (isv57LifeSignal_b)
     {
 
-        //delay(5);
-        isv57.readServoStates();
+        delay(20);
+        //isv57.readServoStates();
         
 
         int32_t servo_offset_compensation_steps_local_i32 = 0;
@@ -857,7 +857,7 @@ void servoCommunicationTask( void * pvParameters )
 
         if (cond_2 == true)
         {
-          //isv57.readServoStates();
+          isv57.readServoStates();
           int16_t servoPos_now_i16 = isv57.servo_pos_given_p;
           timeNow_l = millis();
 

@@ -121,7 +121,7 @@ The SimHub plugin was designed to communicate with the ESP to (a) modify the ped
 
 ![image](SimHubPlugin/Images/SimHubPluginOverview.png)
 
-To install the plugin, I copied the plugin [binaries](SimHubPlugin/bin) content to my SimHub directory, e.g. C:/Program Files (x86)/SimHub
+To install the plugin, the plugin [binaries](https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal/releases), hidden inside the SimHub_plugin.zip, have to be copied to the SimHub directory, e.g. C:/Program Files (x86)/SimHub
 
 # Steps after flashing the firmware
 The pedal will not move initially after flashing. One has to open the SimHub plugin, connect to the pedal and send a config with non-zero PID values.
