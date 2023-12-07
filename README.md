@@ -73,11 +73,10 @@ Depending on the load direction, the servo will act as a generator. It will prod
 To hold the components, a [power PCB](https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal/tree/main/Wiring/PowerPcb) was developed, which also featured a port to hold XT30 connectors. The 
 
 Here is an image of the plain PCB:
-![](Wiring/PowerPcb/front.svg | width=100)
+![](Wiring/PowerPcb/front.svg)
 
 Here is an image of the assembled PCB:
-![](Wiring/PowerPcb/PCB_assembled.jpg | width=100)
-
+![](Wiring/PowerPcb/PCB_assembled.jpg)
 
 
 
