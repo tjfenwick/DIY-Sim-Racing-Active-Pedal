@@ -26,10 +26,7 @@ public struct payloadHeader
     // variable to check if structure at receiver matched version from transmitter
     public byte version;
 
-    // To check if structure is valid
-    public UInt16 checkSum;
-
-    public bool storeToEeprom;
+    public byte storeToEeprom;
 }
 public struct payloadPedalConfig
 {
@@ -94,10 +91,18 @@ public struct payloadPedalConfig
 
 }
 
+public struct payloadFooter
+{
+    // To check if structure is valid
+    public UInt16 checkSum;
+}
+
+
 public struct DAP_config_st
 {
     public payloadHeader payloadHeader_;
     public payloadPedalConfig payloadPedalConfig_;
+    public payloadFooter payloadFooter_;
 }
 
 
@@ -310,8 +315,12 @@ namespace User.PluginSdkDemo
 					_serialPort[pedalIdx].Close();
 				}
 				
-				//_serialPort.Handshake = Handshake.None;
-				_serialPort[pedalIdx].ReadTimeout = 2000;
+				_serialPort[pedalIdx].Handshake = Handshake.None;
+                _serialPort[pedalIdx].Parity = Parity.None;
+                //_serialPort[pedalIdx].StopBits = StopBits.None;
+
+
+                _serialPort[pedalIdx].ReadTimeout = 2000;
 				_serialPort[pedalIdx].WriteTimeout = 500;
 
                 try
@@ -356,8 +365,8 @@ namespace User.PluginSdkDemo
 
 
             dap_config_initial_st.payloadHeader_.payloadType = 100;
-            dap_config_initial_st.payloadHeader_.version = 107;
-            dap_config_initial_st.payloadHeader_.storeToEeprom = false;
+            dap_config_initial_st.payloadHeader_.version = 108;
+            dap_config_initial_st.payloadHeader_.storeToEeprom = 0;
             dap_config_initial_st.payloadPedalConfig_.pedalStartPosition = 35;
             dap_config_initial_st.payloadPedalConfig_.pedalEndPosition = 80;
             dap_config_initial_st.payloadPedalConfig_.maxForce = 90;

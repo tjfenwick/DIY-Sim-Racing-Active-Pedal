@@ -353,7 +353,7 @@ void setup()
 
   
 
-  Serial.println("Setup end!");
+  Serial.println("Setup end");
   
 }
 
@@ -456,7 +456,7 @@ void pedalUpdateTask( void * pvParameters )
         // Take the semaphore and just update the config file, then release the semaphore
         if(xSemaphoreTake(semaphore_updateConfig, (TickType_t)1)==pdTRUE)
         {
-          Serial.println("Update pedal config!");
+          Serial.println("Updating pedal config");
           configUpdateAvailable = false;
           dap_config_st = dap_config_st_local;
           configWasUpdated_b = true;
@@ -466,7 +466,7 @@ void pedalUpdateTask( void * pvParameters )
         // update the calc params
         if (true == configWasUpdated_b)
         {
-          Serial.println("Updating the calc params!");
+          Serial.println("Updating the calc params");
           configWasUpdated_b = false;
           dap_config_st.storeConfigToEprom(dap_config_st); // store config to EEPROM
           updatePedalCalcParameters(); // update the calc parameters
@@ -702,12 +702,25 @@ void serialCommunicationTask( void * pvParameters )
       timerSC.Bump();
     #endif
 
+    uint16_t crc;
+
 
 
 
 
     // read serial input 
     byte n = Serial.available();
+
+    /*if (n > 0)
+    {
+      Serial.println("In: ");
+      Serial.println(n);
+      Serial.println("    Exp: ");
+      Serial.println(sizeof(DAP_config_st) );
+    }*/
+    
+    
+
 
     // likely config structure 
     if ( n == sizeof(DAP_config_st) )
@@ -740,20 +753,20 @@ void serialCommunicationTask( void * pvParameters )
             Serial.println(dap_config_st_local.payLoadHeader_.version);
           }
           // checksum validation
-          uint16_t crc = checksumCalculator((uint8_t*)(&(dap_config_st_local.payLoadPedalConfig_)), sizeof(dap_config_st_local.payLoadPedalConfig_));
-          if (crc != dap_config_st_local.payLoadHeader_.checkSum){ 
+          crc = checksumCalculator((uint8_t*)(&(dap_config_st_local.payLoadHeader_)), sizeof(dap_config_st_local.payLoadHeader_) + sizeof(dap_config_st_local.payLoadPedalConfig_));
+          if (crc != dap_config_st_local.payloadFooter_.checkSum){ 
             structChecker = false;
             Serial.print("CRC expected: ");
             Serial.print(crc);
             Serial.print(",   CRC received: ");
-            Serial.println(dap_config_st_local.payLoadHeader_.checkSum);
+            Serial.println(dap_config_st_local.payloadFooter_.checkSum);
           }
 
 
           // if checks are successfull, overwrite global configuration struct
           if (structChecker == true)
           {
-            Serial.println("Update pedal config!");
+            Serial.println("Updating pedal config");
             configUpdateAvailable = true;          
           }
           xSemaphoreGive(semaphore_updateConfig);
@@ -768,7 +781,7 @@ void serialCommunicationTask( void * pvParameters )
         switch (menuChoice) {
           // resset minimum position
           case 1:
-            Serial.println("Reset position!");
+            Serial.println("Reset position");
             resetPedalPosition = true;
             break;
 
@@ -785,6 +798,9 @@ void serialCommunicationTask( void * pvParameters )
           case 4:
             DAP_config_st * dap_config_st_local_ptr;
             dap_config_st_local_ptr = &dap_config_st;
+            //uint16_t crc = checksumCalculator((uint8_t*)(&(dap_config_st.payLoadHeader_)), sizeof(dap_config_st.payLoadHeader_) + sizeof(dap_config_st.payLoadPedalConfig_));
+            crc = checksumCalculator((uint8_t*)(&(dap_config_st.payLoadHeader_)), sizeof(dap_config_st.payLoadHeader_) + sizeof(dap_config_st.payLoadPedalConfig_));
+            dap_config_st_local_ptr->payloadFooter_.checkSum = crc;
             Serial.write((char*)dap_config_st_local_ptr, sizeof(DAP_config_st));
             break;
 

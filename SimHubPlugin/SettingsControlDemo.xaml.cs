@@ -33,7 +33,7 @@ namespace User.PluginSdkDemo
     {
 
 
-        public uint pedalConfigPayload_version = 107;
+        public uint pedalConfigPayload_version = 108;
 
         public uint indexOfSelectedPedal_u = 1;
 
@@ -981,24 +981,29 @@ namespace User.PluginSdkDemo
 
                 // compute checksum
                 //getBytes(this.dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_)
-                payloadPedalConfig tmp = this.dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_;
-                payloadPedalConfig* v = &tmp;
+                DAP_config_st tmp = this.dap_config_st[indexOfSelectedPedal_u];
+
+                //payloadPedalConfig tmp = this.dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_;
+                DAP_config_st* v = &tmp;
                 byte* p = (byte*)v;
-                this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum = checksumCalc(p, sizeof(payloadPedalConfig));
+                this.dap_config_st[indexOfSelectedPedal_u].payloadFooter_.checkSum = checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalConfig));
 
 
-                TextBox_debugOutput.Text = "CRC simhub calc: " + this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum + "    ";
+                //TextBox_debugOutput.Text = "CRC simhub calc: " + this.dap_config_st[indexOfSelectedPedal_u].payloadFooter_.checkSum + "    ";
 
+                TextBox_debugOutput.Text = String.Empty;
 
                 try
                 {
                     this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.version = (byte)pedalConfigPayload_version;
-                    this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.storeToEeprom = true;
+                    this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.storeToEeprom = 1;
                     int length = sizeof(DAP_config_st);
                     //int val = this.dap_config_st[indexOfSelectedPedal_u].payloadHeader_.checkSum;
                     //string msg = "CRC value: " + val.ToString();
                     byte[] newBuffer = new byte[length];
                     newBuffer = getBytes(this.dap_config_st[indexOfSelectedPedal_u]);
+
+                    //TextBox_debugOutput.Text = "ConfigLength" + length;
 
                     // clear inbuffer 
                     Plugin._serialPort[indexOfSelectedPedal_u].DiscardInBuffer();
@@ -1018,6 +1023,7 @@ namespace User.PluginSdkDemo
                 System.Threading.Thread.Sleep(100);
                 try
                 {
+                    
                     while (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0)
                     {
                         string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
@@ -1061,11 +1067,11 @@ namespace User.PluginSdkDemo
                         DAP_config_st pedalConfig_read_st = getConfigFromBytes(newBuffer);
 
                         // check CRC
-                        payloadPedalConfig tmp = pedalConfig_read_st.payloadPedalConfig_;
-                        payloadPedalConfig* v = &tmp;
+                        //DAP_config_st tmp = pedalConfig_read_st.payloadPedalConfig_;
+                        DAP_config_st* v = &pedalConfig_read_st;
                         byte* p = (byte*)v;
 
-                        if (checksumCalc(p, sizeof(payloadPedalConfig)) == pedalConfig_read_st.payloadHeader_.checkSum)
+                        if (checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalConfig)) == pedalConfig_read_st.payloadFooter_.checkSum)
                         {
                             this.dap_config_st[indexOfSelectedPedal_u] = pedalConfig_read_st;
                             updateTheGuiFromConfig();

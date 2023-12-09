@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-#define DAP_VERSION_CONFIG 107
+#define DAP_VERSION_CONFIG 108
 #define DAP_PAYLOAD_TYPE_CONFIG 100
 
 struct payloadHeader {
@@ -14,11 +14,8 @@ struct payloadHeader {
   // variable to check if structure at receiver matched version from transmitter
   uint8_t version;
 
-  // To check if structure is valid
-  uint16_t checkSum;
-
   // store to EEPROM flag
-  bool storeToEeprom;
+  uint8_t storeToEeprom;
 
 };
 
@@ -75,13 +72,16 @@ struct payloadPedalConfig {
 
 };
 
-
+struct payloadFooter {
+  // To check if structure is valid
+  uint16_t checkSum;
+};
 
 struct DAP_config_st {
 
   payloadHeader payLoadHeader_;
   payloadPedalConfig payLoadPedalConfig_;
-
+  payloadFooter payloadFooter_; 
   
   
   void initialiseDefaults();

@@ -70,7 +70,7 @@ void DAP_config_st::storeConfigToEprom(DAP_config_st& config_st)
     config_st.payLoadHeader_.storeToEeprom = false; // set to false, thus at restart existing EEPROM config isn't restored to EEPROM
     EEPROM.put(0, config_st); 
     EEPROM.commit();
-    Serial.println("Successfully stored config in EPROM!");
+    Serial.println("Successfully stored config in EPROM");
   }
 }
 
@@ -85,11 +85,11 @@ void DAP_config_st::loadConfigFromEprom(DAP_config_st& config_st)
   if (local_config_st.payLoadHeader_.version == DAP_VERSION_CONFIG)
   {
     config_st = local_config_st;
-    Serial.println("Successfully loaded config from EPROM!");
+    Serial.println("Successfully loaded config from EPROM");
   }
   else
   { 
-    Serial.println("Couldn't load config from EPROM due to version mismatch!");
+    Serial.println("Couldn't load config from EPROM due to version mismatch");
     Serial.print("Target version: ");
     Serial.println(DAP_VERSION_CONFIG);
     Serial.print("Source version: ");
