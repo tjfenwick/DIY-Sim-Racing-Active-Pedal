@@ -711,107 +711,133 @@ void serialCommunicationTask( void * pvParameters )
     // read serial input 
     byte n = Serial.available();
 
-    /*if (n > 0)
-    {
-      Serial.println("In: ");
-      Serial.println(n);
-      Serial.println("    Exp: ");
-      Serial.println(sizeof(DAP_config_st) );
-    }*/
+  
     
-    
-
-
-    // likely config structure 
-    if ( n == sizeof(DAP_config_st) )
+    if (n > 0)
     {
-      
-      if(semaphore_updateConfig!=NULL)
-      {
-        if(xSemaphoreTake(semaphore_updateConfig, (TickType_t)1)==pdTRUE)
-        {
-          DAP_config_st * dap_config_st_local_ptr;
-          dap_config_st_local_ptr = &dap_config_st_local;
-          Serial.readBytes((char*)dap_config_st_local_ptr, sizeof(DAP_config_st));
+      switch (n) {
 
-          
+        // likely config structure 
+        case sizeof(DAP_config_st):
+            
+            if(semaphore_updateConfig!=NULL)
+            {
+              if(xSemaphoreTake(semaphore_updateConfig, (TickType_t)1)==pdTRUE)
+              {
+                DAP_config_st * dap_config_st_local_ptr;
+                dap_config_st_local_ptr = &dap_config_st_local;
+                Serial.readBytes((char*)dap_config_st_local_ptr, sizeof(DAP_config_st));
 
-          // check if data is plausible
-          bool structChecker = true;
-          if ( dap_config_st_local.payLoadHeader_.payloadType != DAP_PAYLOAD_TYPE_CONFIG ){ 
-            structChecker = false;
-            Serial.print("Payload type expected: ");
-            Serial.print(DAP_PAYLOAD_TYPE_CONFIG);
-            Serial.print(",   Payload type received: ");
-            Serial.println(dap_config_st_local.payLoadHeader_.payloadType);
-          }
-          if ( dap_config_st_local.payLoadHeader_.version != DAP_VERSION_CONFIG ){ 
-            structChecker = false;
-            Serial.print("Config version expected: ");
-            Serial.print(DAP_VERSION_CONFIG);
-            Serial.print(",   Config version received: ");
-            Serial.println(dap_config_st_local.payLoadHeader_.version);
-          }
-          // checksum validation
-          crc = checksumCalculator((uint8_t*)(&(dap_config_st_local.payLoadHeader_)), sizeof(dap_config_st_local.payLoadHeader_) + sizeof(dap_config_st_local.payLoadPedalConfig_));
-          if (crc != dap_config_st_local.payloadFooter_.checkSum){ 
-            structChecker = false;
+                
+
+                // check if data is plausible
+                bool structChecker = true;
+                if ( dap_config_st_local.payLoadHeader_.payloadType != DAP_PAYLOAD_TYPE_CONFIG ){ 
+                  structChecker = false;
+                  Serial.print("Payload type expected: ");
+                  Serial.print(DAP_PAYLOAD_TYPE_CONFIG);
+                  Serial.print(",   Payload type received: ");
+                  Serial.println(dap_config_st_local.payLoadHeader_.payloadType);
+                }
+                if ( dap_config_st_local.payLoadHeader_.version != DAP_VERSION_CONFIG ){ 
+                  structChecker = false;
+                  Serial.print("Config version expected: ");
+                  Serial.print(DAP_VERSION_CONFIG);
+                  Serial.print(",   Config version received: ");
+                  Serial.println(dap_config_st_local.payLoadHeader_.version);
+                }
+                // checksum validation
+                crc = checksumCalculator((uint8_t*)(&(dap_config_st_local.payLoadHeader_)), sizeof(dap_config_st_local.payLoadHeader_) + sizeof(dap_config_st_local.payLoadPedalConfig_));
+                if (crc != dap_config_st_local.payloadFooter_.checkSum){ 
+                  structChecker = false;
+                  Serial.print("CRC expected: ");
+                  Serial.print(crc);
+                  Serial.print(",   CRC received: ");
+                  Serial.println(dap_config_st_local.payloadFooter_.checkSum);
+                }
+
+
+                // if checks are successfull, overwrite global configuration struct
+                if (structChecker == true)
+                {
+                  Serial.println("Updating pedal config");
+                  configUpdateAvailable = true;          
+                }
+                xSemaphoreGive(semaphore_updateConfig);
+              }
+            }
+          break;
+
+        // likely action structure 
+        case sizeof(DAP_actions_st) :
+
+          DAP_actions_st dap_actions_st;
+          Serial.readBytes((char*)&dap_actions_st, sizeof(DAP_actions_st));
+
+          crc = checksumCalculator((uint8_t*)(&(dap_actions_st.payLoadHeader_)), sizeof(dap_actions_st.payLoadHeader_) + sizeof(dap_actions_st.payloadPedalAction_));
+          if (crc != dap_actions_st.payloadFooter_.checkSum){ 
             Serial.print("CRC expected: ");
             Serial.print(crc);
             Serial.print(",   CRC received: ");
-            Serial.println(dap_config_st_local.payloadFooter_.checkSum);
+            Serial.println(dap_actions_st.payloadFooter_.checkSum);
           }
-
-
-          // if checks are successfull, overwrite global configuration struct
-          if (structChecker == true)
+          else
           {
-            Serial.println("Updating pedal config");
-            configUpdateAvailable = true;          
+
+            // trigger reset pedal position
+            if (dap_actions_st.payloadPedalAction_.resetPedalPos_u8)
+            {
+              resetPedalPosition = true;
+            }
+
+            // trigger ABS effect
+            if (dap_actions_st.payloadPedalAction_.triggerAbs_u8)
+            {
+              absOscillation.trigger();
+            }
+
+            // trigger system identification
+            if (dap_actions_st.payloadPedalAction_.startSystemIdentification_u8)
+            {
+              systemIdentificationMode_b = true;
+            }
+
+            // trigger return pedal position
+            if (dap_actions_st.payloadPedalAction_.returnPedalConfig_u8)
+            {
+              DAP_config_st * dap_config_st_local_ptr;
+              dap_config_st_local_ptr = &dap_config_st;
+              //uint16_t crc = checksumCalculator((uint8_t*)(&(dap_config_st.payLoadHeader_)), sizeof(dap_config_st.payLoadHeader_) + sizeof(dap_config_st.payLoadPedalConfig_));
+              crc = checksumCalculator((uint8_t*)(&(dap_config_st.payLoadHeader_)), sizeof(dap_config_st.payLoadHeader_) + sizeof(dap_config_st.payLoadPedalConfig_));
+              dap_config_st_local_ptr->payloadFooter_.checkSum = crc;
+              Serial.write((char*)dap_config_st_local_ptr, sizeof(DAP_config_st));
+            }
+
+
           }
-          xSemaphoreGive(semaphore_updateConfig);
-        }
-      }
-    }
-    else
-    {
-      if (n!=0)
-      {
-        int menuChoice = Serial.parseInt();
-        switch (menuChoice) {
-          // resset minimum position
-          case 1:
-            Serial.println("Reset position");
-            resetPedalPosition = true;
-            break;
 
-          // toggle ABS
-          case 2:
-            //Serial.print("Second case:");
-            absOscillation.trigger();
-            break;
-          // de-/activate spline debug 
-          case 3:
-            Serial.println("Start system identification");
-            systemIdentificationMode_b = true;
-            break;
-          case 4:
-            DAP_config_st * dap_config_st_local_ptr;
-            dap_config_st_local_ptr = &dap_config_st;
-            //uint16_t crc = checksumCalculator((uint8_t*)(&(dap_config_st.payLoadHeader_)), sizeof(dap_config_st.payLoadHeader_) + sizeof(dap_config_st.payLoadPedalConfig_));
-            crc = checksumCalculator((uint8_t*)(&(dap_config_st.payLoadHeader_)), sizeof(dap_config_st.payLoadHeader_) + sizeof(dap_config_st.payLoadPedalConfig_));
-            dap_config_st_local_ptr->payloadFooter_.checkSum = crc;
-            Serial.write((char*)dap_config_st_local_ptr, sizeof(DAP_config_st));
-            break;
+          break;
 
-          default:
-            Serial.println("Default case:");
-            break;
-        }
+        default:
+
+          // flush the input buffer
+          while (Serial.available()) Serial.read();
+          //Serial.flush();
+
+          Serial.println("\nIn byte size: ");
+          Serial.println(n);
+          Serial.println("    Exp config size: ");
+          Serial.println(sizeof(DAP_config_st) );
+          Serial.println("    Exp action size: ");
+          Serial.println(sizeof(DAP_actions_st) );
+
+          break;  
+
+
+          
 
       }
     }
-
 
     // transmit controller output
     if (IsControllerReady()) {

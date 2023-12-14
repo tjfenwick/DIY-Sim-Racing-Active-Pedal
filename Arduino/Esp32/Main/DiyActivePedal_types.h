@@ -19,6 +19,13 @@ struct payloadHeader {
 
 };
 
+struct payloadPedalAction {
+  uint8_t triggerAbs_u8;
+  uint8_t resetPedalPos_u8;
+  uint8_t startSystemIdentification_u8;
+  uint8_t returnPedalConfig_u8;
+};
+
 struct payloadPedalConfig {
   // configure pedal start and endpoint
   // In percent
@@ -76,6 +83,14 @@ struct payloadFooter {
   // To check if structure is valid
   uint16_t checkSum;
 };
+
+
+struct DAP_actions_st {
+  payloadHeader payLoadHeader_;
+  payloadPedalAction payloadPedalAction_;
+  payloadFooter payloadFooter_; 
+};
+
 
 struct DAP_config_st {
 

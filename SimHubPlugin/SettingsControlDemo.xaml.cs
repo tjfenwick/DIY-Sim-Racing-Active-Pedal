@@ -249,6 +249,20 @@ namespace User.PluginSdkDemo
         }
 
 
+        //public byte[] getBytes_Action(DAP_action_st aux)
+        //{
+        //    int length = Marshal.SizeOf(aux);
+        //    IntPtr ptr = Marshal.AllocHGlobal(length);
+        //    byte[] myBuffer = new byte[length];
+
+        //    Marshal.StructureToPtr(aux, ptr, true);
+        //    Marshal.Copy(ptr, myBuffer, 0, length);
+        //    Marshal.FreeHGlobal(ptr);
+
+        //    return myBuffer;
+        //}
+
+
         public DAP_config_st getConfigFromBytes(byte[] myBuffer)
         {
             DAP_config_st aux;
@@ -266,28 +280,28 @@ namespace User.PluginSdkDemo
         }
 
 
-        unsafe private UInt16 checksumCalc(byte* data, int length)
-        {
+        //unsafe private UInt16 checksumCalc(byte* data, int length)
+        //{
 
-            UInt16 curr_crc = 0x0000;
-            byte sum1 = (byte)curr_crc;
-            byte sum2 = (byte)(curr_crc >> 8);
-            int index;
-            for (index = 0; index < length; index = index + 1)
-            {
-                int v = (sum1 + (*data));
-                sum1 = (byte)v;
-                sum1 = (byte)(v % 255);
+        //    UInt16 curr_crc = 0x0000;
+        //    byte sum1 = (byte)curr_crc;
+        //    byte sum2 = (byte)(curr_crc >> 8);
+        //    int index;
+        //    for (index = 0; index < length; index = index + 1)
+        //    {
+        //        int v = (sum1 + (*data));
+        //        sum1 = (byte)v;
+        //        sum1 = (byte)(v % 255);
 
-                int w = (sum1 + sum2) % 255;
-                sum2 = (byte)w;
+        //        int w = (sum1 + sum2) % 255;
+        //        sum2 = (byte)w;
 
-                data++;// = data++;
-            }
+        //        data++;// = data++;
+        //    }
 
-            int x = (sum2 << 8) | sum1;
-            return (UInt16)x;
-        }
+        //    int x = (sum2 << 8) | sum1;
+        //    return (UInt16)x;
+        //}
 
 
         public SettingsControlDemo(DataPluginDemo plugin) : this()
@@ -828,25 +842,34 @@ namespace User.PluginSdkDemo
         /********************************************************************************************************************/
         /*							Refind min endstop																		*/
         /********************************************************************************************************************/
-        public void ResetPedalPosition_click(object sender, RoutedEventArgs e)
+        unsafe public void ResetPedalPosition_click(object sender, RoutedEventArgs e)
         {
 
             if (Plugin._serialPort[indexOfSelectedPedal_u].IsOpen)
             {
-
-                if (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0)
-                {
-                    Plugin._serialPort[indexOfSelectedPedal_u].DiscardInBuffer();
-                }
-
+                
                 try
                 {
-                    Plugin._serialPort[indexOfSelectedPedal_u].Write("1");
-                    int myInt = 1;
-                    byte[] b = BitConverter.GetBytes(myInt);
-                    Plugin._serialPort[indexOfSelectedPedal_u].Write(b, 0, 4);
-                    Plugin._serialPort[indexOfSelectedPedal_u].Write("\n");
-                    System.Threading.Thread.Sleep(100);
+                    // compute checksum
+                    DAP_action_st tmp;
+                    tmp.payloadPedalAction_.resetPedalPos_u8 = 1;
+
+
+                    DAP_action_st* v = &tmp;
+                    byte* p = (byte*)v;
+                    tmp.payloadFooter_.checkSum = Plugin.checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalAction));
+
+
+                    int length = sizeof(DAP_action_st);
+                    byte[] newBuffer = new byte[length];
+                    newBuffer = Plugin.getBytes_Action(tmp);
+
+
+                    // clear inbuffer 
+                    Plugin._serialPort[indexOfSelectedPedal_u].DiscardInBuffer();
+
+                    // send query command
+                    Plugin._serialPort[indexOfSelectedPedal_u].Write(newBuffer, 0, newBuffer.Length);
                 }
                 catch (Exception caughtEx)
                 {
@@ -859,7 +882,8 @@ namespace User.PluginSdkDemo
 
                 try
                 {
-                    while (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0)
+                    DateTime startTime = DateTime.Now;
+                    while ((Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0) && (DateTime.Now - startTime).Seconds < 2)
                     {
                         string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
                     }
@@ -986,7 +1010,7 @@ namespace User.PluginSdkDemo
                 //payloadPedalConfig tmp = this.dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_;
                 DAP_config_st* v = &tmp;
                 byte* p = (byte*)v;
-                this.dap_config_st[indexOfSelectedPedal_u].payloadFooter_.checkSum = checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalConfig));
+                this.dap_config_st[indexOfSelectedPedal_u].payloadFooter_.checkSum = Plugin.checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalConfig));
 
 
                 //TextBox_debugOutput.Text = "CRC simhub calc: " + this.dap_config_st[indexOfSelectedPedal_u].payloadFooter_.checkSum + "    ";
@@ -1049,49 +1073,97 @@ namespace User.PluginSdkDemo
             if (Plugin._serialPort[indexOfSelectedPedal_u].IsOpen)
             {
 
-                // send query command
+
+                // compute checksum
+                DAP_action_st tmp;
+                tmp.payloadPedalAction_.returnPedalConfig_u8 = 1;
+
+
+                DAP_action_st* v = &tmp;
+                byte* p = (byte*)v;
+                tmp.payloadFooter_.checkSum = Plugin.checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalAction));
+
+
+                int length = sizeof(DAP_action_st);
+                byte[] newBuffer = new byte[length];
+                newBuffer = Plugin.getBytes_Action(tmp);
+
+
+                // clear inbuffer 
                 Plugin._serialPort[indexOfSelectedPedal_u].DiscardInBuffer();
-                Plugin._serialPort[indexOfSelectedPedal_u].Write("4");
+
+                // send query command
+                Plugin._serialPort[indexOfSelectedPedal_u].Write(newBuffer, 0, newBuffer.Length);
+
                 
                 // wait for response
                 System.Threading.Thread.Sleep(100);
 
+                TextBox_debugOutput.Text = "Reading pedal config";
+
                 try
                 {
-                    int length = sizeof(DAP_config_st);
-                    byte[] newBuffer = new byte[length];
 
-                    if (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead == length)
+                    length = sizeof(DAP_config_st);
+                    byte[] newBuffer_config = new byte[length];
+
+                    int receivedLength = Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead;
+
+                    if (receivedLength == length)
                     {
-                        Plugin._serialPort[indexOfSelectedPedal_u].Read(newBuffer, 0, length);
-                        DAP_config_st pedalConfig_read_st = getConfigFromBytes(newBuffer);
+                        Plugin._serialPort[indexOfSelectedPedal_u].Read(newBuffer_config, 0, length);
 
+
+                        DAP_config_st pedalConfig_read_st = getConfigFromBytes(newBuffer_config);
+                        
                         // check CRC
-                        //DAP_config_st tmp = pedalConfig_read_st.payloadPedalConfig_;
-                        DAP_config_st* v = &pedalConfig_read_st;
-                        byte* p = (byte*)v;
+                        DAP_config_st* v_config = &pedalConfig_read_st;
+                        byte* p_config = (byte*)v_config;
 
-                        if (checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalConfig)) == pedalConfig_read_st.payloadFooter_.checkSum)
+
+                        if (Plugin.checksumCalc(p_config, sizeof(payloadHeader) + sizeof(payloadPedalConfig)) == pedalConfig_read_st.payloadFooter_.checkSum)
                         {
                             this.dap_config_st[indexOfSelectedPedal_u] = pedalConfig_read_st;
                             updateTheGuiFromConfig();
-                            TextBox_debugOutput.Text = "Read config from pedal successful!";
+                            TextBox_debugOutput.Text += "Read config from pedal successful!";
                         }
                         else
                         {
-                            TextBox_debugOutput.Text = "CRC mismatch!";
+                            TextBox_debugOutput.Text += "CRC mismatch!";
+                            TextBox_debugOutput.Text += "Data size mismatch!\n";
+                            TextBox_debugOutput.Text += "Expected size: " + length + "\n";
+                            TextBox_debugOutput.Text += "Received size: " + receivedLength;
                         }
                     }
                     else 
                     {
-                        TextBox_debugOutput.Text = "Data size mismatch!";
+                        TextBox_debugOutput.Text += "Data size mismatch";
+
+                        DateTime startTime = DateTime.Now;
+                        //TimeSpan diffTime = DateTime.Now - startTime;
+                        //int millisceonds = (int)diffTime.TotalSeconds;
+                        
+
+                        while ( (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0) && (DateTime.Now - startTime).Seconds < 2 )
+                        {
+                            string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
+                            TextBox_debugOutput.Text += message;
+
+                        }
+
                     }
 
                     
                     
 
                 }
-                catch (TimeoutException) { }
+                catch (Exception ex)
+                {
+                    TextBox_debugOutput.Text = ex.Message;
+                    ConnectToPedal.IsChecked = false;
+                }
+
+                //catch (TimeoutException) { }
 
 
 

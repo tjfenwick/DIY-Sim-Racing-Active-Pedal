@@ -1,4 +1,5 @@
 ﻿using GameReaderCommon;
+//using log4net.Plugin;
 using SimHub.Plugins;
 using SimHub.Plugins.OutputPlugins.Dash.GLCDTemplating;
 using System;
@@ -28,6 +29,16 @@ public struct payloadHeader
 
     public byte storeToEeprom;
 }
+
+
+public struct payloadPedalAction
+{
+    public byte triggerAbs_u8;
+    public byte resetPedalPos_u8;
+    public byte startSystemIdentification_u8;
+    public byte returnPedalConfig_u8;
+};
+
 public struct payloadPedalConfig
 {
     // configure pedal start and endpoint
@@ -98,6 +109,14 @@ public struct payloadFooter
 }
 
 
+
+public struct DAP_action_st
+{
+    public payloadHeader payloadHeader_;
+    public payloadPedalAction payloadPedalAction_;
+    public payloadFooter payloadFooter_;
+}
+
 public struct DAP_config_st
 {
     public payloadHeader payloadHeader_;
@@ -163,7 +182,44 @@ namespace User.PluginSdkDemo
         /// </summary>
         /// <param name="pluginManager"></param>
         /// <param name="data">Current game data, including current and previous data frame.</param>
-        public void DataUpdate(PluginManager pluginManager, ref GameData data)
+        /// 
+        unsafe public UInt16 checksumCalc(byte* data, int length)
+        {
+
+            UInt16 curr_crc = 0x0000;
+            byte sum1 = (byte)curr_crc;
+            byte sum2 = (byte)(curr_crc >> 8);
+            int index;
+            for (index = 0; index < length; index = index + 1)
+            {
+                int v = (sum1 + (*data));
+                sum1 = (byte)v;
+                sum1 = (byte)(v % 255);
+
+                int w = (sum1 + sum2) % 255;
+                sum2 = (byte)w;
+
+                data++;// = data++;
+            }
+
+            int x = (sum2 << 8) | sum1;
+            return (UInt16)x;
+        }
+
+        public byte[] getBytes_Action(DAP_action_st aux)
+        {
+            int length = Marshal.SizeOf(aux);
+            IntPtr ptr = Marshal.AllocHGlobal(length);
+            byte[] myBuffer = new byte[length];
+
+            Marshal.StructureToPtr(aux, ptr, true);
+            Marshal.Copy(ptr, myBuffer, 0, length);
+            Marshal.FreeHGlobal(ptr);
+
+            return myBuffer;
+        }
+
+        unsafe public void DataUpdate(PluginManager pluginManager, ref GameData data)
         {
 			
 			bool sendAbsSignal_local_b = false;
@@ -210,12 +266,36 @@ namespace User.PluginSdkDemo
             }
 
 
+
+
             // Send ABS trigger signal via serial
             if (sendAbsSignal_local_b)
 			{
 				if (_serialPort[1].IsOpen)
                 {
-                    _serialPort[1].Write("2");
+                    //_serialPort[1].Write("2");
+
+                    // compute checksum
+                    DAP_action_st tmp;
+                    tmp.payloadPedalAction_.triggerAbs_u8 = 1;
+
+
+                    DAP_action_st* v = &tmp;
+                    byte* p = (byte*)v;
+                    tmp.payloadFooter_.checkSum = checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalAction));
+
+
+                    int length = sizeof(DAP_action_st);
+                    byte[] newBuffer = new byte[length];
+                    newBuffer = getBytes_Action(tmp);
+
+
+                    // clear inbuffer 
+                    _serialPort[1].DiscardInBuffer();
+
+                    // send query command
+                    _serialPort[1].Write(newBuffer, 0, newBuffer.Length);
+
                 }
 			}
 
@@ -224,7 +304,26 @@ namespace User.PluginSdkDemo
             {
                 if (_serialPort[2].IsOpen)
                 {
-                    _serialPort[2].Write("2");
+                    // compute checksum
+                    DAP_action_st tmp;
+                    tmp.payloadPedalAction_.triggerAbs_u8 = 1;
+
+
+                    DAP_action_st* v = &tmp;
+                    byte* p = (byte*)v;
+                    tmp.payloadFooter_.checkSum = checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalAction));
+
+
+                    int length = sizeof(DAP_action_st);
+                    byte[] newBuffer = new byte[length];
+                    newBuffer = getBytes_Action(tmp);
+
+
+                    // clear inbuffer 
+                    _serialPort[2].DiscardInBuffer();
+
+                    // send query command
+                    _serialPort[2].Write(newBuffer, 0, newBuffer.Length);
                 }
             }
 
