@@ -99,6 +99,9 @@ public struct payloadPedalConfig
     // Kalman filter model noise
     public byte kf_modelNoise;
 
+    // debug flags, sued to enable debug output
+    public byte debug_flags_0;
+
 
 }
 
@@ -487,6 +490,7 @@ namespace User.PluginSdkDemo
             dap_config_initial_st.payloadPedalConfig_.maxGameOutput = 100;
 
             dap_config_initial_st.payloadPedalConfig_.kf_modelNoise = 128;
+            dap_config_initial_st.payloadPedalConfig_.debug_flags_0 = 0;
 
             dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_a_0 = 0;
             dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_a_1 = 0;

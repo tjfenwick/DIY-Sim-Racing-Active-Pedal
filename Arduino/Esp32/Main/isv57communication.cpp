@@ -34,6 +34,12 @@ void isv57communication::setupServoStateReading() {
 }
 
 
+void isv57communication::readAllServoParameters() {
+  for (uint16_t reg_sub_add_u16 = 0;  reg_sub_add_u16 < pr_6_00; reg_sub_add_u16++)
+  {
+    modbus.readParameter(slaveId, pr_0_00 + reg_sub_add_u16);
+  }
+}
 
 // send tuned servo parameters
 void isv57communication::sendTunedServoParameters() {

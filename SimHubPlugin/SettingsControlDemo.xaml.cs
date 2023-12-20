@@ -21,6 +21,7 @@ using System.Windows.Forms;
 using static System.Net.Mime.MediaTypeNames;
 using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Win32;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace User.PluginSdkDemo
 {
@@ -447,6 +448,8 @@ namespace User.PluginSdkDemo
 
             kfModelNoiseScaling_slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.kf_modelNoise;
 
+            debugFlagSlider_0.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.debug_flags_0;
+
             Update_BrakeForceCurve();
 
 
@@ -751,6 +754,16 @@ namespace User.PluginSdkDemo
             dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.kf_modelNoise = (byte)e.NewValue;
         }
 
+        public void debugFlagSlider_0_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if ( (e.NewValue >= 0) && (e.NewValue <= 255) )
+            {
+                dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.debug_flags_0 = (byte)e.NewValue;
+            }
+
+            //extBox_debugOutput.Text = e.NewValue.ToString();
+        }
+        
 
         /********************************************************************************************************************/
         /*							Write/read config to/from Json file														*/
@@ -984,10 +997,10 @@ namespace User.PluginSdkDemo
             // read system return log
             try
             {
-                while (Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0)
+                DateTime startTime = DateTime.Now;
+                while ((Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0) && (DateTime.Now - startTime).Seconds < 2)
                 {
                     string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
-
                     TextBox_serialMonitor.Text += message;
                 }
             }

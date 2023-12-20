@@ -667,6 +667,14 @@
             />
 
 
+            <TextBlock HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="4,73,0,0" 
+                   Text="Debug flags 0:" 
+                   Grid.Row="9" 
+                   Grid.Column="0" 
+                   Width="120" 
+                   Foreground="White"/>
 
 
 
@@ -718,6 +726,23 @@
                 Grid.Column="0" 
                 Width="257" 
                 Foreground="White" Height="37"/>
+            <Slider x:Name="debugFlagSlider_0" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="0,94,0,0" 
+                Grid.Row="9" 
+                Grid.Column="0" 
+                Width="320" 
+                ValueChanged="debugFlagSlider_0_changed" 
+                AutoToolTipPlacement="TopLeft" 
+                AutoToolTipPrecision="0"
+                Minimum="0"
+                Maximum="255"
+                TickPlacement="BottomRight"
+                TickFrequency="16" RenderTransformOrigin="0.508,0.525"
+                Value="0"
+                IsSnapToTickEnabled="False"
+            />
 
 
 

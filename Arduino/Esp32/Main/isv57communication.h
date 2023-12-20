@@ -51,6 +51,7 @@ class isv57communication {
     isv57communication();
     void setupServoStateReading();
     void sendTunedServoParameters();
+    void readAllServoParameters();
     void readServoStates();
     bool checkCommunication();
 

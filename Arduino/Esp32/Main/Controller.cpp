@@ -39,7 +39,7 @@ static const int16_t JOYSTICK_RANGE = JOYSTICK_MAX_VALUE - JOYSTICK_MIN_VALUE;
   char ssid[23];
   uint64_t chipid = ESP.getEfuseMac(); // The chip ID is essentially its MAC address(length: 6 bytes).
   unsigned int chip = (unsigned int)(chipid >> 32);
-  std::string bluetoothName_lcl = "DiyActivePedal_" + std::to_string( chip );
+  std::string bluetoothName_lcl = "DiyFfbPedal_" + std::to_string( chip );
   BleGamepad bleGamepad(bluetoothName_lcl, bluetoothName_lcl, 100);
   
   
@@ -49,14 +49,17 @@ static const int16_t JOYSTICK_RANGE = JOYSTICK_MAX_VALUE - JOYSTICK_MIN_VALUE;
     bleGamepadConfig.setAxesMin(JOYSTICK_MIN_VALUE); // 0 --> int16_t - 16 bit signed integer - Can be in decimal or hexadecimal
     bleGamepadConfig.setAxesMax(JOYSTICK_MAX_VALUE); // 32767 --> int16_t - 16 bit signed integer - Can be in decimal or hexadecimal 
     //bleGamepadConfig.setWhichSpecialButtons(false, false, false, false, false, false, false, false);
-    //bleGamepadConfig.setWhichAxes(false, false, false, false, false, false, false, false);
-    bleGamepadConfig.setWhichSimulationControls(false, false, false, true, false); // only brake active 
+    bleGamepadConfig.setWhichAxes(true, true, true, true, true, true, true, true);
+    //bleGamepadConfig.setWhichSimulationControls(true, true, true, true, true); // only brake active 
     bleGamepadConfig.setButtonCount(0);
     bleGamepadConfig.setHatSwitchCount(0);
     bleGamepadConfig.setAutoReport(false);
     bleGamepadConfig.setPid(chip); // product id
 
     bleGamepad.begin(&bleGamepadConfig);
+
+    //bleGamepad.deviceManufacturer = "DiyFfbPedal";
+    //bleGamepad.deviceName = chip;
   }
 
   bool IsControllerReady() { return bleGamepad.isConnected(); }
@@ -66,7 +69,10 @@ static const int16_t JOYSTICK_RANGE = JOYSTICK_MAX_VALUE - JOYSTICK_MIN_VALUE;
 
     if (bleGamepad.isConnected() )
     {
-      bleGamepad.setAxes(value, 0, 0, 0, 0, 0, 0, 0);
+      //bleGamepad.setAxes(value, 0, 0, 0, 0, 0, 0, 0);
+      bleGamepad.setX(value);
+      //bleGamepad.setSimulationControls(value, 0, 0, 0, 0);
+      //bleGamepad.setSliders(value,0);
       bleGamepad.sendReport();
     }
     else

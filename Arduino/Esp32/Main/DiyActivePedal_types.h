@@ -77,6 +77,8 @@ struct payloadPedalConfig {
   // Kalman filter model noise
   uint8_t kf_modelNoise;
 
+  // debug flags, sued to enable debug output
+  uint8_t debug_flags_0;
 };
 
 struct payloadFooter {

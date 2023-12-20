@@ -2,6 +2,12 @@
 #define ISV_COMMUNICATION
 //#define PRINT_SERVO_STATES
 
+#define DEBUG_INFO_0_CYCLE_TIMER 1
+#define DEBUG_INFO_0_STEPPER_POS 2
+#define DEBUG_INFO_0_LOADCELL_READING 4
+#define DEBUG_INFO_0_SERVO_READINGS 8
+#define DEBUG_INFO_0_PRINT_ALL_SERVO_REGISTERS 16
+
 
 bool resetServoEncoder = true;
 bool isv57LifeSignal_b = false;
@@ -54,7 +60,6 @@ DAP_calculationVariables_st dap_calculationVariables_st;
 
 
 #include "CycleTimer.h"
-//#define PRINT_CYCLETIME
 
 
 
@@ -307,6 +312,20 @@ void setup()
     ESP.restart();
   }
 
+
+
+  // print all servo registers
+  if (dap_config_st.payLoadPedalConfig_.debug_flags_0 & DEBUG_INFO_0_PRINT_ALL_SERVO_REGISTERS) 
+  {
+    if (isv57LifeSignal_b)
+    {
+      isv57.readAllServoParameters();
+    }
+  }
+  
+
+
+
   disableCore0WDT();
 
   //create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
@@ -439,12 +458,13 @@ void pedalUpdateTask( void * pvParameters )
 
     
 
-    // print the execution time averaged over multiple cycles 
-    #ifdef PRINT_CYCLETIME
+    // print the execution time averaged over multiple cycles
+    if (dap_config_st.payLoadPedalConfig_.debug_flags_0 & DEBUG_INFO_0_CYCLE_TIMER) 
+    {
       static CycleTimer timerPU("PU cycle time");
       timerPU.Bump();
-    #endif
-
+    }
+      
 
     // if a config update was received over serial, update the variables required for further computation
     if (configUpdateAvailable == true)
@@ -567,10 +587,11 @@ void pedalUpdateTask( void * pvParameters )
     
 
     //#define DEBUG_FILTER
-    #ifdef DEBUG_FILTER
+    if (dap_config_st.payLoadPedalConfig_.debug_flags_0 & DEBUG_INFO_0_LOADCELL_READING) 
+    {
       static RTDebugOutput<float, 2> rtDebugFilter({ "rawReading_g", "filtered_g"});
       rtDebugFilter.offerData({ loadcellReading * 1000, filteredReading * 1000});
-    #endif
+    }
       
 
     /*#ifdef ABS_OSCILLATION
@@ -585,10 +606,11 @@ void pedalUpdateTask( void * pvParameters )
 
 
     //#define DEBUG_STEPPER_POS
-    #ifdef DEBUG_STEPPER_POS
-      static RTDebugOutput<int32_t, 5> rtDebugFilter({ "ESP_pos", "ESP_tar_pos", "ISV_pos", "frac1", "frac2"});
-      rtDebugFilter.offerData({ stepper->getCurrentPositionSteps(), Position_Next, -(int32_t)(isv57.servo_pos_given_p + isv57.servo_pos_error_p - isv57.getZeroPos()), (int32_t)(stepperPosFraction * 10000.), (int32_t)(stepperPosFraction2 * 10000.)});
-    #endif
+    if (dap_config_st.payLoadPedalConfig_.debug_flags_0 & DEBUG_INFO_0_STEPPER_POS) 
+    {
+      static RTDebugOutput<int32_t, 5> rtDebugFilter({ "ESP_pos", "ESP_tar_pos", "ISV_pos", "frac1"});
+      rtDebugFilter.offerData({ stepper->getCurrentPositionSteps(), Position_Next, -(int32_t)(isv57.servo_pos_given_p + isv57.servo_pos_error_p - isv57.getZeroPos()), (int32_t)(stepperPosFraction * 10000.)});
+    }
 
     
     //stepper->printStates();
@@ -697,10 +719,11 @@ void serialCommunicationTask( void * pvParameters )
   for(;;){
 
     // average cycle time averaged over multiple cycles 
-    #ifdef PRINT_CYCLETIME
+    if (dap_config_st.payLoadPedalConfig_.debug_flags_0 & DEBUG_INFO_0_CYCLE_TIMER) 
+    {
       static CycleTimer timerSC("SC cycle time");
       timerSC.Bump();
-    #endif
+    }
 
     uint16_t crc;
 
@@ -879,6 +902,12 @@ void servoCommunicationTask( void * pvParameters )
   
   for(;;){
 
+    if (dap_config_st.payLoadPedalConfig_.debug_flags_0 & DEBUG_INFO_0_CYCLE_TIMER) 
+    {
+      static CycleTimer timerServoCommunication("SC cycle time");
+      timerServoCommunication.Bump();
+    }
+
     if (isv57LifeSignal_b)
     {
 
@@ -996,10 +1025,11 @@ void servoCommunicationTask( void * pvParameters )
 
 
 
-        #ifdef PRINT_SERVO_STATES
+        if (dap_config_st.payLoadPedalConfig_.debug_flags_0 & DEBUG_INFO_0_SERVO_READINGS) 
+        {
           static RTDebugOutput<int16_t, 4> rtDebugFilter({ "pos_p", "pos_error_p", "curr_per", "offset"});
           rtDebugFilter.offerData({ isv57.servo_pos_given_p, isv57.servo_pos_error_p, isv57.servo_current_percent, servo_offset_compensation_steps_i32});
-        #endif
+        }
 
        
 
