@@ -1,5 +1,6 @@
 #define ESTIMATE_LOADCELL_VARIANCE
 #define ISV_COMMUNICATION
+#define Using_analog_output
 //#define PRINT_SERVO_STATES
 
 #define DEBUG_INFO_0_CYCLE_TIMER 1
@@ -16,6 +17,11 @@ bool isv57LifeSignal_b = false;
   int32_t servo_offset_compensation_steps_i32 = 0; 
 #endif
 
+#ifdef Using_analog_output
+  int32_t Using_analog_output_ = 1;
+#else
+  int32_t Using_analog_output_ = 0;
+#endif
 
 
 
@@ -207,8 +213,15 @@ void setup()
   Serial.println(" ");
 
   // init controller
-  SetupController();
-  delay(2000);
+  if(Using_analog_output_ !=1)
+  {
+    SetupController();
+    delay(2000);
+  }
+  else
+  {
+    delay(10000);
+  }
 
 
 // check whether iSV57 communication can be established
@@ -665,6 +678,18 @@ void pedalUpdateTask( void * pvParameters )
         joystickNormalizedToInt32 = NormalizeControllerOutputValue(loadcellReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
         //joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
         xSemaphoreGive(semaphore_updateJoystick);
+        if(Using_analog_output_ =1)
+        {
+          int dac_value=(int)(joystickNormalizedToInt32*255/10000);
+          dacWrite(D_O,dac_value);
+        }
+        if(dap_config_st.payLoadPedalConfig_.Simulate_ABS_trigger==1)
+        {
+          if(joystickNormalizedToInt32>8000)
+          {
+            absOscillation.trigger();
+          }
+        }       
       }
     }
     else
@@ -863,20 +888,38 @@ void serialCommunicationTask( void * pvParameters )
     }
 
     // transmit controller output
-    if (IsControllerReady()) {
+    if(Using_analog_output_ =1)
+    {
       if(semaphore_updateJoystick!=NULL)
       {
-        if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE)
-        {
-          joystickNormalizedToInt32_local = joystickNormalizedToInt32;
-          xSemaphoreGive(semaphore_updateJoystick);
+      if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE)
+      {
+        joystickNormalizedToInt32_local = joystickNormalizedToInt32;
+        xSemaphoreGive(semaphore_updateJoystick);
         }
         //else
         //{
-          //Serial.println("semaphore_updateJoystick == 0");
+        //Serial.println("semaphore_updateJoystick == 0");
         //}
+        }
+    }
+    else
+    {
+      if (IsControllerReady()) {
+        if(semaphore_updateJoystick!=NULL)
+        {
+          if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE)
+          {
+            joystickNormalizedToInt32_local = joystickNormalizedToInt32;
+            xSemaphoreGive(semaphore_updateJoystick);
+          }
+          //else
+          //{
+            //Serial.println("semaphore_updateJoystick == 0");
+          //}
+        }
+        SetControllerOutputValue(joystickNormalizedToInt32_local);
       }
-      SetControllerOutputValue(joystickNormalizedToInt32_local);
     }
 
   }
