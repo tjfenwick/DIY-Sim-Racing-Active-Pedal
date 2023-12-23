@@ -8,11 +8,6 @@ Please use the simhub pligin with the same version code.<br>
 This is the custom PCB from [https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal](https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal).<br>
 Including 1 INA122P for loadcell reading for general pedal, 1 data in for GAS input, and 1 data out for analog output to other board.<br>
 It's alos build in power PCB, contian 2 XT30 connector for power in and out.<br>
-
-# Arduino code
-you can find [Esp32 code](https://github.com/tcfshcrw/DIY-AP-For-Simucube-D15-Port/tree/628316fac3af6334aedba442feb396a90c38105c/Esp32%20code)<br>
-Basicly, modified from [https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal](https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal).<br>
-Only make BLE controller output as analog output with Dacwrite().<br>
 # Simucube software configuare
 There is a analog input config in truedrive.<br>
 ![](image/SC-1.jpg)<br>
