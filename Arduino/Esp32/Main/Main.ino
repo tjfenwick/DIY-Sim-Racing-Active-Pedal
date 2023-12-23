@@ -1,6 +1,6 @@
 #define ESTIMATE_LOADCELL_VARIANCE
 #define ISV_COMMUNICATION
-#define Using_analog_output
+//#define Using_analog_output
 //#define PRINT_SERVO_STATES
 
 #define DEBUG_INFO_0_CYCLE_TIMER 1
