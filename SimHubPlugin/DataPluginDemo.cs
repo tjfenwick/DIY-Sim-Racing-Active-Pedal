@@ -67,12 +67,15 @@ public struct payloadPedalConfig
     public byte absFrequency; // In Hz
     public byte absAmplitude; // In kg/20
 
+    
+
     // geometric properties of the pedal
     // in mm
     public byte lengthPedal_AC;
     public byte horPos_AB;
     public byte verPos_AB;
     public byte lengthPedal_CB;
+    public byte Simulate_ABS_trigger; //simulateABS
 
     // cubic spline params
     public float cubic_spline_param_a_0;
@@ -486,7 +489,7 @@ namespace User.PluginSdkDemo
             dap_config_initial_st.payloadPedalConfig_.horPos_AB = 215;
             dap_config_initial_st.payloadPedalConfig_.verPos_AB = 80;
             dap_config_initial_st.payloadPedalConfig_.lengthPedal_CB = 200;
-
+            dap_config_initial_st.payloadPedalConfig_.Simulate_ABS_trigger = 0;
             dap_config_initial_st.payloadPedalConfig_.maxGameOutput = 100;
 
             dap_config_initial_st.payloadPedalConfig_.kf_modelNoise = 128;

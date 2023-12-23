@@ -194,7 +194,7 @@ namespace User.PluginSdkDemo
                 dap_config_st[pedalIdx].payloadPedalConfig_.horPos_AB = 215;
                 dap_config_st[pedalIdx].payloadPedalConfig_.verPos_AB = 80;
                 dap_config_st[pedalIdx].payloadPedalConfig_.lengthPedal_CB = 200;
-
+                dap_config_st[pedalIdx].payloadPedalConfig_.Simulate_ABS_trigger= 0;
 
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_0 = 0;
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_1 = 0;
@@ -451,7 +451,14 @@ namespace User.PluginSdkDemo
             debugFlagSlider_0.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.debug_flags_0;
 
             Update_BrakeForceCurve();
-
+            if (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_trigger == 1)
+            {
+                Simulate_ABS_check.IsChecked = true;
+            }
+            else
+            {
+                Simulate_ABS_check.IsChecked = false;
+            }
 
             //// Select serial port accordingly
             string tmp = (string)Plugin._serialPort[indexOfSelectedPedal_u].PortName;
@@ -1190,7 +1197,7 @@ namespace User.PluginSdkDemo
         /********************************************************************************************************************/
         /*							Connect to pedal																		*/
         /********************************************************************************************************************/
-        public void ConnectToPedal_click(object sender, RoutedEventArgs e)
+        unsafe public void ConnectToPedal_click(object sender, RoutedEventArgs e)
         {
 
 
@@ -1233,6 +1240,106 @@ namespace User.PluginSdkDemo
                 ConnectToPedal.IsChecked = false;
                 Plugin._serialPort[indexOfSelectedPedal_u].Close();
                 TextBox_debugOutput.Text = "Serialport close";
+            }
+
+            ////reading config from pedal
+            if (Plugin._serialPort[indexOfSelectedPedal_u].IsOpen)
+            {
+
+
+                // compute checksum
+                DAP_action_st tmp;
+                tmp.payloadPedalAction_.returnPedalConfig_u8 = 1;
+
+
+                DAP_action_st* v = &tmp;
+                byte* p = (byte*)v;
+                tmp.payloadFooter_.checkSum = Plugin.checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalAction));
+
+
+                int length = sizeof(DAP_action_st);
+                byte[] newBuffer = new byte[length];
+                newBuffer = Plugin.getBytes_Action(tmp);
+
+
+                // clear inbuffer 
+                Plugin._serialPort[indexOfSelectedPedal_u].DiscardInBuffer();
+
+                // send query command
+                Plugin._serialPort[indexOfSelectedPedal_u].Write(newBuffer, 0, newBuffer.Length);
+
+
+                // wait for response
+                System.Threading.Thread.Sleep(100);
+
+                TextBox_debugOutput.Text += "\n"+"Reading pedal config";
+
+                try
+                {
+
+                    length = sizeof(DAP_config_st);
+                    byte[] newBuffer_config = new byte[length];
+
+                    int receivedLength = Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead;
+
+                    if (receivedLength == length)
+                    {
+                        Plugin._serialPort[indexOfSelectedPedal_u].Read(newBuffer_config, 0, length);
+
+
+                        DAP_config_st pedalConfig_read_st = getConfigFromBytes(newBuffer_config);
+
+                        // check CRC
+                        DAP_config_st* v_config = &pedalConfig_read_st;
+                        byte* p_config = (byte*)v_config;
+
+
+                        if (Plugin.checksumCalc(p_config, sizeof(payloadHeader) + sizeof(payloadPedalConfig)) == pedalConfig_read_st.payloadFooter_.checkSum)
+                        {
+                            this.dap_config_st[indexOfSelectedPedal_u] = pedalConfig_read_st;
+                            updateTheGuiFromConfig();
+                            TextBox_debugOutput.Text += "\n"+"Read config from pedal successful!";
+                        }
+                        else
+                        {
+                            TextBox_debugOutput.Text += "CRC mismatch!";
+                            TextBox_debugOutput.Text += "Data size mismatch!\n";
+                            TextBox_debugOutput.Text += "Expected size: " + length + "\n";
+                            TextBox_debugOutput.Text += "Received size: " + receivedLength;
+                        }
+                    }
+                    else
+                    {
+                        TextBox_debugOutput.Text += "Data size mismatch";
+
+                        DateTime startTime = DateTime.Now;
+                        //TimeSpan diffTime = DateTime.Now - startTime;
+                        //int millisceonds = (int)diffTime.TotalSeconds;
+
+
+                        while ((Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0) && (DateTime.Now - startTime).Seconds < 2)
+                        {
+                            string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
+                            TextBox_debugOutput.Text += message;
+
+                        }
+
+                    }
+
+
+
+
+                }
+                catch (Exception ex)
+                {
+                    TextBox_debugOutput.Text = ex.Message;
+                    ConnectToPedal.IsChecked = false;
+                }
+
+                //catch (TimeoutException) { }
+
+
+
             }
 
         }
@@ -1365,7 +1472,20 @@ namespace User.PluginSdkDemo
 
         }
 
-        
+        private void Simulate_ABS_check_Checked(object sender, RoutedEventArgs e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_trigger = 1;
+            TextBox_debugOutput.Text = "simulateABS; on";
+
+        }
+        private void Simulate_ABS_check_Unchecked(object sender, RoutedEventArgs e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_trigger = 0;
+            TextBox_debugOutput.Text = "simulateABS; off";
+
+        }
+
+
     }
     
 }

@@ -743,6 +743,9 @@
                 Value="0"
                 IsSnapToTickEnabled="False"
             />
+            <CheckBox x:Name="Simulate_ABS_check" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="6"
+                Width="236"
+                Height="34" VerticalAlignment="Top" Content="Simulate ABS for non-supported game" Foreground="White" Margin="7,0,0,0" Checked="Simulate_ABS_check_Checked" Unchecked="Simulate_ABS_check_Unchecked" IsChecked="False"/>
 
 
 
