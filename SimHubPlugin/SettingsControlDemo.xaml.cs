@@ -22,6 +22,10 @@ using static System.Net.Mime.MediaTypeNames;
 using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Win32;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Windows.Input;
+using System.Windows.Shapes;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+//using System.Drawing;
 
 namespace User.PluginSdkDemo
 {
@@ -167,10 +171,14 @@ namespace User.PluginSdkDemo
             SerialPortSelection.DataContext = SerialPortSelectionArray;
         }
 
+        private bool isDragging = false;
+        private Point offset;
+       
 
 
         public SettingsControlDemo()
         {
+
 
             for (uint pedalIdx = 0; pedalIdx < 3; pedalIdx++)
             {
@@ -215,7 +223,7 @@ namespace User.PluginSdkDemo
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.control_strategy_b = 0;
 
                 InitializeComponent();
-
+                
             }
 
         }
@@ -459,6 +467,13 @@ namespace User.PluginSdkDemo
             {
                 Simulate_ABS_check.IsChecked = false;
             }
+            //set control point position
+            Canvas.SetTop(rect0, -1 * (PedalForceCurve000_Slider.Value - 100 + 5));
+            Canvas.SetTop(rect1, -1 * (PedalForceCurve020_Slider.Value - 100 + 5));
+            Canvas.SetTop(rect2, -1 * (PedalForceCurve040_Slider.Value - 100 + 5));
+            Canvas.SetTop(rect3, -1 * (PedalForceCurve060_Slider.Value - 100 + 5));
+            Canvas.SetTop(rect4, -1 * (PedalForceCurve080_Slider.Value - 100 + 5));
+            Canvas.SetTop(rect5, -1 * (PedalForceCurve100_Slider.Value - 100 + 5));
 
             //// Select serial port accordingly
             string tmp = (string)Plugin._serialPort[indexOfSelectedPedal_u].PortName;
@@ -1490,6 +1505,93 @@ namespace User.PluginSdkDemo
             dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value = Convert.ToByte(e.NewValue);
             TextBox_debugOutput.Text = "ABS trigger value:"+ dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value;
         }
+
+
+        //dragable control rect.
+
+        /*private void InitializeRectanglePositions()
+        {
+            rectanglePositions.Add("rect1", new Point(75, 75));
+            rectanglePositions.Add("rect2", new Point(155, 55));
+            rectanglePositions.Add("rect3", new Point(235, 35));
+            rectanglePositions.Add("rect4", new Point(315, 15));
+        }*/
+
+        private void Rectangle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            isDragging = true;
+            var rectangle = sender as Rectangle;
+            offset = e.GetPosition(rectangle);
+            rectangle.CaptureMouse();
+        }
+
+        private void Rectangle_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                var rectangle = sender as Rectangle;
+                //double x = e.GetPosition(canvas).X - offset.X;
+                double y = e.GetPosition(canvas).Y - offset.Y;
+
+                // Ensure the rectangle stays within the canvas
+                //x = Math.Max(0, Math.Min(x, canvas.ActualWidth - rectangle.ActualWidth));
+                y = Math.Max(0, Math.Min(y, canvas.ActualHeight - rectangle.ActualHeight));
+
+                //Canvas.SetLeft(rectangle, x);
+                Canvas.SetTop(rectangle, y);
+                double y_actual = 100 - y -5;
+                if (rectangle.Name == "rect0")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000 = Convert.ToByte(y_actual);
+                }
+                if (rectangle.Name == "rect1")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020 = Convert.ToByte(y_actual);
+                }
+                if (rectangle.Name == "rect2")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040 = Convert.ToByte(y_actual);
+                }
+                if (rectangle.Name == "rect3")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060 = Convert.ToByte(y_actual);
+                }
+                if (rectangle.Name == "rect4")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080 = Convert.ToByte(y_actual);
+                }
+                if (rectangle.Name == "rect5")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100 = Convert.ToByte(y_actual);
+                }
+                Update_BrakeForceCurve();
+
+
+
+                // Update the position in the dictionary
+                //rectanglePositions[rectangle.Name] = new Point(x, y);
+            }
+        }
+
+        private void Rectangle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (isDragging)
+            {
+                var rectangle = sender as Rectangle;
+                isDragging = false;
+                rectangle.ReleaseMouseCapture();
+            }
+        }
+
+        /*
+        private void GetRectanglePositions()
+        {
+            foreach (var kvp in rectanglePositions)
+            {
+                Console.WriteLine($"{kvp.Key}: X={kvp.Value.X}, Y={kvp.Value.Y}");
+            }
+        }
+        */
 
     }
     

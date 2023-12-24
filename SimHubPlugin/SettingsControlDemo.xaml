@@ -304,7 +304,7 @@
 
 
             <!-- Travel vs Force curve GUI elements -->
-            <Canvas Height="100" Width="400" Background="#FF333333" HorizontalAlignment="Left" Grid.Row="9" Opacity="0.5" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="0,20,0,0" Grid.Column="1" >
+            <Canvas x:Name="canvas" Height="100" Width="400" Background="#FF333333" HorizontalAlignment="Left" Grid.Row="9" Opacity="0.5" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="0,20,0,0" Grid.Column="1" >
                 <Canvas.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleX="1" ScaleY="1"/>
@@ -364,7 +364,12 @@
                         </TransformGroup>
                     </Polyline.RenderTransform>
                 </Polyline>
-
+                <Rectangle x:Name="rect0" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="-5" Canvas.Top="95" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect1" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="75" Canvas.Top="75" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect2" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="155" Canvas.Top="55" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect3" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="235" Canvas.Top="35" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect4" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="315" Canvas.Top="15" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect5" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="395" Canvas.Top="-5" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
             </Canvas>
 
 
