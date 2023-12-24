@@ -402,7 +402,7 @@
             TickPlacement="BottomRight"
 			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
             Value="0" Grid.ColumnSpan="2"
-                 Orientation="Vertical"
+                 Orientation="Vertical" Visibility="Hidden"
             >
             </Slider>
 
@@ -422,7 +422,7 @@
             TickPlacement="BottomRight"
 			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
             Value="20"
-            Orientation="Vertical"
+            Orientation="Vertical" Visibility="Hidden"
             >
             </Slider>
 
@@ -442,7 +442,7 @@
             TickPlacement="BottomRight"
 			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
             Value="40"
-            Orientation="Vertical"
+            Orientation="Vertical" Visibility="Hidden"
             >
             </Slider>
 
@@ -462,7 +462,7 @@
             TickPlacement="BottomRight"
 			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
             Value="60"
-            Orientation="Vertical"
+            Orientation="Vertical" Visibility="Hidden"
             >
             </Slider>
 
@@ -482,7 +482,7 @@
             TickPlacement="BottomRight"
 			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
             Value="80"
-                 Orientation="Vertical"
+                 Orientation="Vertical" Visibility="Hidden"
             >
             </Slider>
 
@@ -502,7 +502,7 @@
 			Maximum="100"
             TickPlacement="BottomRight"
 			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
-            Value="80" Orientation="Vertical"
+            Value="80" Orientation="Vertical" Visibility="Hidden"
             >
             </Slider>
 
