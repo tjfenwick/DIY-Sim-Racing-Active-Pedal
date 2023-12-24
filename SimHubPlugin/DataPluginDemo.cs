@@ -76,6 +76,7 @@ public struct payloadPedalConfig
     public byte verPos_AB;
     public byte lengthPedal_CB;
     public byte Simulate_ABS_trigger; //simulateABS
+    public byte Simulate_ABS_value; //simulated ABS value
 
     // cubic spline params
     public float cubic_spline_param_a_0;

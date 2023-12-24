@@ -195,7 +195,7 @@ namespace User.PluginSdkDemo
                 dap_config_st[pedalIdx].payloadPedalConfig_.verPos_AB = 80;
                 dap_config_st[pedalIdx].payloadPedalConfig_.lengthPedal_CB = 200;
                 dap_config_st[pedalIdx].payloadPedalConfig_.Simulate_ABS_trigger= 0;
-
+                dap_config_st[pedalIdx].payloadPedalConfig_.Simulate_ABS_value= 80;
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_0 = 0;
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_1 = 0;
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_2 = 0;
@@ -442,7 +442,7 @@ namespace User.PluginSdkDemo
             PID_tuning_D_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_d_gain;
 
             PID_tuning_control_strategy_slider.Value = (byte)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.control_strategy_b;
-
+            Simulate_ABS_slider.Value = (byte)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value;
 
             maxGameOutput_slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput;
 
@@ -1475,16 +1475,21 @@ namespace User.PluginSdkDemo
         private void Simulate_ABS_check_Checked(object sender, RoutedEventArgs e)
         {
             dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_trigger = 1;
-            TextBox_debugOutput.Text = "simulateABS; on";
+            TextBox_debugOutput.Text = "simulateABS: on";
 
         }
         private void Simulate_ABS_check_Unchecked(object sender, RoutedEventArgs e)
         {
             dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_trigger = 0;
-            TextBox_debugOutput.Text = "simulateABS; off";
+            TextBox_debugOutput.Text = "simulateABS: off";
 
         }
 
+        private void ABS_SLIDER_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value = Convert.ToByte(e.NewValue);
+            TextBox_debugOutput.Text = "ABS trigger value:"+ dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value;
+        }
 
     }
     

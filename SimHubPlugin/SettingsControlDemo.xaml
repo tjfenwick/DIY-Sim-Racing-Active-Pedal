@@ -746,6 +746,31 @@
             <CheckBox x:Name="Simulate_ABS_check" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="6"
                 Width="236"
                 Height="34" VerticalAlignment="Top" Content="Simulate ABS for non-supported game" Foreground="White" Margin="7,0,0,0" Checked="Simulate_ABS_check_Checked" Unchecked="Simulate_ABS_check_Unchecked" IsChecked="False"/>
+            <Slider x:Name="Simulate_ABS_slider" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="140,37,0,0" 
+                Grid.Row="6" 
+                Grid.Column="1" 
+                Width="107" 
+                ValueChanged="ABS_SLIDER_changed" 
+                AutoToolTipPlacement="TopLeft" 
+                AutoToolTipPrecision="0"
+                Minimum="50"
+                Maximum="100"
+                TickPlacement="BottomRight"
+                TickFrequency="5" RenderTransformOrigin="0.508,0.525"
+                Value="80"
+                IsSnapToTickEnabled="False" SmallChange="1" LargeChange="5"
+            />
+            <TextBlock HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="10,41,0,0" 
+                Text="ABS Trigger value(%):" 
+                Grid.Row="6" 
+                Grid.Column="1" 
+                Width="117" 
+                Foreground="White" FontSize="10"/>
 
 
 
