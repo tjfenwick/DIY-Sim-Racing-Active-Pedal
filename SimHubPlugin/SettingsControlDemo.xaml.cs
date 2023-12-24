@@ -437,14 +437,6 @@ namespace User.PluginSdkDemo
 
             PedalDampening_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.dampingPress;
 
-            PedalForceCurve000_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000;
-            PedalForceCurve020_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020;
-            PedalForceCurve040_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040;
-            PedalForceCurve060_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060;
-            PedalForceCurve080_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080;
-            PedalForceCurve100_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100;
-
-
             PID_tuning_P_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_p_gain;
             PID_tuning_I_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_i_gain;
             PID_tuning_D_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_d_gain;
@@ -468,17 +460,17 @@ namespace User.PluginSdkDemo
                 Simulate_ABS_check.IsChecked = false;
             }
             //set control point position
-            Canvas.SetTop(rect0, -1 * (PedalForceCurve000_Slider.Value - canvas.Height + rect0.Height / 2));
+            Canvas.SetTop(rect0, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000 - canvas.Height + rect0.Height / 2));
             Canvas.SetLeft(rect0, 0*canvas.Width/5-rect0.Width/2);
-            Canvas.SetTop(rect1, -1 * (PedalForceCurve020_Slider.Value - canvas.Height + rect1.Height / 2));
+            Canvas.SetTop(rect1, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020 - canvas.Height + rect1.Height / 2));
             Canvas.SetLeft(rect1, 1 * canvas.Width / 5 - rect1.Width / 2);
-            Canvas.SetTop(rect2, -1 * (PedalForceCurve040_Slider.Value - canvas.Height + rect2.Height / 2));
+            Canvas.SetTop(rect2, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040 - canvas.Height + rect2.Height / 2));
             Canvas.SetLeft(rect2, 2 * canvas.Width / 5 - rect2.Width / 2);
-            Canvas.SetTop(rect3, -1 * (PedalForceCurve060_Slider.Value - canvas.Height + rect3.Height / 2));
+            Canvas.SetTop(rect3, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060 - canvas.Height + rect3.Height / 2));
             Canvas.SetLeft(rect3, 3 * canvas.Width / 5 - rect3.Width / 2);
-            Canvas.SetTop(rect4, -1 * (PedalForceCurve080_Slider.Value - canvas.Height + rect4.Height / 2));
+            Canvas.SetTop(rect4, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080 - canvas.Height + rect4.Height / 2));
             Canvas.SetLeft(rect4, 4 * canvas.Width / 5 - rect4.Width / 2);
-            Canvas.SetTop(rect5, -1 * (PedalForceCurve100_Slider.Value - canvas.Height + rect5.Height / 2));
+            Canvas.SetTop(rect5, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100 - canvas.Height + rect5.Height / 2));
             Canvas.SetLeft(rect5, 5 * canvas.Width / 5 - rect5.Width / 2);
 
             //// Select serial port accordingly
@@ -710,36 +702,7 @@ namespace User.PluginSdkDemo
 
 
 
-        public void Slider_Force000(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
-        public void Slider_Force020(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
-        public void Slider_Force040(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
-        public void Slider_Force060(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
-        public void Slider_Force080(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
-        public void Slider_Force100(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
+
 
 
 
