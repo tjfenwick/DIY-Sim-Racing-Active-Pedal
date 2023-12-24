@@ -1535,7 +1535,7 @@ namespace User.PluginSdkDemo
 
                 // Ensure the rectangle stays within the canvas
                 //x = Math.Max(0, Math.Min(x, canvas.ActualWidth - rectangle.ActualWidth));
-                y = Math.Max(0, Math.Min(y, canvas.ActualHeight - rectangle.ActualHeight));
+                y = Math.Max(-1*rectangle.ActualHeight/2, Math.Min(y, canvas.ActualHeight - rectangle.ActualHeight/2));
 
                 //Canvas.SetLeft(rectangle, x);
                 Canvas.SetTop(rectangle, y);
