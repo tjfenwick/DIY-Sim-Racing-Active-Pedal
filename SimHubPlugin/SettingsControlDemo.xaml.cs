@@ -25,7 +25,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Windows.Input;
 using System.Windows.Shapes;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
-//using System.Drawing;
+
 
 namespace User.PluginSdkDemo
 {
@@ -38,7 +38,7 @@ namespace User.PluginSdkDemo
     {
 
 
-        public uint pedalConfigPayload_version = 108;
+        public uint pedalConfigPayload_version = 109;
 
         public uint indexOfSelectedPedal_u = 1;
 
@@ -468,12 +468,18 @@ namespace User.PluginSdkDemo
                 Simulate_ABS_check.IsChecked = false;
             }
             //set control point position
-            Canvas.SetTop(rect0, -1 * (PedalForceCurve000_Slider.Value - 100 + 5));
-            Canvas.SetTop(rect1, -1 * (PedalForceCurve020_Slider.Value - 100 + 5));
-            Canvas.SetTop(rect2, -1 * (PedalForceCurve040_Slider.Value - 100 + 5));
-            Canvas.SetTop(rect3, -1 * (PedalForceCurve060_Slider.Value - 100 + 5));
-            Canvas.SetTop(rect4, -1 * (PedalForceCurve080_Slider.Value - 100 + 5));
-            Canvas.SetTop(rect5, -1 * (PedalForceCurve100_Slider.Value - 100 + 5));
+            Canvas.SetTop(rect0, -1 * (PedalForceCurve000_Slider.Value - canvas.Height + rect0.Height / 2));
+            Canvas.SetLeft(rect0, 0*canvas.Width/5-rect0.Width/2);
+            Canvas.SetTop(rect1, -1 * (PedalForceCurve020_Slider.Value - canvas.Height + rect1.Height / 2));
+            Canvas.SetLeft(rect1, 1 * canvas.Width / 5 - rect1.Width / 2);
+            Canvas.SetTop(rect2, -1 * (PedalForceCurve040_Slider.Value - canvas.Height + rect2.Height / 2));
+            Canvas.SetLeft(rect2, 2 * canvas.Width / 5 - rect2.Width / 2);
+            Canvas.SetTop(rect3, -1 * (PedalForceCurve060_Slider.Value - canvas.Height + rect3.Height / 2));
+            Canvas.SetLeft(rect3, 3 * canvas.Width / 5 - rect3.Width / 2);
+            Canvas.SetTop(rect4, -1 * (PedalForceCurve080_Slider.Value - canvas.Height + rect4.Height / 2));
+            Canvas.SetLeft(rect4, 4 * canvas.Width / 5 - rect4.Width / 2);
+            Canvas.SetTop(rect5, -1 * (PedalForceCurve100_Slider.Value - canvas.Height + rect5.Height / 2));
+            Canvas.SetLeft(rect5, 5 * canvas.Width / 5 - rect5.Width / 2);
 
             //// Select serial port accordingly
             string tmp = (string)Plugin._serialPort[indexOfSelectedPedal_u].PortName;
