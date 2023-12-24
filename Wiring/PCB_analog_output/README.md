@@ -3,6 +3,8 @@ This is modified from [https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal](https
 Changing connection from bluetooth to simucube wheel base D15 port.<br>
 Current version was release 34.<br>
 Please use the simhub pligin with the same version code.<br>
+#Arduino code
+The arduino code was set BLE connection as default, you need compile the code with uncomment [#define Using_analog_output](https://github.com/tcfshcrw/DIY-AP-For-Simucube-D15-Port/blob/5f9ee92e2915fc8c4bda61bb6a2c49aa94eec56f/Arduino/Esp32/Main/Main.ino#L3C6-L3C6).<br>
 # PCB
 <img src="image/PCB.jpg" width="600"><br>
 This is the custom PCB from [https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal](https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal).<br>
