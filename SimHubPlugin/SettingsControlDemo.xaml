@@ -108,55 +108,87 @@
             <!-- Pedal preforce slider -->
             <TextBlock HorizontalAlignment="Left" 
                    VerticalAlignment="Top" 
-                   Margin="5,0,0,0" 
+                   Margin="341,67,0,0" 
                    Text="Pedal min force:" 
-                   Grid.Row="5" 
-                   Grid.Column="0" 
+                   Grid.Row="9" 
                    Width="120" 
-                   Foreground="White"/>
+                   Foreground="White" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
             <Slider x:Name="PedalMinForce_Slider" 
             HorizontalAlignment="Left" 
-            VerticalAlignment="Center" 
-            Margin="5,0,0,0" 
-            Grid.Row="5" 
-            Grid.Column="0" 
+            VerticalAlignment="Top" 
+            Margin="358,71,0,0" 
+            Grid.Row="9" 
             Width="120" 
             ValueChanged="Slider_PedalMinForce" 
             AutoToolTipPlacement="TopLeft" 
             AutoToolTipPrecision="0"
             Minimum="1"
 			Maximum="100"
-            TickPlacement="BottomRight"
-			TickFrequency="10" RenderTransformOrigin="0.508,0.525"
-            Value="8"
-            />
+RenderTransformOrigin="0.508,0.525"
+            Value="8" Grid.ColumnSpan="2"
+            >
+                <Slider.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Slider.RenderTransform>
+            </Slider>
 
 
             <!-- Pedal max force slider -->
-            <TextBlock HorizontalAlignment="Center" 
+            <TextBlock HorizontalAlignment="Left" 
                    VerticalAlignment="Top" 
-                   Margin="5,0,0,0" 
+                   Margin="406,64,0,0" 
                    Text="Pedal max force:" 
-                   Grid.Row="5" 
-                   Grid.Column="0" 
+                   Grid.Row="9" 
+                   Grid.Column="1" 
                    Width="120" 
-                   Foreground="White"/>
+                   Foreground="White" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
             <Slider x:Name="PedalMaxForce_Slider" 
-            HorizontalAlignment="Center" 
-            VerticalAlignment="Center" 
-            Margin="5,0,0,0" 
-            Grid.Row="5" 
-            Grid.Column="0" 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Top" 
+            Margin="421,67,0,0" 
+            Grid.Row="9" 
+            Grid.Column="1" 
             Width="120" 
             ValueChanged="Slider_PedalMaxForce" 
             AutoToolTipPlacement="TopLeft" 
             AutoToolTipPrecision="0"
             Minimum="0"
 			Maximum="255"
-            TickPlacement="BottomRight"
-			TickFrequency="10" RenderTransformOrigin="0.508,0.525"
-            Value="73"
-            />
+RenderTransformOrigin="0.508,0.525"
+            Value="73" Grid.ColumnSpan="2"
+            >
+                <Slider.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Slider.RenderTransform>
+            </Slider>
 
 
 
@@ -164,17 +196,17 @@
             <!-- Pedal min position slider -->
             <TextBlock HorizontalAlignment="Left" 
                    VerticalAlignment="Top" 
-                   Margin="5,0,0,0" 
+                   Margin="65,165,0,0" 
                    Text="Pedal min position:" 
-                   Grid.Row="5" 
+                   Grid.Row="9" 
                    Grid.Column="1" 
                    Width="120" 
                    Foreground="White"/>
             <Slider x:Name="PedalMinPos_Slider" 
             HorizontalAlignment="Left" 
-            VerticalAlignment="Center" 
-            Margin="5,0,0,0" 
-            Grid.Row="5" 
+            VerticalAlignment="Top" 
+            Margin="63,186,0,0" 
+            Grid.Row="9" 
             Grid.Column="1" 
             Width="120" 
             ValueChanged="Slider_PedalMinPos" 
@@ -182,26 +214,25 @@
             AutoToolTipPrecision="0"
             Minimum="0"
 			Maximum="100"
-            TickPlacement="BottomRight"
-			TickFrequency="10" RenderTransformOrigin="0.508,0.525"
+RenderTransformOrigin="0.508,0.525"
             Value="41"
             />
 
 
             <!-- Pedal max position slider -->
-            <TextBlock HorizontalAlignment="Center" 
+            <TextBlock HorizontalAlignment="Left" 
                    VerticalAlignment="Top" 
-                   Margin="5,0,0,0" 
+                   Margin="330,165,0,0" 
                    Text="Pedal max position:" 
-                   Grid.Row="5" 
+                   Grid.Row="9" 
                    Grid.Column="1" 
                    Width="120" 
                    Foreground="White"/>
             <Slider x:Name="PedalMaxPos_Slider" 
-            HorizontalAlignment="Center" 
-            VerticalAlignment="Center" 
-            Margin="5,0,0,0" 
-            Grid.Row="5" 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Top" 
+            Margin="330,186,0,0" 
+            Grid.Row="9" 
             Grid.Column="1" 
             Width="120" 
             ValueChanged="Slider_PedalMaxPos" 
@@ -209,8 +240,7 @@
             AutoToolTipPrecision="0"
             Minimum="0"
 			Maximum="100"
-            TickPlacement="BottomRight"
-			TickFrequency="10" RenderTransformOrigin="0.508,0.525"
+            RenderTransformOrigin="0.508,0.525"
             Value="86"
             />
 
@@ -304,7 +334,7 @@
 
 
             <!-- Travel vs Force curve GUI elements -->
-            <Canvas x:Name="canvas" Height="100" Width="400" Background="#FF333333" HorizontalAlignment="Left" Grid.Row="9" Opacity="0.5" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="0,20,0,0" Grid.Column="1" >
+            <Canvas x:Name="canvas" Height="100" Width="400" Background="#FF333333" HorizontalAlignment="Center" Grid.Row="9" Opacity="0.5" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="0,31,0,0" Grid.Column="1" >
                 <Canvas.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleX="1" ScaleY="1"/>
@@ -312,6 +342,7 @@
                         <RotateTransform/>
                         <TranslateTransform/>
                     </TransformGroup>
+
                 </Canvas.RenderTransform>
 
 
@@ -379,7 +410,7 @@
             <!-- Travel vs Force curve adjustment sliders -->
             <TextBlock HorizontalAlignment="Left" 
                    VerticalAlignment="Top" 
-                   Margin="5,0,0,0" 
+                   Margin="140,7,0,0" 
                    Text="Force curve adjustment:" 
                    Grid.Row="9" 
                    Grid.Column="1" 

@@ -50,7 +50,7 @@ namespace User.PluginSdkDemo
 
 
 
-
+        
 
 
         // read config from JSON on startup
@@ -96,6 +96,52 @@ namespace User.PluginSdkDemo
 
 
         //}
+
+        private void DrawGridLines()
+        {
+            // Specify the number of rows and columns for the grid
+            int rowCount = 5;
+            int columnCount = 5;
+
+            // Calculate the width and height of each cell
+            double cellWidth = canvas.Width / columnCount;
+            double cellHeight = canvas.Height / rowCount;
+
+            // Draw horizontal gridlines
+            for (int i = 1; i < rowCount; i++)
+            {
+                Line line = new Line
+                {
+                    X1 = 0,
+                    Y1 = i * cellHeight,
+                    X2 = canvas.Width,
+                    Y2 = i * cellHeight,
+                    //Stroke = Brush.Black,
+                    Stroke = System.Windows.Media.Brushes.LightSteelBlue,
+                    StrokeThickness = 1,
+                    Opacity = 0.1
+
+                };
+                canvas.Children.Add(line);
+            }
+
+            // Draw vertical gridlines
+            for (int i = 1; i < columnCount; i++)
+            {
+                Line line = new Line
+                {
+                    X1 = i * cellWidth,
+                    Y1 = 0,
+                    X2 = i * cellWidth,
+                    Y2 = canvas.Height,
+                    //Stroke = Brushes.Black,
+                    Stroke = System.Windows.Media.Brushes.LightSteelBlue,
+                    StrokeThickness = 1,
+                    Opacity = 0.1
+                };
+                canvas.Children.Add(line);
+            }
+        }
 
         private void InitReadStructFromJson()
         {
@@ -223,7 +269,10 @@ namespace User.PluginSdkDemo
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.control_strategy_b = 0;
 
                 InitializeComponent();
-                
+
+                // Call this method to generate gridlines on the Canvas
+                DrawGridLines();
+
             }
 
         }
