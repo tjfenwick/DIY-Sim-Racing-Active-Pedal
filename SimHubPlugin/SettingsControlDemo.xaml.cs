@@ -22,6 +22,10 @@ using static System.Net.Mime.MediaTypeNames;
 using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Win32;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Windows.Input;
+using System.Windows.Shapes;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+
 
 namespace User.PluginSdkDemo
 {
@@ -34,7 +38,7 @@ namespace User.PluginSdkDemo
     {
 
 
-        public uint pedalConfigPayload_version = 108;
+        public uint pedalConfigPayload_version = 109;
 
         public uint indexOfSelectedPedal_u = 1;
 
@@ -167,10 +171,14 @@ namespace User.PluginSdkDemo
             SerialPortSelection.DataContext = SerialPortSelectionArray;
         }
 
+        private bool isDragging = false;
+        private Point offset;
+       
 
 
         public SettingsControlDemo()
         {
+
 
             for (uint pedalIdx = 0; pedalIdx < 3; pedalIdx++)
             {
@@ -194,8 +202,8 @@ namespace User.PluginSdkDemo
                 dap_config_st[pedalIdx].payloadPedalConfig_.horPos_AB = 215;
                 dap_config_st[pedalIdx].payloadPedalConfig_.verPos_AB = 80;
                 dap_config_st[pedalIdx].payloadPedalConfig_.lengthPedal_CB = 200;
-
-
+                dap_config_st[pedalIdx].payloadPedalConfig_.Simulate_ABS_trigger= 0;
+                dap_config_st[pedalIdx].payloadPedalConfig_.Simulate_ABS_value= 80;
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_0 = 0;
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_1 = 0;
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.cubic_spline_param_a_2 = 0;
@@ -215,7 +223,7 @@ namespace User.PluginSdkDemo
                 dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.control_strategy_b = 0;
 
                 InitializeComponent();
-
+                
             }
 
         }
@@ -429,20 +437,12 @@ namespace User.PluginSdkDemo
 
             PedalDampening_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.dampingPress;
 
-            PedalForceCurve000_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000;
-            PedalForceCurve020_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020;
-            PedalForceCurve040_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040;
-            PedalForceCurve060_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060;
-            PedalForceCurve080_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080;
-            PedalForceCurve100_Slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100;
-
-
             PID_tuning_P_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_p_gain;
             PID_tuning_I_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_i_gain;
             PID_tuning_D_gain_slider.Value = (double)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.PID_d_gain;
 
             PID_tuning_control_strategy_slider.Value = (byte)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.control_strategy_b;
-
+            Simulate_ABS_slider.Value = (byte)dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value;
 
             maxGameOutput_slider.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput;
 
@@ -451,7 +451,27 @@ namespace User.PluginSdkDemo
             debugFlagSlider_0.Value = dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.debug_flags_0;
 
             Update_BrakeForceCurve();
-
+            if (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_trigger == 1)
+            {
+                Simulate_ABS_check.IsChecked = true;
+            }
+            else
+            {
+                Simulate_ABS_check.IsChecked = false;
+            }
+            //set control point position
+            Canvas.SetTop(rect0, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000 - canvas.Height + rect0.Height / 2));
+            Canvas.SetLeft(rect0, 0*canvas.Width/5-rect0.Width/2);
+            Canvas.SetTop(rect1, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020 - canvas.Height + rect1.Height / 2));
+            Canvas.SetLeft(rect1, 1 * canvas.Width / 5 - rect1.Width / 2);
+            Canvas.SetTop(rect2, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040 - canvas.Height + rect2.Height / 2));
+            Canvas.SetLeft(rect2, 2 * canvas.Width / 5 - rect2.Width / 2);
+            Canvas.SetTop(rect3, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060 - canvas.Height + rect3.Height / 2));
+            Canvas.SetLeft(rect3, 3 * canvas.Width / 5 - rect3.Width / 2);
+            Canvas.SetTop(rect4, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080 - canvas.Height + rect4.Height / 2));
+            Canvas.SetLeft(rect4, 4 * canvas.Width / 5 - rect4.Width / 2);
+            Canvas.SetTop(rect5, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100 - canvas.Height + rect5.Height / 2));
+            Canvas.SetLeft(rect5, 5 * canvas.Width / 5 - rect5.Width / 2);
 
             //// Select serial port accordingly
             string tmp = (string)Plugin._serialPort[indexOfSelectedPedal_u].PortName;
@@ -682,36 +702,7 @@ namespace User.PluginSdkDemo
 
 
 
-        public void Slider_Force000(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
-        public void Slider_Force020(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
-        public void Slider_Force040(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
-        public void Slider_Force060(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
-        public void Slider_Force080(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
-        public void Slider_Force100(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100 = Convert.ToByte(e.NewValue);
-            Update_BrakeForceCurve();
-        }
+
 
 
 
@@ -1190,7 +1181,7 @@ namespace User.PluginSdkDemo
         /********************************************************************************************************************/
         /*							Connect to pedal																		*/
         /********************************************************************************************************************/
-        public void ConnectToPedal_click(object sender, RoutedEventArgs e)
+        unsafe public void ConnectToPedal_click(object sender, RoutedEventArgs e)
         {
 
 
@@ -1233,6 +1224,106 @@ namespace User.PluginSdkDemo
                 ConnectToPedal.IsChecked = false;
                 Plugin._serialPort[indexOfSelectedPedal_u].Close();
                 TextBox_debugOutput.Text = "Serialport close";
+            }
+
+            ////reading config from pedal
+            if (Plugin._serialPort[indexOfSelectedPedal_u].IsOpen)
+            {
+
+
+                // compute checksum
+                DAP_action_st tmp;
+                tmp.payloadPedalAction_.returnPedalConfig_u8 = 1;
+
+
+                DAP_action_st* v = &tmp;
+                byte* p = (byte*)v;
+                tmp.payloadFooter_.checkSum = Plugin.checksumCalc(p, sizeof(payloadHeader) + sizeof(payloadPedalAction));
+
+
+                int length = sizeof(DAP_action_st);
+                byte[] newBuffer = new byte[length];
+                newBuffer = Plugin.getBytes_Action(tmp);
+
+
+                // clear inbuffer 
+                Plugin._serialPort[indexOfSelectedPedal_u].DiscardInBuffer();
+
+                // send query command
+                Plugin._serialPort[indexOfSelectedPedal_u].Write(newBuffer, 0, newBuffer.Length);
+
+
+                // wait for response
+                System.Threading.Thread.Sleep(100);
+
+                TextBox_debugOutput.Text += "\n"+"Reading pedal config";
+
+                try
+                {
+
+                    length = sizeof(DAP_config_st);
+                    byte[] newBuffer_config = new byte[length];
+
+                    int receivedLength = Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead;
+
+                    if (receivedLength == length)
+                    {
+                        Plugin._serialPort[indexOfSelectedPedal_u].Read(newBuffer_config, 0, length);
+
+
+                        DAP_config_st pedalConfig_read_st = getConfigFromBytes(newBuffer_config);
+
+                        // check CRC
+                        DAP_config_st* v_config = &pedalConfig_read_st;
+                        byte* p_config = (byte*)v_config;
+
+
+                        if (Plugin.checksumCalc(p_config, sizeof(payloadHeader) + sizeof(payloadPedalConfig)) == pedalConfig_read_st.payloadFooter_.checkSum)
+                        {
+                            this.dap_config_st[indexOfSelectedPedal_u] = pedalConfig_read_st;
+                            updateTheGuiFromConfig();
+                            TextBox_debugOutput.Text += "\n"+"Read config from pedal successful!";
+                        }
+                        else
+                        {
+                            TextBox_debugOutput.Text += "CRC mismatch!";
+                            TextBox_debugOutput.Text += "Data size mismatch!\n";
+                            TextBox_debugOutput.Text += "Expected size: " + length + "\n";
+                            TextBox_debugOutput.Text += "Received size: " + receivedLength;
+                        }
+                    }
+                    else
+                    {
+                        TextBox_debugOutput.Text += "Data size mismatch";
+
+                        DateTime startTime = DateTime.Now;
+                        //TimeSpan diffTime = DateTime.Now - startTime;
+                        //int millisceonds = (int)diffTime.TotalSeconds;
+
+
+                        while ((Plugin._serialPort[indexOfSelectedPedal_u].BytesToRead > 0) && (DateTime.Now - startTime).Seconds < 2)
+                        {
+                            string message = Plugin._serialPort[indexOfSelectedPedal_u].ReadLine();
+                            TextBox_debugOutput.Text += message;
+
+                        }
+
+                    }
+
+
+
+
+                }
+                catch (Exception ex)
+                {
+                    TextBox_debugOutput.Text = ex.Message;
+                    ConnectToPedal.IsChecked = false;
+                }
+
+                //catch (TimeoutException) { }
+
+
+
             }
 
         }
@@ -1365,7 +1456,112 @@ namespace User.PluginSdkDemo
 
         }
 
-        
+        private void Simulate_ABS_check_Checked(object sender, RoutedEventArgs e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_trigger = 1;
+            TextBox_debugOutput.Text = "simulateABS: on";
+
+        }
+        private void Simulate_ABS_check_Unchecked(object sender, RoutedEventArgs e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_trigger = 0;
+            TextBox_debugOutput.Text = "simulateABS: off";
+
+        }
+
+        private void ABS_SLIDER_changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value = Convert.ToByte(e.NewValue);
+            TextBox_debugOutput.Text = "ABS trigger value:"+ dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value;
+        }
+
+
+        //dragable control rect.
+
+        /*private void InitializeRectanglePositions()
+        {
+            rectanglePositions.Add("rect1", new Point(75, 75));
+            rectanglePositions.Add("rect2", new Point(155, 55));
+            rectanglePositions.Add("rect3", new Point(235, 35));
+            rectanglePositions.Add("rect4", new Point(315, 15));
+        }*/
+
+        private void Rectangle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            isDragging = true;
+            var rectangle = sender as Rectangle;
+            offset = e.GetPosition(rectangle);
+            rectangle.CaptureMouse();
+        }
+
+        private void Rectangle_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                var rectangle = sender as Rectangle;
+                //double x = e.GetPosition(canvas).X - offset.X;
+                double y = e.GetPosition(canvas).Y - offset.Y;
+
+                // Ensure the rectangle stays within the canvas
+                //x = Math.Max(0, Math.Min(x, canvas.ActualWidth - rectangle.ActualWidth));
+                y = Math.Max(-1*rectangle.ActualHeight/2, Math.Min(y, canvas.ActualHeight - rectangle.ActualHeight/2));
+
+                //Canvas.SetLeft(rectangle, x);
+                Canvas.SetTop(rectangle, y);
+                double y_actual = 100 - y -5;
+                if (rectangle.Name == "rect0")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000 = Convert.ToByte(y_actual);
+                }
+                if (rectangle.Name == "rect1")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020 = Convert.ToByte(y_actual);
+                }
+                if (rectangle.Name == "rect2")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040 = Convert.ToByte(y_actual);
+                }
+                if (rectangle.Name == "rect3")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060 = Convert.ToByte(y_actual);
+                }
+                if (rectangle.Name == "rect4")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080 = Convert.ToByte(y_actual);
+                }
+                if (rectangle.Name == "rect5")
+                {
+                    dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100 = Convert.ToByte(y_actual);
+                }
+                Update_BrakeForceCurve();
+
+
+
+                // Update the position in the dictionary
+                //rectanglePositions[rectangle.Name] = new Point(x, y);
+            }
+        }
+
+        private void Rectangle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (isDragging)
+            {
+                var rectangle = sender as Rectangle;
+                isDragging = false;
+                rectangle.ReleaseMouseCapture();
+            }
+        }
+
+        /*
+        private void GetRectanglePositions()
+        {
+            foreach (var kvp in rectanglePositions)
+            {
+                Console.WriteLine($"{kvp.Key}: X={kvp.Value.X}, Y={kvp.Value.Y}");
+            }
+        }
+        */
+
     }
     
 }

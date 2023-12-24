@@ -122,6 +122,8 @@
   // stepper pins
   #define dirPinStepper    22
   #define stepPinStepper   23
+  //analog output pin
+  #define D_O 25   
   
   // endstop pins
   #define minPin 12

@@ -304,7 +304,7 @@
 
 
             <!-- Travel vs Force curve GUI elements -->
-            <Canvas Height="100" Width="400" Background="#FF333333" HorizontalAlignment="Left" Grid.Row="9" Opacity="0.5" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="0,20,0,0" Grid.Column="1" >
+            <Canvas x:Name="canvas" Height="100" Width="400" Background="#FF333333" HorizontalAlignment="Left" Grid.Row="9" Opacity="0.5" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="0,20,0,0" Grid.Column="1" >
                 <Canvas.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleX="1" ScaleY="1"/>
@@ -364,7 +364,12 @@
                         </TransformGroup>
                     </Polyline.RenderTransform>
                 </Polyline>
-
+                <Rectangle x:Name="rect0" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="-5" Canvas.Top="95" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect1" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="75" Canvas.Top="75" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect2" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="155" Canvas.Top="55" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect3" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="235" Canvas.Top="35" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect4" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="315" Canvas.Top="15" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect5" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="395" Canvas.Top="-5" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
             </Canvas>
 
 
@@ -380,132 +385,6 @@
                    Grid.Column="1" 
                    Width="160" 
                    Foreground="White"/>
-
-            <Slider x:Name="PedalForceCurve000_Slider" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top" 
-            Margin="0,155,0,0" 
-            Grid.Row="9" 
-            Grid.Column="1" 
-            Width="30" 
-            Height="120"
-            ValueChanged="Slider_Force000" 
-            AutoToolTipPlacement="TopLeft" 
-            AutoToolTipPrecision="0"
-            Minimum="0"
-			Maximum="100"
-            TickPlacement="BottomRight"
-			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
-            Value="0" Grid.ColumnSpan="2"
-                 Orientation="Vertical"
-            >
-            </Slider>
-
-            <Slider x:Name="PedalForceCurve020_Slider" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top" 
-            Margin="80,155,0,0" 
-            Grid.Row="9" 
-            Grid.Column="1" 
-            Width="30" 
-            Height="120" 
-            ValueChanged="Slider_Force020" 
-            AutoToolTipPlacement="TopLeft" 
-            AutoToolTipPrecision="0"
-            Minimum="0"
-			Maximum="100"
-            TickPlacement="BottomRight"
-			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
-            Value="20"
-            Orientation="Vertical"
-            >
-            </Slider>
-
-            <Slider x:Name="PedalForceCurve040_Slider" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top" 
-            Margin="160,155,0,0" 
-            Grid.Row="9" 
-            Grid.Column="1" 
-            Width="30" 
-            Height="120" 
-            ValueChanged="Slider_Force040" 
-            AutoToolTipPlacement="TopLeft" 
-            AutoToolTipPrecision="0"
-            Minimum="0"
-			Maximum="100"
-            TickPlacement="BottomRight"
-			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
-            Value="40"
-            Orientation="Vertical"
-            >
-            </Slider>
-
-            <Slider x:Name="PedalForceCurve060_Slider" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top" 
-            Margin="240,155,0,0" 
-            Grid.Row="9" 
-            Grid.Column="1" 
-            Width="30" 
-            Height="120"
-            ValueChanged="Slider_Force060" 
-            AutoToolTipPlacement="TopLeft" 
-            AutoToolTipPrecision="0"
-            Minimum="0"
-			Maximum="100"
-            TickPlacement="BottomRight"
-			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
-            Value="60"
-            Orientation="Vertical"
-            >
-            </Slider>
-
-            <Slider x:Name="PedalForceCurve080_Slider" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top" 
-            Margin="320,155,0,0" 
-            Grid.Row="9" 
-            Grid.Column="1" 
-            Width="30" 
-            Height="120"
-            ValueChanged="Slider_Force080" 
-            AutoToolTipPlacement="TopLeft" 
-            AutoToolTipPrecision="0"
-            Minimum="0"
-			Maximum="100"
-            TickPlacement="BottomRight"
-			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
-            Value="80"
-                 Orientation="Vertical"
-            >
-            </Slider>
-
-
-            <Slider x:Name="PedalForceCurve100_Slider" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top" 
-            Margin="400,155,0,0" 
-            Grid.Row="9" 
-            Grid.Column="1" 
-            Width="30" 
-            Height="120"
-            ValueChanged="Slider_Force100" 
-            AutoToolTipPlacement="TopLeft" 
-            AutoToolTipPrecision="0"
-            Minimum="0"
-			Maximum="100"
-            TickPlacement="BottomRight"
-			TickFrequency="5" RenderTransformOrigin="0.508,0.525"
-            Value="80" Orientation="Vertical"
-            >
-            </Slider>
-
-
-
-
-
-
 
 
             <!-- PID sliders -->
@@ -743,6 +622,34 @@
                 Value="0"
                 IsSnapToTickEnabled="False"
             />
+            <CheckBox x:Name="Simulate_ABS_check" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="6"
+                Width="236"
+                Height="34" VerticalAlignment="Top" Content="Simulate ABS for non-supported game" Foreground="White" Margin="7,0,0,0" Checked="Simulate_ABS_check_Checked" Unchecked="Simulate_ABS_check_Unchecked" IsChecked="False"/>
+            <Slider x:Name="Simulate_ABS_slider" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="140,37,0,0" 
+                Grid.Row="6" 
+                Grid.Column="1" 
+                Width="107" 
+                ValueChanged="ABS_SLIDER_changed" 
+                AutoToolTipPlacement="TopLeft" 
+                AutoToolTipPrecision="0"
+                Minimum="50"
+                Maximum="100"
+                TickPlacement="BottomRight"
+                TickFrequency="5" RenderTransformOrigin="0.508,0.525"
+                Value="80"
+                IsSnapToTickEnabled="False" SmallChange="1" LargeChange="5"
+            />
+            <TextBlock HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="10,41,0,0" 
+                Text="ABS Trigger value(%):" 
+                Grid.Row="6" 
+                Grid.Column="1" 
+                Width="117" 
+                Foreground="White" FontSize="10"/>
 
 
 

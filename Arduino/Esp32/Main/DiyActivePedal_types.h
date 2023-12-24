@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-#define DAP_VERSION_CONFIG 108
+#define DAP_VERSION_CONFIG 109
 #define DAP_PAYLOAD_TYPE_CONFIG 100
 
 struct payloadHeader {
@@ -59,7 +59,9 @@ struct payloadPedalConfig {
   uint8_t horPos_AB;
   uint8_t verPos_AB;
   uint8_t lengthPedal_CB;
-
+  //Simulate ABS trigger
+  uint8_t Simulate_ABS_trigger;
+  uint8_t Simulate_ABS_value;
   // cubic spline parameters
   float cubic_spline_param_a_array[5];
   float cubic_spline_param_b_array[5];
@@ -126,6 +128,7 @@ struct DAP_calculationVariables_st
   float endPosRel;
   float absFrequency;
   float absAmplitude;
+  
 
   float dampingPress;
 
