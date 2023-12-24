@@ -61,6 +61,7 @@ struct payloadPedalConfig {
   uint8_t lengthPedal_CB;
   //Simulate ABS trigger
   uint8_t Simulate_ABS_trigger;
+  uint8_t Simulate_ABS_value;
   // cubic spline parameters
   float cubic_spline_param_a_array[5];
   float cubic_spline_param_b_array[5];

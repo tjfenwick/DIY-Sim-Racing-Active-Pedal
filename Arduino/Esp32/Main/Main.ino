@@ -685,7 +685,7 @@ void pedalUpdateTask( void * pvParameters )
         }
         if(dap_config_st.payLoadPedalConfig_.Simulate_ABS_trigger==1)
         {
-          if(joystickNormalizedToInt32>8000)
+          if(joystickNormalizedToInt32>dap_config_st.payLoadPedalConfig_.Simulate_ABS_value*100)
           {
             absOscillation.trigger();
           }

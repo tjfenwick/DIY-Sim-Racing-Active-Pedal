@@ -37,7 +37,7 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.verPos_AB = 80;
   payLoadPedalConfig_.lengthPedal_CB = 200;
   payLoadPedalConfig_.Simulate_ABS_trigger = 0;// add for abs trigger
-
+  payLoadPedalConfig_.Simulate_ABS_value = 80;// add for abs trigger
   payLoadPedalConfig_.cubic_spline_param_a_array[0] = 0;
   payLoadPedalConfig_.cubic_spline_param_a_array[1] = 0;
   payLoadPedalConfig_.cubic_spline_param_a_array[2] = 0;
