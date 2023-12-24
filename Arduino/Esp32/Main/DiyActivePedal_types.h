@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-#define DAP_VERSION_CONFIG 108
+#define DAP_VERSION_CONFIG 109
 #define DAP_PAYLOAD_TYPE_CONFIG 100
 
 struct payloadHeader {
