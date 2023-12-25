@@ -17,11 +17,7 @@ bool isv57LifeSignal_b = false;
   int32_t servo_offset_compensation_steps_i32 = 0; 
 #endif
 
-#ifdef Using_analog_output
-  int32_t Using_analog_output_ = 1;
-#else
-  int32_t Using_analog_output_ = 0;
-#endif
+
 
 
 
@@ -213,15 +209,9 @@ void setup()
   Serial.println(" ");
 
   // init controller
-  if(Using_analog_output_ !=1)
-  {
-    SetupController();
-    delay(2000);
-  }
-  else
-  {
-    delay(10000);
-  }
+  SetupController();
+  delay(2000);
+
 
 
 // check whether iSV57 communication can be established
@@ -678,19 +668,6 @@ void pedalUpdateTask( void * pvParameters )
         joystickNormalizedToInt32 = NormalizeControllerOutputValue(loadcellReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
         //joystickNormalizedToInt32 = NormalizeControllerOutputValue(filteredReading, dap_calculationVariables_st.Force_Min, dap_calculationVariables_st.Force_Max, dap_config_st.payLoadPedalConfig_.maxGameOutput);
         xSemaphoreGive(semaphore_updateJoystick);
-        if(Using_analog_output_ =1)
-        {
-          int dac_value=(int)(joystickNormalizedToInt32*255/10000);
-          dacWrite(D_O,dac_value);
-        }
-        if(dap_config_st.payLoadPedalConfig_.Simulate_ABS_trigger==1)
-        {
-          int32_t ABS_trigger_value=dap_config_st.payLoadPedalConfig_.Simulate_ABS_value*100;
-          if(joystickNormalizedToInt32 > ABS_trigger_value)
-          {
-            absOscillation.trigger();
-          }
-        }       
       }
     }
     else
@@ -698,6 +675,25 @@ void pedalUpdateTask( void * pvParameters )
       semaphore_updateJoystick = xSemaphoreCreateMutex();
       //Serial.println("semaphore_updateJoystick == 0");
     }
+
+    // provide joystick output on PIN
+    #ifdef Using_analog_output
+      int dac_value=(int)(joystickNormalizedToInt32*255/10000);
+      dacWrite(D_O,dac_value);
+    #endif
+
+
+    // simulate ABS trigger 
+    if(dap_config_st.payLoadPedalConfig_.Simulate_ABS_trigger==1)
+    {
+      int32_t ABS_trigger_value=dap_config_st.payLoadPedalConfig_.Simulate_ABS_value*100;
+      if(joystickNormalizedToInt32 > ABS_trigger_value)
+      {
+        absOscillation.trigger();
+      }
+    }
+
+    
 
     #ifdef PRINT_USED_STACK_SIZE
       unsigned int temp2 = uxTaskGetStackHighWaterMark(nullptr);
@@ -888,40 +884,24 @@ void serialCommunicationTask( void * pvParameters )
       }
     }
 
+
+
     // transmit controller output
-    if(Using_analog_output_ =1)
+    if (IsControllerReady()) 
     {
       if(semaphore_updateJoystick!=NULL)
       {
-      if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE)
-      {
-        joystickNormalizedToInt32_local = joystickNormalizedToInt32;
-        xSemaphoreGive(semaphore_updateJoystick);
-        }
-        //else
-        //{
-        //Serial.println("semaphore_updateJoystick == 0");
-        //}
-        }
-    }
-    else
-    {
-      if (IsControllerReady()) {
-        if(semaphore_updateJoystick!=NULL)
+        if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE)
         {
-          if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE)
-          {
-            joystickNormalizedToInt32_local = joystickNormalizedToInt32;
-            xSemaphoreGive(semaphore_updateJoystick);
-          }
-          //else
-          //{
-            //Serial.println("semaphore_updateJoystick == 0");
-          //}
+          joystickNormalizedToInt32_local = joystickNormalizedToInt32;
+          xSemaphoreGive(semaphore_updateJoystick);
         }
-        SetControllerOutputValue(joystickNormalizedToInt32_local);
       }
+      SetControllerOutputValue(joystickNormalizedToInt32_local);
     }
+
+
+
 
   }
 }
