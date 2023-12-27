@@ -645,7 +645,7 @@ namespace User.PluginSdkDemo
             double abs_freq_max = 30;
             dx = canvas_horz_ABS_freq.Width / abs_freq_max;
             Canvas.SetLeft(rect_ABS_freq, dx * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.absFrequency);
-            text_ABS_freq.Text = "ABS/TC Frequency: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.absFrequency;
+            text_ABS_freq.Text = "ABS/TC Frequency: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.absFrequency+"Hz";
             Canvas.SetLeft(text_ABS_freq, Canvas.GetLeft(rect_ABS_freq) + rect_ABS_freq.Width / 2);
             Canvas.SetTop(text_ABS_freq, canvas_horz_ABS_freq.Height - 10);
             //max game output slider
@@ -664,10 +664,10 @@ namespace User.PluginSdkDemo
             Canvas.SetTop(text_KF, canvas_horz_KF.Height - 10);
             //LC rating slider
 
-            double LC_max = 500;
+            double LC_max = 510;
             dx = canvas_horz_LC_rating.Width / LC_max;
             Canvas.SetLeft(rect_LC_rating, dx * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.loadcell_rating*2);
-            text_LC_rating.Text = "LC Rating: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.loadcell_rating+"Kg/2";
+            text_LC_rating.Text = "LC Rating: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.loadcell_rating*2+"Kg";
             Canvas.SetLeft(text_LC_rating, Canvas.GetLeft(rect_LC_rating) - text_LC_rating.Width / 2);
             Canvas.SetTop(text_LC_rating, canvas_horz_LC_rating.Height - 10);
 
@@ -1882,7 +1882,7 @@ namespace User.PluginSdkDemo
                     double actual_x = x / dx;
                     dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.absFrequency = Convert.ToByte(actual_x);
 
-                    text_ABS_freq.Text = "ABS/TC Frequency:  " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.absFrequency;
+                    text_ABS_freq.Text = "ABS/TC Frequency:  " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.absFrequency+"Hz";
                     Canvas.SetLeft(text_ABS_freq, x + rect_ABS_freq.Width / 2);
                     Canvas.SetLeft(rectangle, x);
                 }
@@ -1928,7 +1928,7 @@ namespace User.PluginSdkDemo
                 {
                     // Ensure the rectangle stays within the canvas
                     double x = e.GetPosition(canvas_horz_LC_rating).X - offset.X;
-                    double LC_max = 500;
+                    double LC_max = 510;
                     double dx = canvas_horz_LC_rating.Width / LC_max;
                     double min_position = 0 * dx;
                     double max_position = LC_max * dx;
@@ -1937,7 +1937,7 @@ namespace User.PluginSdkDemo
                     double actual_x = x / dx;
                     dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.loadcell_rating = (byte)(actual_x / 2);
 
-                    text_LC_rating.Text = "LC Rating: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.loadcell_rating + "Kg/2";
+                    text_LC_rating.Text = "LC Rating: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.loadcell_rating*2 + "Kg";
                     Canvas.SetLeft(text_LC_rating, x - text_LC_rating.Width / 2);
                     Canvas.SetLeft(rectangle, x);
                 }

@@ -597,7 +597,7 @@
                 </Canvas.RenderTransform>
                 <TextBlock x:Name="text_ABS_freq" HorizontalAlignment="Left" 
                     VerticalAlignment="Center" 
-                    Width="100" 
+                    Width="120" 
                     Foreground="LightSkyBlue" RenderTransformOrigin="0.5,0.5" Canvas.Top="26" FontSize="8" FontFamily="Arial Black" TextAlignment="Center" Text="ABS/TC Frequency :">
                     <TextBlock.RenderTransform>
                         <TransformGroup>
