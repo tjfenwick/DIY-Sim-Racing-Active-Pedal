@@ -54,7 +54,7 @@
                   Width="120" HorizontalAlignment="Left"
                   ItemsSource="{Binding}" DisplayMemberPath="Display" SelectedValuePath="Value"/>
 
-            <styles:SHButtonPrimary Click="UpdateSerialPortList_click" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Width="180" >Update serial port list</styles:SHButtonPrimary>
+            <styles:SHButtonPrimary x:Name="btn_update" Click="UpdateSerialPortList_click" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Width="180" >Update serial port list</styles:SHButtonPrimary>
 
             <!-- serial connection -->
             <styles:SHButtonSecondary Click="ConnectToPedal_click" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0" Width="120" Margin="200,5,0,13" FontSize="10" Background="#FF08FF00" >Connect to Pedal</styles:SHButtonSecondary>
@@ -106,143 +106,17 @@
 
 
             <!-- Pedal preforce slider -->
-            <TextBlock HorizontalAlignment="Left" 
-                   VerticalAlignment="Top" 
-                   Margin="341,67,0,0" 
-                   Text="Pedal min force:" 
-                   Grid.Row="9" 
-                   Width="120" 
-                   Foreground="White" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2">
-                <TextBlock.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="-90"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </TextBlock.RenderTransform>
-            </TextBlock>
-            <Slider x:Name="PedalMinForce_Slider" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top" 
-            Margin="358,71,0,0" 
-            Grid.Row="9" 
-            Width="120" 
-            ValueChanged="Slider_PedalMinForce" 
-            AutoToolTipPlacement="TopLeft" 
-            AutoToolTipPrecision="0"
-            Minimum="1"
-			Maximum="100"
-RenderTransformOrigin="0.508,0.525"
-            Value="8" Grid.ColumnSpan="2"
-            >
-                <Slider.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="-90"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Slider.RenderTransform>
-            </Slider>
 
 
             <!-- Pedal max force slider -->
-            <TextBlock HorizontalAlignment="Left" 
-                   VerticalAlignment="Top" 
-                   Margin="406,64,0,0" 
-                   Text="Pedal max force:" 
-                   Grid.Row="9" 
-                   Grid.Column="1" 
-                   Width="120" 
-                   Foreground="White" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2">
-                <TextBlock.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="-90"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </TextBlock.RenderTransform>
-            </TextBlock>
-            <Slider x:Name="PedalMaxForce_Slider" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top" 
-            Margin="421,67,0,0" 
-            Grid.Row="9" 
-            Grid.Column="1" 
-            Width="120" 
-            ValueChanged="Slider_PedalMaxForce" 
-            AutoToolTipPlacement="TopLeft" 
-            AutoToolTipPrecision="0"
-            Minimum="0"
-			Maximum="255"
-RenderTransformOrigin="0.508,0.525"
-            Value="73" Grid.ColumnSpan="2"
-            >
-                <Slider.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="-90"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Slider.RenderTransform>
-            </Slider>
 
 
 
 
             <!-- Pedal min position slider -->
-            <TextBlock HorizontalAlignment="Left" 
-                   VerticalAlignment="Top" 
-                   Margin="65,165,0,0" 
-                   Text="Pedal min position:" 
-                   Grid.Row="9" 
-                   Grid.Column="1" 
-                   Width="120" 
-                   Foreground="White"/>
-            <Slider x:Name="PedalMinPos_Slider" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top" 
-            Margin="63,186,0,0" 
-            Grid.Row="9" 
-            Grid.Column="1" 
-            Width="120" 
-            ValueChanged="Slider_PedalMinPos" 
-            AutoToolTipPlacement="TopLeft" 
-            AutoToolTipPrecision="0"
-            Minimum="0"
-			Maximum="100"
-RenderTransformOrigin="0.508,0.525"
-            Value="41"
-            />
 
 
             <!-- Pedal max position slider -->
-            <TextBlock HorizontalAlignment="Left" 
-                   VerticalAlignment="Top" 
-                   Margin="330,165,0,0" 
-                   Text="Pedal max position:" 
-                   Grid.Row="9" 
-                   Grid.Column="1" 
-                   Width="120" 
-                   Foreground="White"/>
-            <Slider x:Name="PedalMaxPos_Slider" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top" 
-            Margin="330,186,0,0" 
-            Grid.Row="9" 
-            Grid.Column="1" 
-            Width="120" 
-            ValueChanged="Slider_PedalMaxPos" 
-            AutoToolTipPlacement="TopLeft" 
-            AutoToolTipPrecision="0"
-            Minimum="0"
-			Maximum="100"
-            RenderTransformOrigin="0.508,0.525"
-            Value="86"
-            />
 
 
 
@@ -334,7 +208,7 @@ RenderTransformOrigin="0.508,0.525"
 
 
             <!-- Travel vs Force curve GUI elements -->
-            <Canvas x:Name="canvas" Height="100" Width="400" Background="#FF333333" HorizontalAlignment="Center" Grid.Row="9" Opacity="0.5" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="0,31,0,0" Grid.Column="1" >
+            <Canvas x:Name="canvas" Height="100" Width="400" Background="#7F333333" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="390,28,0,0" Grid.RowSpan="2" Grid.ColumnSpan="2" >
                 <Canvas.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleX="1" ScaleY="1"/>
@@ -351,7 +225,7 @@ RenderTransformOrigin="0.508,0.525"
                    VerticalAlignment="Top" 
                    Text="Force ->" 
                    Width="60" 
-                   Foreground="White" RenderTransformOrigin="0.5,0.5" Canvas.Left="-40" Canvas.Top="35">
+                   Foreground="White" RenderTransformOrigin="0.5,0.5" Canvas.Left="-40" Canvas.Top="35" FontFamily="Arial">
                     <TextBlock.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -367,7 +241,7 @@ RenderTransformOrigin="0.508,0.525"
                    VerticalAlignment="Top" 
                    Text="Travel ->" 
                    Width="60" 
-                   Foreground="White" RenderTransformOrigin="0.5,0.5" Canvas.Left="170" Canvas.Top="105">
+                   Foreground="White" RenderTransformOrigin="0.5,0.5" Canvas.Left="170" Canvas.Top="105" FontFamily="Arial">
                     <TextBlock.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -378,13 +252,40 @@ RenderTransformOrigin="0.508,0.525"
                     </TextBlock.RenderTransform>
                 </TextBlock>
 
+                <TextBlock x:Name="text_SABS" HorizontalAlignment="Left" 
+                    VerticalAlignment="Top" 
+                    Text="Simulated ABS" 
+                    Width="120" 
+                    Foreground="White" RenderTransformOrigin="0.5,0.5" Canvas.Left="320" Canvas.Top="90" FontSize="8">
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
 
-
+                <TextBlock x:Name="text_point_pos" HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Text="pos" 
+                   Width="60" 
+                   Foreground="White" RenderTransformOrigin="0.5,0.5" Canvas.Left="5" Canvas.Top="5" Height="28" FontSize="10" FontFamily="Arial">
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
 
                 <Polyline x:Name="Polyline_BrakeForceCurve"
                       Height="400" Width="400"
                     Points="0,0 80,20 160,40 240,60 320,80 400,100"
-                    Stroke="#FF1585B5"
+                    Stroke="#7F87CEFA"
                     StrokeThickness="4" RenderTransformOrigin="1,0.5" Canvas.Top="-300" HorizontalAlignment="Left" VerticalAlignment="Center" >
                     <Polyline.RenderTransform>
                         <TransformGroup>
@@ -395,12 +296,16 @@ RenderTransformOrigin="0.508,0.525"
                         </TransformGroup>
                     </Polyline.RenderTransform>
                 </Polyline>
-                <Rectangle x:Name="rect0" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="-5" Canvas.Top="95" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
-                <Rectangle x:Name="rect1" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="75" Canvas.Top="75" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
-                <Rectangle x:Name="rect2" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="155" Canvas.Top="55" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
-                <Rectangle x:Name="rect3" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="235" Canvas.Top="35" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
-                <Rectangle x:Name="rect4" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="315" Canvas.Top="15" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
-                <Rectangle x:Name="rect5" Width="10" Height="10" Fill="DarkOrange" Canvas.Left="395" Canvas.Top="-5" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect_SABS" Width="80" Height="100" Fill="#4C8B0000" Canvas.Left="320" Canvas.Top="0" />
+                <Rectangle x:Name="rect_SABS_Control" Width="6" Height="100" Fill="#998B0000" Canvas.Left="317" Canvas.Top="0" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove_ABS" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect0" Width="10" Height="10" Fill="LightSkyBlue" Canvas.Left="-5" Canvas.Top="95" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect1" Width="10" Height="10" Fill="LightSkyBlue" Canvas.Left="75" Canvas.Top="75" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect2" Width="10" Height="10" Fill="LightSkyBlue" Canvas.Left="155" Canvas.Top="55" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect3" Width="10" Height="10" Fill="LightSkyBlue" Canvas.Left="235" Canvas.Top="35" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect4" Width="10" Height="10" Fill="LightSkyBlue" Canvas.Left="315" Canvas.Top="15" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect5" Width="10" Height="10" Fill="LightSkyBlue" Canvas.Left="395" Canvas.Top="-5" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+
+
             </Canvas>
 
 
@@ -410,12 +315,11 @@ RenderTransformOrigin="0.508,0.525"
             <!-- Travel vs Force curve adjustment sliders -->
             <TextBlock HorizontalAlignment="Left" 
                    VerticalAlignment="Top" 
-                   Margin="140,7,0,0" 
+                   Margin="390,8,0,0" 
                    Text="Force curve adjustment:" 
-                   Grid.Row="9" 
-                   Grid.Column="1" 
+                   Grid.Row="5" 
                    Width="160" 
-                   Foreground="White"/>
+                   Foreground="White" Grid.ColumnSpan="2" FontFamily="Arial"/>
 
 
             <!-- PID sliders -->
@@ -653,34 +557,149 @@ RenderTransformOrigin="0.508,0.525"
                 Value="0"
                 IsSnapToTickEnabled="False"
             />
-            <CheckBox x:Name="Simulate_ABS_check" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="6"
+            <CheckBox x:Name="Simulate_ABS_check" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="4"
                 Width="236"
-                Height="34" VerticalAlignment="Top" Content="Simulate ABS for non-supported game" Foreground="White" Margin="7,0,0,0" Checked="Simulate_ABS_check_Checked" Unchecked="Simulate_ABS_check_Unchecked" IsChecked="False"/>
-            <Slider x:Name="Simulate_ABS_slider" 
+                Height="34" VerticalAlignment="Top" Content="Simulate ABS for non-supported game" Foreground="White" Margin="10,12,0,0" Checked="Simulate_ABS_check_Checked" Unchecked="Simulate_ABS_check_Unchecked" IsChecked="False"/>
+            <TextBlock x:Name="text_debug_abs_trigger" HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="20,204,0,0" 
+                Text="ABS Trigger value(%):" 
+                Grid.Row="9" 
+                Grid.Column="1" 
+                Width="118" 
+                Foreground="White" FontSize="10"/>
+            <Canvas x:Name="canvas_horz_slider" Height="40" Width="410" Background="#00333333" HorizontalAlignment="Left" Grid.Row="6" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="385,92,0,0" Grid.RowSpan="2" Grid.ColumnSpan="2" >
+                <Canvas.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+
+                </Canvas.RenderTransform>
+
+
+                <TextBlock x:Name="text_min_pos" HorizontalAlignment="Left" 
+                    VerticalAlignment="Center" 
+                    Text="Pedal min" 
+                    Width="60" 
+                    Foreground="LightSkyBlue" RenderTransformOrigin="0.5,0.5" Canvas.Top="30" FontSize="8" FontFamily="Arial Black" TextAlignment="Center" Canvas.Left="-25">
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+                <TextBlock x:Name="text_max_pos" HorizontalAlignment="Left" 
+                    VerticalAlignment="Top" 
+                    Text="Pedal max" 
+                    Width="60" 
+                    Foreground="LightSkyBlue" RenderTransformOrigin="0.5,0.5" Canvas.Top="27" FontSize="8" FontFamily="Arial Black" TextAlignment="Center" Canvas.Left="375">
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+
+
+
+                <Line x:Name="Line_H_pos"
+                X1="5" Y1="20"
+                X2="405" Y2="20"
+                Stroke="#7F87CEFA"
+                StrokeThickness="2" />
+
+                <Rectangle x:Name="rect6" Width="10" Height="10" Fill="LightSkyBlue" Canvas.Left="0" Canvas.Top="15" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove_H" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect7" Width="10" Height="10" Fill="LightSkyBlue" Canvas.Left="400" Canvas.Top="15" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove_H" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+
+            </Canvas>
+            <Canvas x:Name="canvas_vert_slider" Height="160" Width="40
+                    " Background="#00333333" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="395,8,0,0" Grid.Column="1" Grid.RowSpan="3" >
+                <Canvas.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+
+                </Canvas.RenderTransform>
+
+
+                <TextBlock x:Name="text_min_force" HorizontalAlignment="Left" 
+                    VerticalAlignment="Center" 
+                    Text="Preload:" 
+                    Width="90" 
+                    Foreground="LightSkyBlue" RenderTransformOrigin="0.5,0.5" Canvas.Top="95" FontSize="8" FontFamily="Arial Black" Canvas.Left="28">
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+                <TextBlock x:Name="text_max_force" HorizontalAlignment="Left" 
+                    VerticalAlignment="Center" 
+                    Text="Max Force:" 
+                    Width="90" 
+                    Foreground="LightSkyBlue" RenderTransformOrigin="0.5,0.5" Canvas.Top="12" FontSize="8" FontFamily="Arial Black" Canvas.Left="28">
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+
+
+
+                <Line x:Name="Line_V_force"
+                    X1="20" Y1="0"
+                    X2="20" Y2="160"
+                    Stroke="#7E87CEFA"
+                    StrokeThickness="2" HorizontalAlignment="Left" Canvas.Left="-1" VerticalAlignment="Center" />
+
+                <Rectangle x:Name="rect8" Width="12" Height="6" Fill="LightSkyBlue" Canvas.Left="11" Canvas.Top="98" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove_V" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+                <Rectangle x:Name="rect9" Width="12" Height="6" Fill="LightSkyBlue" Canvas.Left="11" Canvas.Top="15" MouseLeftButtonDown="Rectangle_MouseLeftButtonDown" MouseMove="Rectangle_MouseMove_V" MouseLeftButtonUp="Rectangle_MouseLeftButtonUp"/>
+
+            </Canvas>
+            <CheckBox x:Name="checkbox_pedal_read" Content="Reading config from pedal when connected" HorizontalAlignment="Left" Margin="200,23,0,0" Grid.Row="3" VerticalAlignment="Top" Checked="CheckBox_Checked" IsChecked="False" FontSize="8"/>
+            <Slider x:Name="LoadcellRating_Slider" 
                 HorizontalAlignment="Left" 
                 VerticalAlignment="Top" 
-                Margin="140,37,0,0" 
-                Grid.Row="6" 
-                Grid.Column="1" 
-                Width="107" 
-                ValueChanged="ABS_SLIDER_changed" 
+                Margin="5,191,0,0" 
+                Grid.Row="9" 
+                Grid.Column="0" 
+                Width="120" 
+                ValueChanged="LoadcellRating_Slider_changed" 
                 AutoToolTipPlacement="TopLeft" 
                 AutoToolTipPrecision="0"
-                Minimum="50"
-                Maximum="100"
+                Minimum="0"
+                Maximum="500"
                 TickPlacement="BottomRight"
-                TickFrequency="5" RenderTransformOrigin="0.508,0.525"
-                Value="80"
-                IsSnapToTickEnabled="False" SmallChange="1" LargeChange="5"
+                TickFrequency="30" RenderTransformOrigin="0.508,0.525"
+                Value="300"
             />
             <TextBlock HorizontalAlignment="Left" 
                 VerticalAlignment="Top" 
-                Margin="10,41,0,0" 
-                Text="ABS Trigger value(%):" 
-                Grid.Row="6" 
-                Grid.Column="1" 
-                Width="117" 
-                Foreground="White" FontSize="10"/>
+                Margin="4,170,0,0" 
+                Text="Loadcell rating in kg:" 
+                Grid.Row="9" 
+                Grid.Column="0" 
+                Width="180" 
+                Foreground="White"/>
 
 
 

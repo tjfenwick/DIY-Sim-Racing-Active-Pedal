@@ -232,10 +232,20 @@ void setup()
 #endif
 
 
+  // Load config from EEPROM, if valid, overwrite initial config
+  EEPROM.begin(sizeof(DAP_config_st));
+  dap_config_st.loadConfigFromEprom(dap_config_st);
+
+  // interprete config values
+  dap_calculationVariables_st.updateFromConfig(dap_config_st);
+
+
 
 
   stepper = new StepperWithLimits(stepPinStepper, dirPinStepper, minPin, maxPin);
   loadcell = new LoadCell_ADS1256();
+
+  loadcell->setLoadcellRating(dap_config_st.payLoadPedalConfig_.loadcell_rating);
 
   loadcell->setZeroPoint();
   #ifdef ESTIMATE_LOADCELL_VARIANCE
@@ -281,12 +291,7 @@ void setup()
     dap_config_st.initialiseDefaults_Accelerator();
   #endif
 
-  // Load config from EEPROM, if valid, overwrite initial config
-  EEPROM.begin(sizeof(DAP_config_st));
-  dap_config_st.loadConfigFromEprom(dap_config_st);
-
-  // interprete config values
-  dap_calculationVariables_st.updateFromConfig(dap_config_st);
+  
 
   // activate parameter update in first cycle
   configUpdateAvailable = true;

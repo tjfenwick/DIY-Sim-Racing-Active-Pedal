@@ -61,6 +61,8 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.kf_modelNoise = 128;
 
   payLoadPedalConfig_.debug_flags_0 = 0;
+
+  payLoadPedalConfig_.loadcell_rating = 150;
 }
 
 

@@ -106,6 +106,9 @@ public struct payloadPedalConfig
     // debug flags, sued to enable debug output
     public byte debug_flags_0;
 
+    // loadcell rating in kg / 2 --> to get value in kg, muiltiply by 2
+    public byte loadcell_rating;
+
 
 }
 
@@ -471,7 +474,7 @@ namespace User.PluginSdkDemo
 
 
             dap_config_initial_st.payloadHeader_.payloadType = 100;
-            dap_config_initial_st.payloadHeader_.version = 109;
+            dap_config_initial_st.payloadHeader_.version = 110;
             dap_config_initial_st.payloadHeader_.storeToEeprom = 0;
             dap_config_initial_st.payloadPedalConfig_.pedalStartPosition = 35;
             dap_config_initial_st.payloadPedalConfig_.pedalEndPosition = 80;
@@ -513,6 +516,8 @@ namespace User.PluginSdkDemo
             dap_config_initial_st.payloadPedalConfig_.PID_d_gain = 0.0f;
 
             dap_config_initial_st.payloadPedalConfig_.control_strategy_b = 0;
+
+            dap_config_initial_st.payloadPedalConfig_.loadcell_rating = 150;
 
 
         }

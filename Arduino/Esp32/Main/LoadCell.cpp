@@ -46,6 +46,24 @@ ADS1256& ADC() {
   return adc;
 }
 
+
+void LoadCell_ADS1256::setLoadcellRating(uint8_t loadcellRating_u8) const {
+  ADS1256& adc = ADC();
+  double originalConversionFactor_f64 = CONVERSION_FACTOR;
+  double updatedConversionFactor_f64 = 2 * ((double)loadcellRating_u8) * (CONVERSION_FACTOR/LOADCELL_WEIGHT_RATING_KG);
+
+  Serial.print("OrigConversionFactor: ");
+  Serial.print(originalConversionFactor_f64);
+  Serial.print(",     NewConversionFactor:");
+  Serial.println(updatedConversionFactor_f64);
+
+
+  adc.setConversionFactor( updatedConversionFactor_f64 );
+}
+
+
+
+
 LoadCell_ADS1256::LoadCell_ADS1256(uint8_t channel0, uint8_t channel1)
   : _zeroPoint(0.0), _varianceEstimate(DEFAULT_VARIANCE_ESTIMATE)
 {

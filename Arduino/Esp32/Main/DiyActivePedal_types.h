@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-#define DAP_VERSION_CONFIG 109
+#define DAP_VERSION_CONFIG 110
 #define DAP_PAYLOAD_TYPE_CONFIG 100
 
 struct payloadHeader {
@@ -81,6 +81,9 @@ struct payloadPedalConfig {
 
   // debug flags, sued to enable debug output
   uint8_t debug_flags_0;
+
+  // loadcell rating in kg / 2 --> to get value in kg, muiltiply by 2
+  uint8_t loadcell_rating;
 };
 
 struct payloadFooter {
