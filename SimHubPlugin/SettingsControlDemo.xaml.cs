@@ -620,11 +620,11 @@ namespace User.PluginSdkDemo
             //set for force vertical slider
             double dy = (canvas_vert_slider.Height/250);
             Canvas.SetTop(rect8,canvas_vert_slider.Height-dy* dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.preloadForce);
-            Canvas.SetLeft(rect8, canvas_vert_slider.Width / 2 - rect8.Width / 2);
+            Canvas.SetLeft(rect8, canvas_vert_slider.Width / 2 - rect8.Width / 2- Line_V_force.StrokeThickness / 2);
             Canvas.SetLeft(text_min_force, 12 + rect8.Width+3);
             Canvas.SetTop(text_min_force, Canvas.GetTop(rect8) + 3);
             Canvas.SetTop(rect9, canvas_vert_slider.Height - dy * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxForce);
-            Canvas.SetLeft(rect9, canvas_vert_slider.Width / 2 - rect9.Width / 2);
+            Canvas.SetLeft(rect9, canvas_vert_slider.Width / 2 - rect9.Width / 2-Line_V_force.StrokeThickness / 2);
             Canvas.SetLeft(text_max_force, 12 + rect9.Width+3);
             Canvas.SetTop(text_max_force, Canvas.GetTop(rect9)-6);
             
