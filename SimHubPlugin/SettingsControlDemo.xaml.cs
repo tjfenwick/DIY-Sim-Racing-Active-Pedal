@@ -570,25 +570,28 @@ namespace User.PluginSdkDemo
             }
             //set control point position
             text_point_pos.Opacity = 0;
-            Canvas.SetTop(rect0, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000 - canvas.Height + rect0.Height / 2));
+            double control_rect_value_max = 100;
+            double dyy = canvas.Height / control_rect_value_max;
+            Canvas.SetTop(rect0, canvas.Height-dyy*dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000 - rect0.Height / 2);
             Canvas.SetLeft(rect0, 0*canvas.Width/5-rect0.Width/2);
-            Canvas.SetTop(rect1, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020 - canvas.Height + rect1.Height / 2));
+            Canvas.SetTop(rect1, canvas.Height - dyy * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020 - rect0.Height / 2);
             Canvas.SetLeft(rect1, 1 * canvas.Width / 5 - rect1.Width / 2);
-            Canvas.SetTop(rect2, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040 - canvas.Height + rect2.Height / 2));
+            Canvas.SetTop(rect2, canvas.Height - dyy * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040 - rect0.Height / 2);
             Canvas.SetLeft(rect2, 2 * canvas.Width / 5 - rect2.Width / 2);
-            Canvas.SetTop(rect3, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060 - canvas.Height + rect3.Height / 2));
+            Canvas.SetTop(rect3, canvas.Height - dyy * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060 - rect0.Height / 2);
             Canvas.SetLeft(rect3, 3 * canvas.Width / 5 - rect3.Width / 2);
-            Canvas.SetTop(rect4, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080 - canvas.Height + rect4.Height / 2));
+            Canvas.SetTop(rect4, canvas.Height - dyy * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080 - rect0.Height / 2);
             Canvas.SetLeft(rect4, 4 * canvas.Width / 5 - rect4.Width / 2);
-            Canvas.SetTop(rect5, -1 * (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100 - canvas.Height + rect5.Height / 2));
+            Canvas.SetTop(rect5, canvas.Height - dyy * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100 - rect0.Height / 2);
             Canvas.SetLeft(rect5, 5 * canvas.Width / 5 - rect5.Width / 2);
             //set for ABS slider
-            Canvas.SetLeft(rect_SABS_Control, dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value * canvas.Width / 100);
+            Canvas.SetLeft(rect_SABS_Control, dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value * canvas.Width / 100-rect_SABS_Control.Width/2);
             Canvas.SetTop(rect_SABS_Control , 0);
             Canvas.SetLeft(rect_SABS, dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value * canvas.Width / 100);
             Canvas.SetTop(rect_SABS, 0);
             rect_SABS.Width = canvas.Width - dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value * canvas.Width / 100;
-            Canvas.SetLeft(text_SABS, dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value * canvas.Width / 100 + rect_SABS_Control.Width);
+            Canvas.SetLeft(text_SABS, dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value * canvas.Width / 100 + rect_SABS_Control.Width );
+            Canvas.SetTop(text_SABS, canvas.Height-text_SABS.Height);
             text_SABS.Text = "ABS trigger"+"\nvalue: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value + "%";
             if (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_trigger == 1)
             {
@@ -653,14 +656,14 @@ namespace User.PluginSdkDemo
             dx = canvas_horz_max_game.Width / max_game_max;
             Canvas.SetLeft(rect_max_game, dx * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput);
             text_max_game.Text = "Max Game" + "\n Output: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput;
-            Canvas.SetLeft(text_max_game, Canvas.GetLeft(rect_max_game) - text_max_game.Width / 2);
+            Canvas.SetLeft(text_max_game, Canvas.GetLeft(rect_max_game) - text_max_game.Width / 2+rect_max_game.Width/2);
             Canvas.SetTop(text_max_game, canvas_horz_max_game.Height - 10);
             //KF SLider
             double KF_max = 255;
             dx = canvas_horz_KF.Width / KF_max;
             Canvas.SetLeft(rect_KF, dx * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.kf_modelNoise);
             text_KF.Text = "KF: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.kf_modelNoise;
-            Canvas.SetLeft(text_KF, Canvas.GetLeft(rect_KF) - text_KF.Width / 2);
+            Canvas.SetLeft(text_KF, Canvas.GetLeft(rect_KF) - text_KF.Width / 2 + rect_KF.Width/2);
             Canvas.SetTop(text_KF, canvas_horz_KF.Height - 10);
             //LC rating slider
 
@@ -668,7 +671,7 @@ namespace User.PluginSdkDemo
             dx = canvas_horz_LC_rating.Width / LC_max;
             Canvas.SetLeft(rect_LC_rating, dx * dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.loadcell_rating*2);
             text_LC_rating.Text = "LC Rating: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.loadcell_rating*2+"Kg";
-            Canvas.SetLeft(text_LC_rating, Canvas.GetLeft(rect_LC_rating) - text_LC_rating.Width / 2);
+            Canvas.SetLeft(text_LC_rating, Canvas.GetLeft(rect_LC_rating) - text_LC_rating.Width / 2 + rect_LC_rating.Width/2);
             Canvas.SetTop(text_LC_rating, canvas_horz_LC_rating.Height - 10);
 
             //// Select serial port accordingly
@@ -734,6 +737,11 @@ namespace User.PluginSdkDemo
 
             double[] x = new double[6];
             double[] y = new double[6];
+            double x_quantity = 100;
+            double y_max = 100;
+            double dx = canvas.Width / x_quantity;
+            double dy = canvas.Height / y_max;
+
             x[0] = 0;
             x[1] = 20;
             x[2] = 40;
@@ -777,7 +785,7 @@ namespace User.PluginSdkDemo
 
             for (int pointIdx = 0; pointIdx < 100; pointIdx++)
             {
-                System.Windows.Point Pointlcl = new System.Windows.Point(4 * xs2[pointIdx], ys2[pointIdx]);
+                System.Windows.Point Pointlcl = new System.Windows.Point(dx * xs2[pointIdx], dy*ys2[pointIdx]);
                 myPointCollection2.Add(Pointlcl);
             }
 
@@ -1641,7 +1649,9 @@ namespace User.PluginSdkDemo
 
                 //Canvas.SetLeft(rectangle, x);
                 Canvas.SetTop(rectangle, y);
-                double y_actual = canvas.Height - y -rectangle.Height/2;
+                double y_max = 100;
+                double dx = canvas.Height / y_max;
+                double y_actual = (canvas.Height - y -rectangle.Height/2)/dx;
                 if (rectangle.Name == "rect0")
                 {
                     dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000 = Convert.ToByte(y_actual);
@@ -1821,7 +1831,7 @@ namespace User.PluginSdkDemo
                 TextBox_debugOutput.Text = "ABS trigger value: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value+"%";
                 text_SABS.Text = "ABS trigger"+"\nvalue: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.Simulate_ABS_value + "%";
                 Canvas.SetLeft(text_SABS, x + rect_SABS_Control.Width);
-                Canvas.SetLeft(rectangle, x);
+                Canvas.SetLeft(rectangle, x-rect_SABS_Control.Width/2);
 
             }
         }
@@ -1901,7 +1911,7 @@ namespace User.PluginSdkDemo
                     dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput = Convert.ToByte(actual_x);
 
                     text_max_game.Text = "Max Game" + "\n Output: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxGameOutput;
-                    Canvas.SetLeft(text_max_game, x - text_max_game.Width / 2);
+                    Canvas.SetLeft(text_max_game, x - text_max_game.Width / 2+rect_max_game.Width/2);
                     Canvas.SetLeft(rectangle, x);
                 }
                 //KF Slider
@@ -1920,7 +1930,7 @@ namespace User.PluginSdkDemo
                     dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.kf_modelNoise = Convert.ToByte(actual_x);
 
                     text_KF.Text = "KF: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.kf_modelNoise;
-                    Canvas.SetLeft(text_KF, x - text_KF.Width / 2);
+                    Canvas.SetLeft(text_KF, x - text_KF.Width / 2+ rect_KF.Width/2);
                     Canvas.SetLeft(rectangle, x);
                 }
                 //LC rating slider
@@ -1938,7 +1948,7 @@ namespace User.PluginSdkDemo
                     dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.loadcell_rating = (byte)(actual_x / 2);
 
                     text_LC_rating.Text = "LC Rating: " + dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.loadcell_rating*2 + "Kg";
-                    Canvas.SetLeft(text_LC_rating, x - text_LC_rating.Width / 2);
+                    Canvas.SetLeft(text_LC_rating, x - text_LC_rating.Width / 2+rect_LC_rating.Width/2);
                     Canvas.SetLeft(rectangle, x);
                 }
 
