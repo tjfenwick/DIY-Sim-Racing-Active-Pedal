@@ -17,7 +17,7 @@ A [Discord](https://discord.gg/j8QhD5hCv7) server has been created to allow join
 ## Electronics
 
 ## Control PCB
-The embedded code of this DIY FFB pedal runs on an ESP32 microcontroller. The PCB design was developed to prove the concept. It holds the ESP32, the ADC, a level shifter, and connectors. Currently, version 3 of this PCB design is used which introduced sensorless homing of the servo. The PCB design and pinout diagram can be found [here](Wiring/Esp32_V3).
+The embedded code of this DIY FFB pedal runs on an ESP32 microcontroller. The PCB design was developed to prove the concept. It holds the ESP32, the ADC, a level shifter, and connectors. Currently, version 3 of this PCB design is used which introduced sensorless homing of the servo. The PCB design and pinout diagram can be found [here](Wiring/Esp32_V3). If you use Simucube wheelbase, you can use the D15 accessory port for input, detail was list [here](Wiring/PCB_analog_output)
 
 Here is an image of the plain PCB:
 ![](Wiring/Esp32_V3/PCB_empty.jpeg)
@@ -141,7 +141,7 @@ With the current [PCB](Wiring/Esp32_V3) design, the ESP can directly communicate
 ## SimHub plugin:
 The SimHub plugin was designed to communicate with the ESP to (a) modify the pedal configuration, e.g. the force vs. travel parameterization and (b) to trigger effects such as ABS oscillations.  
 
-![image](SimHubPlugin/Images/SimHubPluginOverview.png)
+![image](SimHubPlugin/Images/Plugin-UI.png)
 
 To install the plugin, the plugin [binaries](https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal/releases), hidden inside the SimHub_plugin.zip, have to be copied to the SimHub directory, e.g. C:/Program Files (x86)/SimHub
 
