@@ -176,10 +176,10 @@ jobs:
     
 
 
-    ## zip plugin binaries
-    #- name: ZIP files
-    #  run: | 
-    #    7z a ./SimHubPlugin/bin/SimHub_plugin.zip ./SimHubPlugin/bin/*
+    # zip plugin binaries
+    - name: ZIP files
+      run: | 
+        7z a ./SimHubPlugin/bin/SimHub_plugin.zip ./SimHubPlugin/bin/*
 
 
     #- name: List files in dir 3
@@ -216,9 +216,9 @@ jobs:
 
 
     # zip plugin binaries
-    - uses: montudor/action-zip@v1
-      with:
-        args: zip -qq -r ./SimHubPlugin/bin/SimHub_plugin.zip ./SimHubPlugin/bin/
+    #- uses: montudor/action-zip@v1
+    #  with:
+    #    args: zip -qq -r ./SimHubPlugin/bin/SimHub_plugin.zip ./SimHubPlugin/bin/
 
 
     #- name: Upload Artifact
