@@ -221,27 +221,27 @@ jobs:
     #    args: zip -qq -r ./SimHubPlugin/bin/SimHub_plugin.zip ./SimHubPlugin/bin/
 
 
-    #- name: Upload Artifact
-    #  uses: ncipollo/release-action@v1
-    #  with:
-    #    artifacts: '${{ github.workspace }}\SimHubPlugin\bin\DiyActivePedal.dll'
-    #    prerelease: ${{ github.event.inputs.is-pre-release }}
-    #    replacesArtifacts: true
-    #    allowUpdates: true
-    #    name: ${{ github.event.inputs.version }}
-    #    tag: ${{ github.event.inputs.version }}
+    - name: Upload Artifact
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: '${{ github.workspace }}\SimHubPlugin\bin\DiyActivePedal.dll'
+        prerelease: ${{ github.event.inputs.is-pre-release }}
+        replacesArtifacts: true
+        allowUpdates: true
+        name: ${{ github.run_number }}
+        tag: ${{ github.run_number }}
 
     # SimHub plugin binaries
-    - name: Upload SimHub release assets
-      id: upload-release-asset-plugin 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create-new-release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./SimHubPlugin/bin/SimHub_plugin.zip
-        asset_name: SimHub_plugin.zip
-        asset_content_type: application/zip
+    #- name: Upload SimHub release assets
+    #  id: upload-release-asset-plugin 
+    #  uses: actions/upload-release-asset@v1
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #  with:
+    #    upload_url: ${{ steps.create-new-release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+    #    asset_path: ./SimHubPlugin/bin/SimHub_plugin.zip
+    #    asset_name: SimHub_plugin.zip
+    #    asset_content_type: application/zip
 
       
 
